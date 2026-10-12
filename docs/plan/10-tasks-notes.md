@@ -32,7 +32,7 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 | 12 | Wire local embeddings as an optional index | `services/ml-service/` | Vector row deleted with the note | 5 |
 | 13 | Implement search: full-text first, vector as a rerank | note service | Search returns note IDs | 5 |
 | 14 | Register the note tool family: create, search, read, link, summarise | tool registry | Overwrite requires confirmation | 5 |
-| 15 | Build the notes and tasks page composition | web UI | Playwright flow passes | 6 |
+| 15 | Build the Tasks and Notes page: list, board and calendar views, snooze and overdue state, note editor with tags and linked references | `apps/web/tasks/` | Every view renders from real data, an overdue task shows its overdue state, and no view shows sample data (spec:407) | 6 |
 | 16 | Add timezone-safe due-time handling | task service | DST boundary case passes | 5 |
 | 17 | Add task and reminder metrics: queue backlog, delivery latency | observability | Alert fires on backlog | 3 |
 | 18 | Add per-item export and per-item delete for notes and remembered facts | note service | One note exports and deletes without touching others | 5 |
@@ -46,7 +46,7 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 1. Create the task table and the CRUD service with ownership checks.
 2. Build the reminder outbox worker with idempotent delivery.
-3. Add notes with full-text search, then embeddings as an optional layer.
+3. Add notes with full-text search, wire the optional embeddings index, then implement search over both.
 
 ## Acceptance tests
 

@@ -31,10 +31,10 @@ Import, categorise and review transactions with evidence. Compute totals in code
 | 11 | Implement provider connection handling and account linking consent | integration service | Consent scope is explicit | 6 |
 | 12 | Add Plaid or India Account Aggregator behind a config flag | integration service | Flag off means CSV only | 6 |
 | 13 | Create the trip table: dates, origin, destination, budget, status | migrations | Ownership indexed | 4 |
-| 14 | Implement route and fare estimation with a provider adapter | `services/trip-service/` | Estimates are labelled | 6 |
+| 14 | Implement route and fare estimation with a provider adapter | `services/trips-service/` | Estimates are labelled | 6 |
 | 15 | Implement itinerary draft, packing list and a pre-departure checklist | trip service | Checklist is deterministic | 5 |
 | 16 | Gate booking actions behind an approval grant | policy + trip service | Booking without approval fails | 5 |
-| 17 | Build the finance and trips page composition | web UI | Playwright flow passes | 6 |
+| 17 | Build the Finance and Trips page: period selector, net and cash-flow cards, category chart, import provenance and review queue; and for trips a map with stops, a route timeline, transport options and booking links | `apps/web/finance/` | The chart renders from stored transactions, every import shows its provenance, and booking links carry an estimate label (spec:408, spec:409, spec:222) | 6 |
 
 This build sequence sums to 93 hours.
 

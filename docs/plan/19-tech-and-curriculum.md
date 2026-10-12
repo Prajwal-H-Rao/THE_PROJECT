@@ -14,6 +14,7 @@ The spec decides these. This plan records the decision and the reason. Any devia
 
 | Layer | Chosen (spec line) | Not chosen |
 |---|---|---|
+| LLM/model provider | Qwen3.5 2B/4B quantized through Ollama or llama.cpp; optional approved cloud provider (423). Owner: `05-model-strategy` | Choosing a model by hype, or trusting a local model without measuring it |
 | Backend TypeScript | NestJS on Fastify (424) | Express, plain Fastify |
 | Backend Python | Flask app factory with blueprints (430) | FastAPI, Django. Spec:1007 supersedes "FastAPI-based" |
 | Validation | Pydantic v2 and pydantic-settings (431) | Joi, Zod in Python |
@@ -59,7 +60,7 @@ Every lab still runs inside the NOVA repository. The owning module carries its h
 | 2 | Record version pins and licences for every dependency | `THIRD_PARTY.md` | Every entry names a licence | 4 |
 | 3 | Lab 1: contracts with OpenAPI and Pydantic fixtures | `labs/lab01/` | All six schemas validate a fixture | 5 |
 | 4 | Write source and design notes: every choice and every rejection with a reason | `docs/design-notes/` | Each rejected option has a reason | 5 |
-| 5 | Create the lab CI workflow and register lab 1; each later lab registers itself in its own phase | `.github/workflows/labs.yml` | The workflow runs every listed lab and fails when a listed lab is absent | 4 |
+| 5 | Create the lab registry with all 12 labs and their owning module and phase, plus the CI workflow that runs the labs registered so far | `labs/registry.yaml` + `.github/workflows/labs.yml` | The registry has 12 rows, the workflow runs lab 1, and it fails when a registered lab has no runner | 4 |
 
 This build sequence sums to 22 hours.
 
@@ -68,21 +69,21 @@ This build sequence sums to 22 hours.
 Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Confirm the technology table against spec:421-438 and record version pins.
-2. Deliver lab 1 and lab 3.
+2. Deliver lab 1, then register the other 11 labs with the module file and phase that owns each.
 3. Write the source and design notes.
 
 ## Acceptance tests
 
-- `test_registered_labs_run_in_ci` — the registry lists 12 labs, and the workflow fails when a listed lab has no runner.
+- `test_registered_labs_run_in_ci` — the workflow runs lab 1, and fails when a registered lab has no runner.
 - `test_every_dependency_names_a_licence` — a dependency without a licence fails the check.
 - `test_no_fastapi_service` — no Python service imports FastAPI, which spec:1007 supersedes.
 - `test_tool_contract_is_registry_not_mcp` — tools come from the registry at spec:500.
 - `test_each_rejection_has_a_reason` — every row in the not-chosen column appears in `docs/design-notes/` with a reason.
 - `test_every_lab_has_an_owner` — each of the 12 labs names a module file and a phase.
-- `test_lab_registry_complete` — the registry lists 12 labs, and CI fails if a listed lab has no runner.
+- `test_lab_registry_names_an_owner` — the registry lists 12 labs, and every row names a module file and a phase.
 
 ## Risks
 
 - Labs drift from the code they teach. Build each lab from the real service code, not from a copy.
 - A lab scheduled before its owning module cannot run. The phase column above is binding; if a phase slips, its lab slips with it.
-- The comparison table is dated in places. Record a re-check date in `claims-ledger.md` before relying on a row.
+- Parts of the comparison table go stale. Record a re-check date in `claims-ledger.md` before you rely on a row.

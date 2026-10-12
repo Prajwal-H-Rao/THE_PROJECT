@@ -4,7 +4,7 @@ Phase P2. Spec headings: Security & Access Control, Service Authentication and A
 
 ## Goal
 
-One verified identity per user. Every service call authenticates the workload and authorises the operation. The service encrypts tokens at rest. Every sensitive change needs step-up authentication.
+Each user holds one verified identity. Every service call authenticates the workload and authorises the operation. The service encrypts tokens at rest. Every sensitive change needs step-up authentication.
 
 ## Constraints (spec, binding)
 
@@ -45,8 +45,8 @@ The spec's 10-row matrix at line 788 is normative. Reproduce it as policy tests,
 | 4 | Add email plus OTP for password reset | identity service | Token is single-use and time-boxed | 4 |
 | 5 | Encrypt OAuth refresh tokens at rest with envelope encryption | identity service | Ciphertext only in DB and logs | 6 |
 | 6 | Implement scopes per integration and per user | identity service | Scope escalation fails | 5 |
-| 7 | Implement resource ownership checks in every repository layer | all services | Cross-user read fails | 8 |
-| 8 | Build the service JWT validation middleware: issuer, audience, expiry, subject, scope | all services | `alg: none` rejected | 6 |
+| 7 | Implement the resource-ownership check in the repository base layer. Every service created later extends it | repository base layer | Cross-user read fails | 8 |
+| 8 | Build the service JWT validation middleware: issuer, audience, expiry, subject and scope, in the shared gateway path that every service inherits | gateway middleware | `alg: none` rejected | 6 |
 | 9 | Add key rotation for workload keys | identity service | Old key fails after rotation | 5 |
 | 10 | Implement step-up authentication for sensitive changes | gateway | Sensitive route demands fresh TOTP | 5 |
 | 11 | Build the account-linking flow: one-time nonce issued only from a logged-in session | identity service | A nonce minted outside a logged-in session is refused | 6 |
@@ -55,8 +55,8 @@ The spec's 10-row matrix at line 788 is normative. Reproduce it as policy tests,
 | 14 | Add rate limiting and account lockout | gateway | Lockout triggers and recovers | 4 |
 | 15 | Encode the 10 matrix rows as policy tests | policy service | All 10 pass | 5 |
 | 16 | Verify no token or secret appears in logs or traces | log scan test | Scan is clean | 3 |
-| 17 | Implement RBAC roles `admin` and `user`, checked by the policy layer on every tool call | identity + policy | A `user` role cannot reach an admin route (spec:235) | 6 |
-| 18 | Terminate TLS outside localhost, redirect HTTP, set HSTS | gateway + Compose | A plain HTTP request to the public edge is redirected (spec:785) | 4 |
+| 17 | Implement RBAC roles `admin` and `user`, checked by the policy layer on every tool call | identity + policy | A `user` role is denied on an admin-classified tool call (spec:235) | 6 |
+| 18 | Terminate TLS outside localhost, set HttpOnly and SameSite cookies, add CSRF protection for cookie-auth writes, a CORS allow-list and a content security policy | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:785) | 4 |
 
 This build sequence sums to 96 hours.
 
@@ -79,8 +79,8 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 - `test_revocation_stops_access` — a revoked grant returns 401 on the next call.
 - `test_no_secret_in_logs` — the log scan finds no token material.
 - `test_matrix_rows_all_pass` — all 10 authorization matrix rows hold.
-- `test_admin_role_restricted` — the `user` role receives a 403 from the admin plane that `04-scope-lock` creates in P4. `20-pages-and-automations` repeats the check on the built pages in P9.
-- `test_tls_redirect_holds` — an HTTP request to the public edge returns a redirect to HTTPS.
+- `test_admin_role_restricted` — the policy layer denies an admin-classified tool call for the `user` role. `20-pages-and-automations` repeats the check on the built admin routes in P9.
+- `test_tls_and_csrf_hold` — a request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403.
 
 ## Risks
 

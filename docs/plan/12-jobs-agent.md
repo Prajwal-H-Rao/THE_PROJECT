@@ -18,13 +18,13 @@ Search, rank and track jobs with evidence. Draft every application artifact from
 ## Flow (spec:518-528, 11 steps)
 
 1. Upload and quarantine: file object ID, SHA-256, type/size/page limits, malware scan where tooling is available, sandboxed parse.
-2. Extract: text with page/paragraph/table/character-span provenance. Candidate fields carry `source_ref`, method and confidence.
+2. Extract: the parser returns text with page, paragraph, table and character-span provenance. Candidate fields carry `source_ref`, method and confidence.
 3. Review profile: fields beside supporting text. The user confirms name, dates, skills, employment, education, location and preferences. Unknown stays unknown.
 4. Discover jobs: query the registry using only connectors marked `verified_permitted`.
 5. Normalize and deduplicate: canonicalise, use source IDs, track duplicate confidence, treat job text as untrusted.
 6. Rank and explain: hard filters first, then optional embeddings. Show factor breakdown and missing requirements.
 7. Prepare materials: drafts from verified profile facts only. Every claim links to a source. When no source exists, the system marks the claim for user input.
-8. Review and approval: show employer, link, fields, attachments and disclosures. Explicit approval bound to the payload hash.
+8. Review and approval: show employer, link, fields, attachments and disclosures. Bind the approval to the payload hash.
 9. Submit through an allowed path. If unsupported, hand the prepared content to the user. Never evade CAPTCHA or bot controls.
 10. Verify status: `submitted` only after authoritative confirmation with a stored provider reference.
 11. Follow up: `applied`, `assessment`, `interview`, `rejected`, `withdrawn`, `unknown` from user input or source evidence.
@@ -63,7 +63,8 @@ Search, rank and track jobs with evidence. Draft every application artifact from
 | 19 | Add export, deletion and provider-revoke for resume and application records | job service | Export contains every user row | 5 |
 | 20 | Deliver curriculum lab 7: one permitted ATS source with a labelled ranking set | `labs/lab07/` | The ranking report renders from the labelled set | 5 |
 | 21 | Complete curriculum lab 2 with the React review view beside the supporting text | `labs/lab02/` | A field shows its source span, and an unknown field stays unknown | 4 |
-This build sequence sums to 123 hours.
+| 22 | Map parser spans to `resume_profile` candidate fields with `source_ref`, extraction method and confidence where meaningful | `services/jobs-service/profile/` | Every candidate field carries a resolvable `source_ref`, and a field with no span is marked unknown (spec:519, spec:520) | 5 |
+This build sequence sums to 128 hours.
 
 ## Acceptance criteria (spec:545-551)
 

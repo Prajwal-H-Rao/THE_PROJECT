@@ -22,7 +22,7 @@ Two channels carry reading, notifications, confirmations and low-risk approvals.
 
 | # | Task | Artifact | Test | Hrs |
 |---|---|---|---|---|
-| 1 | Implement WhatsApp signature verification over the raw body with constant-time compare | `services/channel-adapters/whatsapp/` | Truncated and mutated bodies fail | 7 |
+| 1 | Implement WhatsApp signature verification over the raw body with constant-time compare | `services/whatsapp-adapter/` | Truncated and mutated bodies fail | 7 |
 | 2 | Implement `GET /webhooks/whatsapp` verify-token challenge | adapter | Wrong challenge fails | 3 |
 | 3 | Implement message-ID idempotency with a dedup store | adapter | Duplicate delivery is a no-op | 5 |
 | 4 | Add replay protection: timestamp window plus nonce store | adapter | An old signed message fails | 5 |

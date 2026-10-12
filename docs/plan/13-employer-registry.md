@@ -37,7 +37,7 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 |---|---|---|---|---|
 | 1 | Write the CSV importer against the 11-column header | `services/employer-registry-service/import/` | Fails on a missing or renamed column | 6 |
 | 2 | Enforce exactly 250 `IN` plus 250 `GLOBAL` and unique `normalized_name` | importer | 499 or 501 rows fails | 4 |
-| 3 | Store the seed as versioned data, not configuration (`employer-seed-v1`) | registry schema | Import preserves user edits and verification state | 5 |
+| 3 | Own the seed artifact: copy the repo CSV to `data/employer-seed-v1.csv`, the path spec:955 names, and keep it versioned data rather than configuration | `data/employer-seed-v1.csv` | The file has the 11-column header, 500 rows, and no populated `career_url` | 5 |
 | 4 | Record alias relationships in a separate reviewed table | alias schema | No alias is silently discarded | 5 |
 | 5 | Implement the full spec:559 lifecycle: six pipeline states plus six health states, with legal transitions only | registry service | An illegal transition fails | 7 |
 | 6 | Add the `verified_permitted` gate: no poll before `source_permission_reviewed` | worker | Unverified source is never polled | 6 |
@@ -75,7 +75,7 @@ This build sequence sums to 139 hours.
 - `test_import_counts_250_250` — 500 rows, split 250 and 250, unique normalised names.
 - `test_import_fails_on_wrong_header` — a renamed column stops the import.
 - `test_no_poll_before_permission_review` — an unverified source produces zero requests.
-- `test_unverified_url_stays_null` — no `career_url` is guessed from a company name.
+- `test_unverified_url_stays_null` — the service leaves `career_url` null when only a company name is known.
 - `test_blocked_source_pauses_without_evasion` — a `403` moves the source to `paused`, not to a retry with a new method.
 - `test_run_history_supports_searched_claim` — the dashboard cannot show "searched all 500" unless run history covers all 500.
 - `test_batch_action_cannot_enable_source` — a batch cannot add a source or authorise an application.

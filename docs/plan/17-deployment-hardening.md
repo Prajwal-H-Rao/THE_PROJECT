@@ -38,19 +38,21 @@ Docker Compose is the MVP runtime. Kubernetes is the local target. Model and par
 | 10 | Prove no Docker socket or host path is mounted | Compose test | Mount check passes | 4 |
 | 11 | Build the Kubernetes manifests: Namespaces, NetworkPolicy, ResourceQuota, LimitRange | `infra/k8s/base/` | Manifest validation passes | 8 |
 | 12 | Apply Pod Security Admission with `restricted` and the documented exceptions | `infra/k8s/` | A privileged pod is rejected | 6 |
-| 13 | Add seccomp, capability dropping and `allowPrivilegeEscalation: false` | manifests | Scan passes | 5 |
-| 14 | Use external `SecretRef` files with least privilege and documented rotation | manifests | No secret in an env var | 6 |
-| 15 | Add non-root FSGroup, dedicated ServiceAccounts and token automount control | manifests | Default SA cannot read secrets | 5 |
-| 16 | Run a private registry with per-environment pull credentials and image signing | `infra/registry/` | Unsigned image is rejected | 6 |
-| 17 | Add multi-arch builds for amd64 and arm64 | CI | Both images build | 4 |
-| 18 | Wire autoscaling, disruption budgets, zone-aware scheduling, topology hints, HPA, PDB, affinity | manifests | Scheduling constraints hold | 7 |
-| 19 | Add rolling deploys, preStop hooks and a version endpoint per service | manifests + services | Zero-downtime roll passes | 6 |
-| 20 | Set up Prometheus scrape annotations, OpenTelemetry sidecars and dashboards | `infra/observability/` | Metrics scrape succeeds | 5 |
-| 21 | Run Trivy, Grype and pip-audit in CI; fail on critical CVEs | CI config | A planted CVE fails the build | 5 |
-| 22 | Build the local `kind` cluster target with pinned node image | `infra/kind/` | `make kind-up` works from a clean checkout | 5 |
-| 23 | Deliver curriculum lab 8: hardened Dockerfile passing the isolation checks | `labs/lab08/` | Non-root and no-egress tests pass | 5 |
-| 24 | Deliver curriculum lab 9: kind cluster with three namespaces and default-deny | `labs/lab09/` | A cross-namespace call fails | 6 |
-This build sequence sums to 129 hours.
+| 13 | Add Kustomize overlays for `kind` and for the optional EKS target, over the base manifests | `infra/k8s/overlays/` | The kind overlay applies cleanly and differs from base only in overlay fields (spec:676, spec:709) | 5 |
+| 14 | Re-run the P4 scope-lock red-team suite against the deployed kind services, and prove no code path or Kubernetes permission can change a workload spec | `labs/lab09-proofs/` | The suite passes against the cluster, and a workload-spec edit attempt is denied (spec:709, spec:847) | 6 |
+| 15 | Add seccomp, capability dropping and `allowPrivilegeEscalation: false` | manifests | Scan passes | 5 |
+| 16 | Use external `SecretRef` files with least privilege and documented rotation | manifests | No secret in an env var | 6 |
+| 17 | Add non-root FSGroup, dedicated ServiceAccounts and token automount control | manifests | Default SA cannot read secrets | 5 |
+| 18 | Run a private registry with per-environment pull credentials and image signing | `infra/registry/` | Unsigned image is rejected | 6 |
+| 19 | Add multi-arch builds for amd64 and arm64 | CI | Both images build | 4 |
+| 20 | Add namespace isolation, bounded resources, service accounts and default-deny network policy to the kind cluster, per spec:833-845 | manifests | Every namespace enforces Restricted Pod Security and default-deny egress | 7 |
+| 21 | Add rolling deploys, preStop hooks and a version endpoint per service | manifests + services | Zero-downtime roll passes | 6 |
+| 22 | Set up Prometheus scrape annotations, OpenTelemetry sidecars and dashboards | `infra/observability/` | Metrics scrape succeeds | 5 |
+| 23 | Run Trivy, Grype and pip-audit in CI; fail on critical CVEs | CI config | A planted CVE fails the build | 5 |
+| 24 | Build the local `kind` cluster target with pinned node image | `infra/k8s/overlays/kind/` | `make kind-up` works from a clean checkout | 5 |
+| 25 | Deliver curriculum lab 8: hardened Dockerfile passing the isolation checks | `labs/lab08/` | Non-root and no-egress tests pass | 5 |
+| 26 | Deliver curriculum lab 9: kind cluster with three namespaces and default-deny | `labs/lab09/` | A cross-namespace call fails | 6 |
+This build sequence sums to 140 hours.
 
 
 ## Acceptance tests

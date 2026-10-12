@@ -38,7 +38,7 @@ Planning, Approval required, Executing, Verified success, Failed/uncertain, and 
 | 2 | Build the theme switch with persistence and system preference | web app | Both themes render from the same keys | 4 |
 | 3 | Implement the 25-row token table as a typed token file | `tokens.ts` | Typed file has exactly 25 color keys | 4 |
 | 4 | Implement typography: Inter for UI, JetBrains Mono for IDs and code | `typography.css` | Long-word overflow passes | 4 |
-| 5 | Implement spacing on the 4px base and the layout dimension table | `spacing.css` | No hard-coded pixel spacing | 4 |
+| 5 | Implement spacing on the 4px base, then copy the layout dimension table from spec:338-358 | `spacing.css` | Spacing tokens are multiples of 4, and the layout values match spec:338-358 | 4 |
 | 6 | Build Button with all variants and states: default, hover, active, focus-visible, loading, disabled | `components/Button/` | Focus-visible present on every control | 5 |
 | 7 | Build TextField, TextArea, Select, Combobox with invalid, read-only and no-results states | `components/` | `aria-describedby` links the error | 8 |
 | 8 | Build Card, Badge, Tabs, Dialog, Drawer, DataTable, Timeline with specified states | `components/` | Dialog traps focus and closes safely | 9 |
@@ -51,9 +51,10 @@ Planning, Approval required, Executing, Verified success, Failed/uncertain, and 
 | 15 | Build the app shell: navigation, command palette, user menu, theme, status, audit link | `apps/web/shell/` | Navigation is keyboard reachable | 7 |
 | 16 | Add reduced-motion and high-contrast support | global styles | Preference changes take effect | 4 |
 | 17 | Run an accessibility pass: contrast, labels, focus order, ARIA, keyboard, hit targets 40-44px | `a11y-report.json` | The report lists zero violations of severity critical, and every entry carries an element selector | 7 |
-| 18 | Add the empty, loading, offline and permission-denied state for every shared component | components | Each state renders, none shows fake data | 5 |
+| 18 | Test with a screen reader: navigation, focus announcements and action previews | `a11y-screen-reader.md` | The record lists each flow tested and its result (spec:388, spec:869) | 5 |
+| 19 | Add the empty, loading, offline and permission-denied state for every shared component | components | Each state renders, none shows fake data | 5 |
 
-This build sequence sums to 107 hours.
+This build sequence sums to 112 hours.
 
 ## Build order
 
@@ -67,7 +68,7 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 - `test_token_diff_empty` — `tokens.css` matches spec:282-311 byte for byte.
 - `test_typed_token_file_has_25_keys` — the count is 25, not 24 or 26.
-- `test_spacing_base_is_4px` — every spacing value is a multiple of 4.
+- `test_spacing_base_is_4px` — every value in `spacing.css` is a multiple of 4, and the layout dimension table matches spec:338-358.
 - `test_focus_visible_on_every_control` — a crawl finds no interactive element without `:focus-visible`.
 - `test_status_not_color_alone` — each status carries an icon or a text label.
 - `test_no_unverified_done` — the success state never renders before the verifier passes.

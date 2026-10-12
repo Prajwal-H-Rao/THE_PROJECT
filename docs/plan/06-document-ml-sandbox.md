@@ -42,9 +42,10 @@ Every field carries: raw object hash, parser or model version, `field_name`, `va
 | 15 | Wire the ML service for classification and embeddings behind the same sandbox rules | `services/ml-service/` | Same isolation tests pass | 6 |
 | 16 | Reject citation IDs that do not resolve to a stored span | validator | Fabricated citation fails | 4 |
 | 17 | Scan uploads for malware where tooling is available, before parse | ingest + worker | An infected fixture is quarantined, not parsed (spec:518) | 5 |
-| 18 | Deliver curriculum lab 2: upload to Flask parser to evidence-linked profile to review view | `labs/lab02/` | Malformed and large inputs rejected | 5 |
+| 18 | Deliver the parser half of curriculum lab 2: upload to Flask parser to evidence-linked profile. `12-jobs-agent` adds the React review view in P8 | `labs/lab02/` | Malformed and large inputs are rejected, and every field carries its span | 5 |
 | 19 | Deliver curriculum lab 3: parser behind an authenticated internal endpoint, two identities, one allowed call and one denied | `labs/lab03/` | The denied call returns 403 and the parser cannot reach Postgres | 4 |
-This build sequence sums to 101 hours.
+| 20 | Run the NLP extraction step over parsed text: skills and experience, each carrying the source span it came from | `services/ml-service/resume/` | Every extracted skill resolves to a stored span, and an unsupported field stays unknown (spec:224, spec:520) | 5 |
+This build sequence sums to 106 hours.
 
 ## Build order
 

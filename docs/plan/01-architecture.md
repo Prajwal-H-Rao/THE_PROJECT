@@ -38,8 +38,9 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 14 | Build images for the services created so far: multi-stage, pinned digest, non-root, no secrets | each new `Dockerfile` | Scan passes, `USER` is non-zero | 4 |
 | 15 | Scaffold `apps/web` as a Next.js + React + Tailwind app with a build script | `apps/web/` | `npm run build` succeeds from a clean checkout | 5 |
 | 16 | Write `docs/architecture`: service map, trust boundaries, data flow and the layout diff | `docs/architecture/` | Each of the 23 catalogue services appears exactly once | 5 |
+| 17 | Add the public HTTPS edge: a reverse proxy with a certificate and hostname, or a tunnel for local work | `infra/edge/` | An HTTPS request from outside reaches the gateway, and plain HTTP does not answer | 6 |
 
-This build sequence sums to 81 hours.
+This build sequence sums to 87 hours.
 
 ## Build order
 
@@ -61,4 +62,4 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 - 23 services is heavy for one developer. Start with gateway, identity, policy, audit and one domain. Add the rest in the phase that needs them. Health and image tasks cover only services that exist at that point.
 - Per-service schemas slow cross-domain joins. The spec forbids them. Use events.
-- Workload identity in the MVP is service JWTs, not mTLS. Plan the mTLS swap for P10.
+- Workload identity in the MVP is service JWTs, not mTLS. mTLS is out of scope for this plan. Add it only when a service boundary crosses a host, and record that change in `changes/`.
