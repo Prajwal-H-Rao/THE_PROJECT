@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permissions": [
+    { "action": "edit", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "git commit *", "effect": "ask" },
+    { "action": "subagent", "resource": "*", "effect": "deny" },
+    { "action": "subagent", "resource": "general", "effect": "allow" },
+    { "action": "subagent", "resource": "explore", "effect": "allow" },
+    { "action": "subagent", "resource": "the-project", "effect": "allow" }
+  ]
+}
