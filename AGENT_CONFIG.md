@@ -1,0 +1,348 @@
+# Agent Config
+
+This file lists installed skills and configured agent rules. Give it to any agent, or use it as the source for fresh OpenCode setup.
+
+## Setup status (2026-10-11)
+
+- On this machine, every skill named in this file is a content-less stub. The original skill text was not present in this export.
+- A stub is not coverage. Never count a stub as review, verification, or security work. Skip loading a stub and note the skip.
+- The 4 rule-referenced skills (ponytail, ponytail-review, claude-mem, security-review) are absent from the installed lists and are also stubs.
+- Stub wiring is complete. Skill IDs, scopes, and discovery all work. To activate a skill, replace its stub body with real content and remove the `metadata: opencode/autoinvoke: false` line so the model can discover it.
+- This file exceeds the 200-line rule. It is the source manifest and is preserved intact. The measured line count is recorded in repo.md and in the setup changelog entry.
+
+## Mandatory rules
+
+- Always use ASD-STE100 language. This mandate is unconditional. It applies to every user reply, report, plan, repo.md entry, changelog entry, commit message, and code comment. Use short active sentences, one idea per sentence, exact terms, and no ceremony.
+- First step of every turn: load the applicable skills via the skill tool before planning or editing. Load a skill only when it has real content. Skip any stub and note the skip.
+- Mandatory skill order when available: ponytail, ponytail-review (only when reviewing a diff), caveman, graphify (when codebase question or graph exists), impeccable (when UI/frontend touched), system-design (only when designing/architecting), claude-mem. Apply this order only to skills that have real content. Skip any stub and note the skip.
+- ECC and security skills load on demand. Use ecc-guide when ECC itself matters. Use installed security skills, especially security-review, for auth, secrets, input validation, security, and attack-path work. Use a security skill only when it has real content. A stub gives no security coverage. Skip any stub and note the skip.
+- Never assume. Ask before planning, editing, or functional/architectural change.
+- Get explicit user approval before implementing functional or architectural changes.
+- Read repo.md first. Use repo.md to target files instead of rescanning the repo.
+- For every proposed change, state approach plainly, spawn two independent subagents in parallel with no reasoning leak, and force both to negate the approach.
+- If either subagent proves the approach wrong, revise and rerun the loop.
+- Proceed only when both say: no blocking objections, approach is sound.
+- Files must be under 200 lines. Split into modules first.
+- Each module does one job.
+- Every file/module gets a header comment. Each function gets a one-line purpose comment. Comment WHY for non-obvious logic.
+- Follow ponytail ladder: native/stdlib first, reuse before rewrite, shorter path wins, no speculative abstraction.
+- Never strip trust-boundary validation, error handling, security, or accessibility basics.
+- After every successful change: update repo.md, add changes/YYYY-MM-DD-short-slug.md, ask before commit.
+- Responses, reports, repo.md entries, changelog entries, commit messages, and code comments follow ASD-STE100: short active sentences, one idea per sentence, exact terms, no ceremony.
+- Definition of done: both subagents signed off, user approved, code is modular/commented/under line limits, repo.md updated, changelog entry exists.
+
+## Installed skills
+
+### Global OpenCode skills
+- abusing-adcs
+- abusing-ci-cd-oidc
+- address-sanitizer
+- aflpp
+- agentic-actions-auditor
+- agent-introspection-debugging
+- agent-self-evaluation
+- agent-sort
+- ai-inventory
+- ai-regression-testing
+- algorand-vulnerability-scanner
+- analyzing-binaries
+- analyzing-disk-images
+- analyzing-dotnet-assemblies
+- analyzing-firmware-images
+- analyzing-go-binaries
+- analyzing-ios-binaries
+- analyzing-linux-persistence
+- analyzing-macos-binaries
+- analyzing-malware
+- analyzing-memory-images
+- analyzing-network-traffic
+- analyzing-phishing-emails
+- analyzing-rust-binaries
+- analyzing-shellcode
+- architect
+- architecture-decision-records
+- atheris
+- attacking-active-directory
+- attacking-bluetooth-nfc
+- attacking-eks-gke-aks
+- attacking-entra-id
+- attacking-graphql
+- attacking-grpc-protobuf
+- attacking-hardware-interfaces
+- attacking-jwt
+- attacking-kerberos-delegation
+- attacking-oauth-oidc
+- attacking-saml
+- attacking-serverless
+- attacking-wireless-networks
+- audit-augmentation
+- audit-context-building
+- auditing-code-for-vulnerabilities
+- auditing-mcp-servers
+- auditing-php-applications
+- auditing-supply-chain
+- audit-prep-assistant
+- authoring-security-skills
+- browser-qa
+- builder
+- burpsuite-project-parser
+- bypassing-mobile-pinning
+- bypassing-root-jailbreak-detection
+- cairo-vulnerability-scanner
+- cargo-fuzz
+- chrome-mcp-troubleshooting
+- ck
+- click-path-audit
+- codebase-onboarding
+- code-check
+- codehealth-mcp
+- code-improver
+- code-maturity-assessor
+- codeql
+- code-tour
+- config-gc
+- configure-ecc
+- constant-time-analysis
+- constant-time-testing
+- container-security
+- context-budget
+- continuous-learning
+- continuous-learning-v2
+- cosmos-vulnerability-scanner
+- council
+- council-multi-model
+- coverage-analysis
+- cracking-passwords
+- c-review
+- crypto-protocol-diagram
+- defending-kubernetes
+- delivery-gate
+- dependency-upgrade
+- designing-systems
+- devcontainer-setup
+- devirtualizing-vm-protected-code
+- dev-team
+- diagramming-code
+- differential-review
+- diffing-binary-patches
+- dimensional-analysis
+- drift-detector
+- dwarf-expert
+- e2e-testing
+- ecc-guide
+- ecc-recipes
+- engineering-detections
+- entry-point-analyzer
+- enumerating-network-services
+- error-handling
+- escalating-linux-privileges
+- escalating-windows-privileges
+- escaping-hardened-containers
+- establishing-persistence
+- eval-harness
+- exploiting-cloud-platforms
+- exploiting-containers
+- exploiting-deserialization
+- exploiting-memory-corruption
+- exploiting-ssrf
+- exploiting-web3-smart-contracts
+- exploiting-xxe
+- firebase-apk-scanner
+- fp-check
+- fuzzing-dictionary
+- fuzzing-obstacles
+- genotoxic
+- gh-cli
+- github-triage
+- git-workflow
+- goal-prompt
+- graph-evolution
+- growth-log
+- guidelines-advisor
+- hardening-cloud-posture
+- harness-writing
+- hookify-rules
+- hunting-threats
+- hunting-web-backdoors
+- iac-security
+- inherit-legacy-style
+- intent-driven-development
+- interpreting-culture-index
+- investigating-aws-incidents
+- investigating-azure-incidents
+- investigating-gcp-incidents
+- investigating-m365-entra
+- investigating-windows-endpoints
+- iterative-retrieval
+- land-the-plane
+- let-fate-decide
+- libafl
+- libfuzzer
+- living-docs-governance
+- llm-testing
+- loop-design-check
+- maintaining-engagement-state
+- managing-vulnerabilities
+- mapping-attack-techniques
+- mermaid-to-proverif
+- modern-cpp
+- modern-python
+- mutation-testing
+- open-sourcing
+- orchestrating-vulnerability-research
+- ossfuzz
+- owasp-security
+- performing-reconnaissance
+- performing-social-engineering
+- plan-canvas
+- plankton-code-quality
+- planning-artifacts
+- postmortem
+- post-patch-validation
+- pr-improver
+- producing-threat-intelligence
+- production-audit
+- product-lens
+- property-based-testing
+- qa-engineer
+- recognizing-deception
+- reporting-security-findings
+- repo-scan
+- responding-to-incidents
+- reversing-browser-extensions
+- reversing-flutter-apps
+- reversing-network-protocols
+- reversing-obfuscated-javascript
+- reversing-react-native-apps
+- reversing-unity-il2cpp
+- reversing-xamarin-maui
+- reviewing-code-changes
+- reviewing-cryptography
+- review-steering
+- review-walkthrough
+- rules-distill
+- rust-review
+- ruzzy
+- santa-method
+- sarif-parsing
+- sbom-analyzer
+- second-opinion
+- secure-at-inception
+- secure-dependency-health-check
+- secure-workflow-guide
+- securing-ai-systems
+- security-auditor
+- security-fuzzing
+- security-passwords
+- security-patterns
+- security-payloads
+- security-usernames
+- security-webshells
+- semgrep
+- semgrep-rule-creator
+- semgrep-rule-variant-creator
+- sharp-edges
+- skill-comply
+- skill-improver
+- skill-scout
+- skill-stocktake
+- slicing-code-context
+- snyk-fix
+- solana-vulnerability-scanner
+- spec-to-code-compliance
+- strategic-compact
+- substrate-vulnerability-scanner
+- supply-chain-risk-auditor
+- swarm-coordination
+- swarm-execute
+- swarm-plan
+- swarm-research
+- swarm-review
+- tailor
+- tdd-workflow
+- testing
+- testing-apis
+- testing-handbook-generator
+- testing-ics-ot-protocols
+- testing-mobile-applications
+- testing-mobile-ipc
+- testing-thick-clients
+- testing-web-applications
+- threat-modeling
+- token-integration-analyzer
+- ton-vulnerability-scanner
+- trailmark
+- trailmark-finding-triage
+- trailmark-review-gate
+- trailmark-structural
+- trailmark-summary
+- trailmark-variant-neighborhood
+- transferring-files
+- triaging-security-alerts
+- ui-ux-designer
+- unified-memory
+- unpacking-protected-binaries
+- variant-analysis
+- vector-forge
+- verification-loop
+- verifying-skill-accuracy
+- vetting-agent-extensions
+- vulnerability-triage-brocards
+- windows-desktop-e2e
+- writing-adrs
+- writing-lean-proofs
+- writing-sigma-rules
+- writing-yara-rules
+- wycheproof
+- yara-rule-authoring
+- zeroize-audit
+
+### Local agent skills
+- api-design
+- architecture-diagram
+- back-of-the-envelope
+- blob-store
+- caching
+- cavecrew
+- caveman
+- caveman-commit
+- caveman-compress
+- caveman-discover
+- caveman-evidence-review
+- caveman-explore
+- caveman-help
+- caveman-learn
+- caveman-manage
+- caveman-optimize
+- caveman-review
+- caveman-setup
+- caveman-stats
+- consistency-coordination
+- content-delivery
+- data-storage
+- distributed-logging
+- distributed-search
+- dns
+- impeccable
+- investigate-first
+- lean-build
+- load-balancing
+- megacave
+- messaging-streaming
+- migration
+- observability
+- requirements-scoping
+- resilience-failure
+- safe-refactor
+- scaling-evolution
+- sequencer
+- service-decomposition
+- sharded-counters
+- surgical-patch
+- system-design
+- task-scheduling
+- ultracave
+- verify-and-stop
+
+### Project skills
+- graphify
