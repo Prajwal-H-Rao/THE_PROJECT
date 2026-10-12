@@ -4,7 +4,10 @@ Project map for THE_PROJECT. Read this first. Use it to target files instead of 
 
 ## Purpose
 
-This repo holds an OpenCode agent setup. The source of truth is `AGENT_CONFIG.md`. It lists the mandatory agent rules and the full skill manifest. The setup turns that manifest into working OpenCode configuration.
+This repo has two purposes.
+
+1. It holds an OpenCode agent setup. The source of truth is `AGENT_CONFIG.md`. It lists the mandatory agent rules and the full skill manifest. The setup turns that manifest into working OpenCode configuration.
+2. It holds the NOVA build plan. The source of truth is `NOVA_Full_Updated_Spec.md`. `docs/plan/` turns that spec into an ordered build schedule.
 
 ## Layout
 
@@ -13,6 +16,10 @@ This repo holds an OpenCode agent setup. The source of truth is `AGENT_CONFIG.md
 - `opencode.json` — project config. Holds the permission rules.
 - `.opencode/skills/` — project-scope skills. One stub: `graphify`.
 - `changes/` — changelog entries. One file per change.
+- `NOVA_Full_Updated_Spec.md` — NOVA spec. Source of truth for all NOVA content. 1542 lines, 74 fence-aware headings.
+- `NOVA_Employer_Targets_500.csv` — seed employer registry. 500 rows: 250 `IN`, 250 `GLOBAL`.
+- `docs/plan/` — NOVA build plan. 24 files: index, schedule, claims ledger, coverage map, 20 module files. 358 tasks, 1920 base hours, 11 phases.
+- `README.md` — repo readme. Present at the root, not covered elsewhere.
 
 Machine-global files live outside this repo:
 
