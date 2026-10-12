@@ -59,7 +59,7 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 - `test_today_kpi_links_to_source` — each KPI resolves to a real record, not a constant.
 - `test_tool_result_separate_from_prose` — the Assistant DOM keeps tool output out of prose.
 - `test_automation_runs_once` — two triggers produce one run.
-- `test_automation_cannot_widen_scope` — a rule's own permissions are fixed at authoring time.
+- `test_automation_cannot_widen_scope` — the engine captures the rule's permissions at authoring time and never widens them.
 - `test_revoke_stops_next_sync` — a revoked provider fails the next scheduled sync.
 - `test_admin_route_denied_for_user_role` — RBAC holds at the policy layer.
 - `test_no_chat_path_to_admin` — a chat request cannot reach an admin route.

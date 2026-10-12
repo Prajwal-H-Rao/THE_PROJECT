@@ -18,7 +18,7 @@ Read, search, draft and send mail. Read, create, change and delete events. Every
 
 | # | Task | Artifact | Test | Hrs |
 |---|---|---|---|---|
-| 1 | Define the mail adapter interface: list, get, search, draft, send | `services/integration-service/mail/` | Adapter contract test passes | 5 |
+| 1 | Define the mail adapter interface: list, get, search, draft, send | `services/inbox-service/gmail/` | Adapter contract test passes | 5 |
 | 2 | Implement the Gmail adapter with OAuth scopes and consent screen | adapter | Scope escalation fails | 8 |
 | 3 | Implement polling with delta sync, page tokens and backoff | worker | Poll survives a rate limit | 6 |
 | 4 | Add idempotent mail processing keyed on Gmail message ID | worker | Duplicate message processed once | 5 |
@@ -33,10 +33,10 @@ Read, search, draft and send mail. Read, create, change and delete events. Every
 | 13 | Implement event conflict detection against the provider | calendar service | Double booking surfaces | 5 |
 | 14 | Add ICS import and export for non-Google providers | calendar service | Round-trip preserves fields | 5 |
 | 15 | Handle partial provider failure: retry, reauthenticate, fail safe | worker | Each path is covered by a test | 6 |
-| 16 | Add email and calendar to the dashboard page composition | web UI | Playwright flow passes | 6 |
+| 16 | Build the Calendar page: agenda, week and month switcher, a clear timezone indicator, event categories that pair colour with a label or icon, and an event-write approval preview that shows invitees and conflicts | `apps/web/calendar/` | Each view switches without losing the timezone, no category relies on colour alone, and a write preview lists invitees and conflicts (spec:406) | 7 |
 | 17 | Deliver curriculum lab 6: Gmail read-only, then draft and send behind approval | `labs/lab06/` | Send without a grant fails | 5 |
-| 18 | Build the three-pane Inbox page: list, thread and context rail, per spec:405 | `apps/web/inbox/` | Each pane keeps its source, freshness and action controls | 6 |
-This build sequence sums to 102 hours.
+| 18 | Build the three-pane Inbox page: folder and filter rail, message list and reading pane, per spec:405 | `apps/web/inbox/` | Each pane keeps its source, freshness and action controls | 6 |
+This build sequence sums to 103 hours.
 
 ## Build order
 
@@ -50,7 +50,7 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 - `test_send_without_grant_rejected` — send fails with a typed denial.
 - `test_draft_and_send_are_separate` — the draft tool cannot send.
-- `test_invite_requires_approval` — an event with attendees is blocked without a grant.
+- `test_invite_requires_approval` — the policy blocks an event with attendees when no grant exists.
 - `test_send_verified_by_message_id` — no message ID means no `succeeded`.
 - `test_duplicate_message_processed_once` — a redelivered message is a no-op.
 - `test_no_body_in_audit` — audit rows match the redaction key list.

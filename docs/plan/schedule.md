@@ -1,6 +1,6 @@
 # Schedule
 
-Realistic solo schedule for NOVA. Start 2026-10-12. Every hour here comes from a module task table. Those tables invent nothing.
+This schedule is realistic for one developer on NOVA. Start 2026-10-12. Every hour here comes from a module task table. Those tables invent nothing.
 
 ## Estimation basis
 
@@ -24,23 +24,23 @@ A phase may start only when its modules' inputs exist. Three ordering facts matt
 | Measure | Value |
 |---|---|
 | Module files | 20 |
-| Tasks | 358 |
-| Base hours | 1920 |
-| Hours with 20 percent contingency | 2309 |
-| End date at 30 h/week | 2028-04-07 |
-| End date at 40 h/week | 2027-11-24 |
-| End date at 20 h/week | 2029-01-02 |
+| Tasks | 365 |
+| Base hours | 1957 |
+| Hours with 20 percent contingency | 2353 |
+| End date at 30 h/week | 2028-04-16 |
+| End date at 40 h/week | 2027-12-02 |
+| End date at 20 h/week | 2029-01-17 |
 
 ## Conflict with the spec deadline
 
-The spec sets a deadline of 2026-12-31 (spec:697). The full scope needs 1920 hours. Hitting 2026-12-31 from 2026-10-12 means 11.4 weeks, or about 168 hours per week. That is not possible for one person.
+The spec sets a deadline of 2026-12-31 (spec:697). The full scope needs 1957 hours. Hitting 2026-12-31 from 2026-10-12 means 11.4 weeks, or about 171 hours per week. That is not possible for one person.
 
 The spec anticipates this. Spec:697 says: "Scope management is essential: prove security and one working end-to-end vertical slice first, then add service domains incrementally."
 
 Three options:
 
-1. **Accept 2028-04-07 and build the full scope.** Dates follow hours. Nothing is cut.
-2. **Cut to Release 1.** Ship P1 to P4 only. That is 717 base hours: platform, identity, policy, document sandbox, model strategy, agent runtime and scope lock. Release 1 ends 2027-05-02 at 30 h/week. The other 1203 hours cover the design system, domain pages, jobs, channels and hardening, and come after.
+1. **Accept 2028-04-16 and build the full scope.** Dates follow hours. Nothing is cut.
+2. **Cut to Release 1.** Ship P1 to P4 only. That is 732 base hours: platform, identity, policy, document sandbox, model strategy, agent runtime and scope lock. Release 1 ends 2027-05-06 at 30 h/week. The other 1225 hours cover the design system, domain pages, jobs, channels and hardening, and come after.
 3. **Raise capacity.** Each extra 10 h/week pulls the end date forward by about 19 weeks.
 
 The plan default is option 1. Change it by editing the capacity value above and rerunning the date arithmetic.
@@ -49,20 +49,20 @@ The plan default is option 1. Change it by editing the capacity value above and 
 
 | Phase | Start | End | Tasks | Hours (with contingency) | Module files |
 |---|---|---|---|---|---|
-| P1 Repo, contracts, platform | 2026-10-12 | 2026-11-29 | 35 | 208 | 01, 02, 19 |
-| P2 Identity and policy | 2026-11-30 | 2027-01-17 | 33 | 208 | 07, 08 |
-| P3 Document sandbox and models | 2027-01-18 | 2027-03-06 | 34 | 204 | 06, 05 |
-| P4 Agent runtime and scope lock | 2027-03-07 | 2027-05-02 | 37 | 242 | 03, 04 |
-| P5 Design system | 2027-05-03 | 2027-06-02 | 18 | 129 | 15 |
-| P6 Inbox, calendar, tasks, notes | 2027-06-03 | 2027-07-27 | 37 | 232 | 09, 10 |
-| P7 Finance and trips | 2027-07-28 | 2027-08-23 | 17 | 112 | 11 |
-| P8 Jobs agent and registry | 2027-08-24 | 2027-11-05 | 45 | 315 | 12, 13 |
-| P9 Channels, automations, pages | 2027-11-06 | 2028-01-05 | 40 | 261 | 14, 20 |
-| P10 Hardening and testing | 2028-01-06 | 2028-03-13 | 43 | 291 | 17, 16 |
-| P11 Release gate | 2028-03-14 | 2028-04-07 | 19 | 107 | 18 |
-| **Total** | 2026-10-12 | **2028-04-07** | **358** | **2309** | 20 files |
+| P1 Repo, contracts, platform | 2026-10-12 | 2026-12-02 | 37 | 220 | 01, 02, 19 |
+| P2 Identity and policy | 2026-12-03 | 2027-01-20 | 33 | 208 | 07, 08 |
+| P3 Document sandbox and models | 2027-01-21 | 2027-03-10 | 35 | 210 | 06, 05 |
+| P4 Agent runtime and scope lock | 2027-03-11 | 2027-05-06 | 37 | 242 | 03, 04 |
+| P5 Design system | 2027-05-07 | 2027-06-07 | 19 | 135 | 15 |
+| P6 Inbox, calendar, tasks, notes | 2027-06-08 | 2027-08-01 | 37 | 233 | 09, 10 |
+| P7 Finance and trips | 2027-08-02 | 2027-08-28 | 17 | 112 | 11 |
+| P8 Jobs agent and registry | 2027-08-29 | 2027-11-11 | 46 | 321 | 12, 13 |
+| P9 Channels, automations, pages | 2027-11-12 | 2028-01-11 | 40 | 261 | 14, 20 |
+| P10 Hardening, security and testing | 2028-01-12 | 2028-03-22 | 45 | 304 | 17, 16 |
+| P11 Release gate | 2028-03-23 | 2028-04-16 | 19 | 107 | 18 |
+| **Total** | 2026-10-12 | **2028-04-16** | **365** | **2353** | 20 files |
 
-Check: base hours by phase sum to 1920. Multiply each by 1.2, round up, divide by 30, multiply by 7 and round up to get days.
+Check: base hours by phase sum to 1957. Multiply each by 1.2, round up, divide by 30, multiply by 7 and round up to get days.
 
 ## Mapping to the spec roadmap
 
@@ -73,8 +73,8 @@ The spec lists 13 milestones (spec:699-711). This plan uses 11 phases because th
 | Repo, contracts and local platform | Oct 12-18 | P1 |
 | Identity and policy service | Oct 19-25 | P2 |
 | Document Service | Oct 26-Nov 1 | P3 (module 06) |
-| Agent workflow and model gateway | Nov 2-8 | P4 (modules 03, 04), P3 (module 05) |
-| Web dashboard, design system and Telegram | Nov 9-15 | P5, P9 (Telegram part) |
+| Agent workflow and model gateway | Nov 2-8 | P4 (modules 03, 04), P3 (module 05), P2 (module 08 approvals) |
+| Web dashboard, design system and Telegram | Nov 9-15 | P9 (Today, Assistant and Telegram), P5 (design system) |
 | Inbox, calendar, tasks and reminders | Nov 16-22 | P6 |
 | Job Agent v1 and employer registry | Nov 23-29 | P8 |
 | Finance, notes and trips | Nov 30-Dec 6 | P7, P6 (notes part) |
@@ -84,20 +84,20 @@ The spec lists 13 milestones (spec:699-711). This plan uses 11 phases because th
 | Optional cloud deployment | Dec 25-27 | Deferred, see below |
 | Release gate | Dec 28-31 | P11 |
 
-Nine milestones have one owning phase. Three rows span two phases: agent workflow (P4 first), dashboard and Telegram (P5 first), and finance with notes (P7 first). The phase named first owns the milestone.
+Six milestones have one owning phase. Four rows span two phases: agent workflow (P4 first), dashboard and Telegram (P9 first), finance with notes (P7 first), and hardening with the Kubernetes lab (P10). The phase named first owns the milestone.
 
 ## Deferred: optional cloud deployment
 
 The spec marks the cloud lab optional twice. Spec:438: "cloud EKS is gated by budget and hardening readiness."
 Spec:691: "Optional cloud lab: deploy to AWS EKS only after cluster access, IAM, networking, costs and rollback plan are reviewed."
 
-This plan defers it. Kubernetes stays in the stack through `kind`/`k3d` in module 17. No task in this plan provisions AWS. To add the cloud lab later, create a new module. Set a budget cap. Add a Terraform task set. Then rerun this schedule.
+This plan defers it. Kubernetes stays in the stack through `kind`/`k3d` in module 17. No task in this plan provisions AWS. The deferral leaves four spec items with no owning task. Spec:951 names an `infra/terraform/aws/` tree. Spec:831 names AWS ECS or Fargate tasks, task IAM roles, private subnets and no long-lived keys. Spec:438 names the EKS cluster itself. Spec:677 sets a curriculum definition of done: no long-lived cloud keys in pods, least-privilege IAM, private endpoints where feasible, a tested restore and rollback runbook, and a tested budget alert. Nothing in this plan builds any of the four. To add the cloud lab later, create a new module for them. Set a budget cap. Then rerun this schedule.
 
 ## External gates
 
 | Gate | Blocks | Lead time | Fallback |
 |---|---|---|---|
-| Google OAuth app verification | P6 inbox send scopes, and curriculum lab 6 | Days to weeks, Google review | Use the test-user list while unverified |
+| Google OAuth app verification | P2 identity login scopes (module 07), P6 inbox send scopes, and curriculum lab 6 | Days to weeks, Google review | Use the test-user list while unverified |
 | Meta business verification, WABA setup | P9 WhatsApp | Weeks, external review | Ship Telegram only. Mark WhatsApp `blocked-by-claim` |
 | Telegram bot token and `setWebhook` | P9 Telegram delivery | Minutes | None |
 | Maps or routing API key | P7 trips | Hours | Mark route estimates `manual_only` |

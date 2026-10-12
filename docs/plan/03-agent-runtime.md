@@ -35,7 +35,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 12 | Build the verifier layer that checks provider IDs and persisted state | `orchestrator/verify/` | Fabricated receipt is rejected | 8 |
 | 13 | Return-value validation: reject unknown enums, out-of-scope IDs, stale jobs | validators | Each rejection case has a test | 6 |
 | 14 | Emit audit events at every state change | orchestrator | Every transition has one audit row | 4 |
-| 15 | Add a deterministic fake model for tests | `tests/fixtures/` | Full workflow runs with no LLM | 5 |
+| 15 | Wire the deterministic fake model that `05-model-strategy` added in P3, and add the scenario fixtures the workflow needs | `tests/fixtures/` | Full workflow runs with no LLM | 5 |
 | 16 | Implement cancellation where safe | orchestrator | Cancelled run leaves no partial write | 4 |
 | 17 | Add per-user quotas and cost accounting | gateway | Quota exceeded returns a typed error | 4 |
 | 18 | Deliver curriculum lab 4: LangGraph stub workflow with an injected hallucination | `labs/lab04/` | The validator catches the injected lie | 5 |

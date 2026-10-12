@@ -27,7 +27,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 4 | Create the approval record bound to payload hash, user, target, expiry and nonce | policy schema | Any byte change invalidates it | 7 |
 | 5 | Implement single-use consumption with a race test | policy service | Two concurrent approvals, one wins | 6 |
 | 6 | Implement expiry and revocation | policy service | Expired grant fails at the domain service | 5 |
-| 7 | Domain services verify the grant themselves before executing | inbox, calendar, jobs | Grant for another service fails | 7 |
+| 7 | Build the grant-verification helper that the domain services will call. The inbox, calendar and job services consume it in P6 and P8 | policy service | A grant issued for another service fails | 7 |
 | 8 | Build the approval card API: target, data preview, permissions, consequence, expiry, hash | policy service | Preview matches the executed payload | 5 |
 | 9 | Support approve, reject, edit and expire outcomes | policy service | Edit re-hashes and re-routes to policy | 6 |
 | 10 | Implement the chat-approval policy: low-risk allow-list, payload binding, expiry and nonce checks | policy service | A high-risk payload is refused by the policy service with no channel involved | 5 |

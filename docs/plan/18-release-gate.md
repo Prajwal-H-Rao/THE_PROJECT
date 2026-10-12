@@ -34,7 +34,7 @@ Spec:713 gives the exit criteria. This plan adds a phase and a state file so ord
 | C | P4 | Approval-and-verification agent lifecycle. No unauthorised write. No fabricated success. |
 | D | P6 | One functioning personal workflow. Provider IDs and persisted state verify results. Reminders survive restart without duplicates. |
 | E | P8 | Job discovery and drafting with safe human handoff. 250 plus 250 seeds. Source verification gates hold. No site-rule bypass. |
-| F | P9 | Telegram and WhatsApp where setup prerequisites permit. Unsigned and replayed webhooks rejected and deduplicated. |
+| F | P9 | Telegram and WhatsApp where setup prerequisites permit. Unsigned and replayed webhooks rejected and deduplicated. Every privileged chat action requires a bound approval. |
 | G | P11 | Deploy, restore and security regression suite. All ten invariants pass. |
 
 ## Build sequence

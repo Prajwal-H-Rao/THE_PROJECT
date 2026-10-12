@@ -5,7 +5,7 @@ External facts this plan depends on. I fetched each source on 2026-10-12. Proven
 ## Status values
 
 - `verified` — fetched on the date in `Verified on`. Polling or building may proceed.
-- `stale` — past `Recheck before`. The dependent phase is blocked until a new fetch.
+- `stale` — past `Recheck before`. A stale row blocks its dependent phase. A new fetch lifts the block.
 - `unverifiable` — no reachable official source. The dependent task runs at reduced capability.
 - `superseded` — a newer fact replaced it.
 - `evaluated-rejected` — checked and judged not to fit NOVA.
@@ -18,23 +18,23 @@ Only `verified` permits automated polling. A `stale` or `unverifiable` claim for
 
 | ID | Claim | Source | Status | Verified on | Recheck before | Dependent module |
 |---|---|---|---|---|---|---|
-| C01 | Ollama lists `qwen3.5` with a `tools` tag at 0.8b, 2b, 4b, 9b, 27b, 35b, 122b | https://ollama.com/library/qwen3.5 | verified | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
-| C02 | `qwen3.5:2b` is 2.7-3.1 GB. `4b` is 3.3-4.0 GB. `0.8b` is 1.2-1.3 GB. `9b` is 6.6-7.6 GB | https://ollama.com/library/qwen3.5/tags | verified | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
-| C03 | Tag `qwen3.5:4b-q4_K_M` exists and is a valid pull target | https://ollama.com/library/qwen3.5:4b-q4_K_M | verified | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
-| C04 | Qwen3.5 advertises 256K context. Feasibility on 4 GB VRAM is not implied | https://ollama.com/library/qwen3.5 | verified | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
-| C05 | Qwen3.5 carries a `vision` tag. All sizes accept image input | https://ollama.com/library/qwen3.5 | verified | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
-| C06 | Ollama documents the tool-calling request and response loop | https://github.com/ollama/ollama/blob/main/docs/capabilities/tool-calling.mdx | verified | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
-| C06b | Ollama tool-calling loop, re-fetched for the gateway work in P4 | https://github.com/ollama/ollama/blob/main/docs/capabilities/tool-calling.mdx | verified | 2026-10-12 | 2027-03-07 | `03-agent-runtime` (P4) |
-| C07 | Greenhouse Job Board API is public and needs no key | https://docs.greenhouse.io/job-board.html | verified | 2026-10-12 | 2027-08-24 | `13-employer-registry` (P8) |
-| C08 | Lever Postings API is public and read-only. `?mode=xml` returns a syndication feed | https://hire.lever.co/developer | verified | 2026-10-12 | 2027-08-24 | `13-employer-registry` (P8) |
-| C09 | Ashby public job posting API is documented and supports `listedOnly` | https://developers.ashbyhq.com/docs/public-job-posting-api | verified | 2026-10-12 | 2027-08-24 | `13-employer-registry` (P8) |
-| C10 | SmartRecruiters public Posting API is keyless at `api.smartrecruiters.com/v1/companies/{id}/postings`, but availability is tier dependent and there is no list of enabled customers | https://developers.smartrecruiters.com/docs/posting-api | verified | 2026-10-12 | 2027-08-24 | `13-employer-registry` (P8) |
-| C11 | Gmail `users.watch` needs a GCP project, a Pub/Sub topic and an IAM grant, and must be renewed every 7 days | https://developers.google.com/workspace/gmail/api/guides/push | verified | 2026-10-12 | 2027-06-03 | `09-inbox-calendar` (P6) |
-| C12 | WhatsApp webhooks carry `X-Hub-Signature-256`, an HMAC-SHA256 of the raw body keyed with the app secret, prefixed `sha256=`. Compare in constant time | https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks | verified | 2026-10-12 | 2027-11-06 | `14-channels` (P9) |
-| C13 | Telegram sends `X-Telegram-Bot-Api-Secret-Token` when `secret_token` is set on `setWebhook`. Failed non-2xx deliveries are retried | https://core.telegram.org/bots/api#setWebhook | verified | 2026-10-12 | 2027-11-06 | `14-channels` (P9) |
-| C14 | LangGraph pauses on `interrupt()` and resumes with `Command(resume=...)`. A checkpointer and a `thread_id` are required. Side effects before `interrupt()` run again on resume | https://docs.langchain.com/oss/python/langgraph/interrupts | verified | 2026-10-12 | 2027-03-07 | `03-agent-runtime` (P4) |
-| C15 | AirLLM streams one layer at a time so a 70B model fits 4 GB VRAM. Cost is seconds per token. It is a Python library, not an OpenAI-compatible server | https://github.com/lyogavin/airllm | evaluated-rejected | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
-| C16 | llama.cpp already exposes layer offload through `--n-gpu-layers`, so the AirLLM idea reaches NOVA without AirLLM | https://github.com/ggml-org/llama.cpp | evaluated-rejected | 2026-10-12 | 2027-01-18 | `05-model-strategy` (P3) |
+| C01 | Ollama lists `qwen3.5` with a `tools` tag at 0.8b, 2b, 4b, 9b, 27b, 35b, 122b | https://ollama.com/library/qwen3.5 | verified | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
+| C02 | `qwen3.5:2b` is 2.7-3.1 GB. `4b` is 3.3-4.0 GB. `0.8b` is 1.2-1.3 GB. `9b` is 6.6-7.6 GB | https://ollama.com/library/qwen3.5/tags | verified | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
+| C03 | Tag `qwen3.5:4b-q4_K_M` exists and is a valid pull target | https://ollama.com/library/qwen3.5:4b-q4_K_M | verified | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
+| C04 | Qwen3.5 advertises 256K context. Feasibility on 4 GB VRAM is not implied | https://ollama.com/library/qwen3.5 | verified | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
+| C05 | Qwen3.5 carries a `vision` tag. All sizes accept image input | https://ollama.com/library/qwen3.5 | verified | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
+| C06 | Ollama documents the tool-calling request and response loop | https://github.com/ollama/ollama/blob/main/docs/capabilities/tool-calling.mdx | verified | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
+| C06b | Ollama tool-calling loop, re-fetched for the gateway work in P4 | https://github.com/ollama/ollama/blob/main/docs/capabilities/tool-calling.mdx | verified | 2026-10-12 | 2027-03-11 | `03-agent-runtime` (P4) |
+| C07 | Greenhouse Job Board API is public and needs no key | https://docs.greenhouse.io/job-board.html | verified | 2026-10-12 | 2027-08-29 | `13-employer-registry` (P8) |
+| C08 | Lever Postings API is public and read-only. `?mode=xml` returns a syndication feed | https://hire.lever.co/developer | verified | 2026-10-12 | 2027-08-29 | `13-employer-registry` (P8) |
+| C09 | Ashby public job posting API is documented and supports `listedOnly` | https://developers.ashbyhq.com/docs/public-job-posting-api | verified | 2026-10-12 | 2027-08-29 | `13-employer-registry` (P8) |
+| C10 | SmartRecruiters public Posting API is keyless at `api.smartrecruiters.com/v1/companies/{id}/postings`, but availability is tier dependent and there is no list of enabled customers | https://developers.smartrecruiters.com/docs/posting-api | verified | 2026-10-12 | 2027-08-29 | `13-employer-registry` (P8) |
+| C11 | Gmail `users.watch` needs a GCP project, a Pub/Sub topic and an IAM grant, and must be renewed every 7 days | https://developers.google.com/workspace/gmail/api/guides/push | verified | 2026-10-12 | 2027-06-08 | `09-inbox-calendar` (P6) |
+| C12 | WhatsApp webhooks carry `X-Hub-Signature-256`, an HMAC-SHA256 of the raw body keyed with the app secret, prefixed `sha256=`. Compare in constant time | https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks | verified | 2026-10-12 | 2027-11-12 | `14-channels` (P9) |
+| C13 | Telegram sends `X-Telegram-Bot-Api-Secret-Token` when `secret_token` is set on `setWebhook`. Failed non-2xx deliveries are retried | https://core.telegram.org/bots/api#setWebhook | verified | 2026-10-12 | 2027-11-12 | `14-channels` (P9) |
+| C14 | LangGraph pauses on `interrupt()` and resumes with `Command(resume=...)`. A checkpointer and a `thread_id` are required. Side effects before `interrupt()` run again on resume | https://docs.langchain.com/oss/python/langgraph/interrupts | verified | 2026-10-12 | 2027-03-11 | `03-agent-runtime` (P4) |
+| C15 | AirLLM streams one layer at a time so a 70B model fits 4 GB VRAM. Cost is seconds per token. It is a Python library, not an OpenAI-compatible server | https://github.com/lyogavin/airllm | evaluated-rejected | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
+| C16 | llama.cpp already exposes layer offload through `--n-gpu-layers`, so the AirLLM idea reaches NOVA without AirLLM | https://github.com/ggml-org/llama.cpp | evaluated-rejected | 2026-10-12 | 2027-01-21 | `05-model-strategy` (P3) |
 
 ## Why AirLLM was rejected
 

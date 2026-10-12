@@ -14,6 +14,7 @@ Build plan for `NOVA_Full_Updated_Spec.md`. The spec is the source of truth. Thi
 
 - The spec wins on every conflict. Report the conflict. Do not silently follow this plan.
 - A task is done only when its test passes. A model response is never proof.
+- The Artifact column names a category or a shared path, not a unique file. `migrations`, `CI config`, `observability`, `tool registry`, `worker` and `adapter` appear in several modules. A later module extends the shared artifact. It does not rebuild it, unless its own row says so.
 - Only a source marked `verified` may be polled. An `unverifiable` claim forces `manual_only`.
 - Files stay under 200 lines. Split a module into `-a` and `-b` when it grows.
 - Every quoted string attributed to the spec carries a `spec:LINE` reference. Paraphrase carries no quote marks.
@@ -26,18 +27,18 @@ Phase order follows dependency. The design system lands at P5. The domain pages 
 
 | Phase | Window | Module files | Tasks | Exit criteria |
 |---|---|---|---|---|
-| P1 Repo, contracts, platform | 2026-10-12 – 2026-11-29 | `01-architecture.md`, `02-data-and-audit.md`, `19-tech-and-curriculum.md` | 35 | Gate A. An unauthenticated private service call is rejected. Images run non-root. No secrets in images. |
-| P2 Identity and policy | 2026-11-30 – 2027-01-17 | `07-identity-authz.md`, `08-policy-approval.md` | 33 | Replayed, expired and cross-user approvals are denied. RBAC and TLS hold. |
-| P3 Document sandbox and models | 2027-01-18 – 2027-03-06 | `06-document-ml-sandbox.md`, `05-model-strategy.md` | 34 | Gate B. The parser returns evidence-bound fields or explicit unknown. Malicious and oversized fixtures fail safely. |
-| P4 Agent runtime and scope lock | 2027-03-07 – 2027-05-02 | `03-agent-runtime.md`, `04-scope-lock.md` | 37 | Gate C. The model cannot make an unauthorised write. The model cannot fabricate success. |
-| P5 Design system | 2027-05-03 – 2027-06-02 | `15-design-system.md` | 18 | Action previews and denial states are keyboard-accessible. Tokens drive both themes. |
-| P6 Inbox, calendar, tasks, notes | 2027-06-03 – 2027-07-27 | `09-inbox-calendar.md`, `10-tasks-notes.md` | 37 | Gate D. Provider IDs and persisted state verify results. Reminder workers survive restart without duplicates. |
-| P7 Finance and trips | 2027-07-28 – 2027-08-23 | `11-finance-trips.md` | 17 | Uncertain extraction is marked for review. Trip estimates are labelled as estimates. |
-| P8 Jobs agent and registry | 2027-08-24 – 2027-11-05 | `12-jobs-agent.md`, `13-employer-registry.md` | 45 | Gate E. Exactly 250 IN plus 250 GLOBAL seeds. Source verification gates hold. Fresh opening provenance. No site-rule bypass. |
-| P9 Channels, automations, pages | 2027-11-06 – 2028-01-05 | `14-channels.md`, `20-pages-and-automations.md` | 40 | Gate F. Unsigned and replayed webhooks are rejected and deduplicated. Automations run once per trigger. |
-| P10 Hardening, security and testing | 2028-01-06 – 2028-03-13 | `17-deployment-hardening.md`, `16-reliability-testing.md` | 43 | No known direct model-to-tool path remains. Model and parser workloads cannot reach the DB, secrets, the Docker socket, host paths or arbitrary egress. |
-| P11 Release gate | 2028-03-14 – 2028-04-07 | `18-release-gate.md` | 19 | Gate G. All ten release invariants pass by test or operator-reviewed record. |
-| **Total** | 2026-10-12 – **2028-04-07** | 20 files | **358** | |
+| P1 Repo, contracts, platform | 2026-10-12 – 2026-12-02 | `01-architecture.md`, `02-data-and-audit.md`, `19-tech-and-curriculum.md` | 37 | Gate A. An unauthenticated private service call is rejected. Images run non-root. No secrets in images. |
+| P2 Identity and policy | 2026-12-03 – 2027-01-20 | `07-identity-authz.md`, `08-policy-approval.md` | 33 | Replayed, expired and cross-user approvals are denied. RBAC and TLS hold. |
+| P3 Document sandbox and models | 2027-01-21 – 2027-03-10 | `06-document-ml-sandbox.md`, `05-model-strategy.md` | 35 | Gate B. The parser returns evidence-bound fields or explicit unknown. Malicious and oversized fixtures fail safely. |
+| P4 Agent runtime and scope lock | 2027-03-11 – 2027-05-06 | `03-agent-runtime.md`, `04-scope-lock.md` | 37 | Gate C. The model cannot make an unauthorised write. The model cannot fabricate success. |
+| P5 Design system | 2027-05-07 – 2027-06-07 | `15-design-system.md` | 19 | Action previews, denial states and failure states are keyboard-accessible. Tokens drive both themes. |
+| P6 Inbox, calendar, tasks, notes | 2027-06-08 – 2027-08-01 | `09-inbox-calendar.md`, `10-tasks-notes.md` | 37 | Gate D. Provider IDs and persisted state verify results. Reminder workers survive restart without duplicates. |
+| P7 Finance and trips | 2027-08-02 – 2027-08-28 | `11-finance-trips.md` | 17 | Uncertain extraction is marked for review. Trip estimates are labelled as estimates. |
+| P8 Jobs agent and registry | 2027-08-29 – 2027-11-11 | `12-jobs-agent.md`, `13-employer-registry.md` | 46 | Gate E. Exactly 250 IN plus 250 GLOBAL seeds. Source verification gates hold. Fresh opening provenance. No site-rule bypass. |
+| P9 Channels, automations, pages | 2027-11-12 – 2028-01-11 | `14-channels.md`, `20-pages-and-automations.md` | 40 | Gate F. Unsigned and replayed webhooks are rejected and deduplicated. Automations run once per trigger. |
+| P10 Hardening, security and testing | 2028-01-12 – 2028-03-22 | `17-deployment-hardening.md`, `16-reliability-testing.md` | 45 | No known direct model-to-tool path remains. Success and failure states tie to authoritative evidence. Model and parser workloads cannot reach the DB, secrets, the Docker socket, host paths or arbitrary egress. |
+| P11 Release gate | 2028-03-23 – 2028-04-16 | `18-release-gate.md` | 19 | Gate G. All ten release invariants pass by test or operator-reviewed record. |
+| **Total** | 2026-10-12 – **2028-04-16** | 20 files | **365** | |
 
 ## Spec coverage
 

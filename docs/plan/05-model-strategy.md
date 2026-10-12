@@ -42,10 +42,10 @@ The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility
 | # | Task | Artifact | Test | Hrs |
 |---|---|---|---|---|
 | 1 | Write a repeatable setup script: pull, pin digest, record size and license | `models/setup.sh` | Script reproduces the same digest | 4 |
-| 2 | Create `model_registry.yaml` with provider, ID, digest, quant, license, template version, `num_ctx`, latency, peak RAM/VRAM, eval date | `models/` | Registry validates against a schema | 4 |
+| 2 | Create `models/model-registry.yaml`, the path spec:957 names, with provider, ID, digest, quant, license, template version, `num_ctx`, latency, peak RAM/VRAM, eval date | `models/` | Registry validates against a schema | 4 |
 | 3 | Bind Ollama to loopback and the private container network only | Compose config | Public port scan fails | 3 |
 | 4 | Pin the model tag and digest in deployment config | Compose config | Drift fails CI | 2 |
-| 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request is rejected by the runtime | 3 |
+| 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request waits in queue order and never runs in parallel | 3 |
 | 6 | Measure CPU-only and GPU-assisted runs separately | eval report | The report has a CPU block and a GPU block, each with peak RAM and p95 | 5 |
 | 7 | Build the 250-case evaluation set: supported tasks, ambiguity, out-of-scope, wrong tool, invalid args, injection, multilingual, multi-turn | `tests/model-eval/` | Set has 250 cases and a manifest | 12 |
 | 8 | Score exact tool-name accuracy and per-field argument accuracy | eval runner | Report per case and worst slice | 6 |
@@ -71,7 +71,7 @@ If a candidate misses the tool-choice target, simplify the workflow or use deter
 
 Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
 
-1. Write the setup script and `model_registry.yaml`.
+1. Write the setup script and `models/model-registry.yaml`.
 2. Build the 250-case evaluation set.
 3. Run 2b and 4b. Record both. Decide.
 
@@ -79,7 +79,7 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 - `test_registry_schema_complete` — a row missing digest, quant, licence, `num_ctx` or eval date fails.
 - `test_ollama_not_public` — a request to the model port from outside the private network fails.
-- `test_context_capped_at_4k` — the model runtime rejects a request above the configured `num_ctx`. `03-agent-runtime` repeats the check at the gateway in P4.
+- `test_context_capped_at_4k` — any request above the configured `num_ctx` comes back truncated, and the truncation marker is present. `03-agent-runtime` repeats the check at the gateway in P4.
 - `test_eval_set_has_250_cases` — a count below 250 fails the runner.
 - `test_false_tool_call_rate_reported` — the report contains a number for out-of-scope false calls.
 - `test_decision_cites_existing_run` — the default model names an eval run ID that resolves.

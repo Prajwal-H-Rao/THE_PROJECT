@@ -28,15 +28,16 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 5 | Implement hash chaining over audit rows | audit service | Editing a row breaks the chain check | 6 |
 | 6 | Create `emails`, `events`, `tasks`, `notes`, `finances`, `trips` | domain schemas | Ownership column is indexed | 6 |
 | 7 | Create `resume_profile`, `job_listing`, `job_match`, `application_draft`, `application_submission` | jobs schema | Profile version is immutable | 6 |
-| 8 | Create `employer_targets`, `employer_job_sources`, `job_opening`, `job_source_run` | registry schema | Matches the spec SQL at line 586 | 6 |
+| 8 | Create `employer_targets`, `employer_job_sources`, `job_opening`, `job_source_run` | registry schema | Matches the spec SQL at line 587 | 6 |
 | 9 | Implement the event envelope with `event_id`, `schema_version`, `correlation_id`, `causation_id` | `packages/contracts/events/` | Backward-compat test passes | 5 |
 | 10 | Add object-storage pointers and a retention policy table | finance, notes schemas | Deletion propagates to the object | 4 |
 | 11 | Add pgvector as an optional extension for note search | notes schema | Vector row deletes with its note | 4 |
-| 12 | Write the export and deletion workflow | audit + all schemas | Export contains every user row | 6 |
-| 13 | Add a backup and restore script with a drill | `infra/` scripts | Restore into an empty DB passes | 6 |
-| 14 | Add indexes on IDs, timestamps and ownership columns | migrations | `EXPLAIN` uses the index | 3 |
+| 12 | Record the privacy, AI, employment and messaging review for the actual jurisdiction, then set every retention period from it | `docs/privacy-review.md` | Every retention row cites the review, and no period is set without it (spec:237, spec:229) | 4 |
+| 13 | Write the export and deletion workflow | audit + all schemas | Export contains every user row | 6 |
+| 14 | Add a backup and restore script with a drill | `infra/` scripts | Restore into an empty DB passes | 6 |
+| 15 | Add indexes on IDs, timestamps and ownership columns | migrations | `EXPLAIN` uses the index | 3 |
 
-This build sequence sums to 70 hours.
+This build sequence sums to 74 hours.
 
 ## Build order
 

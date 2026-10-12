@@ -29,7 +29,7 @@ Every service has health checks, bounded retries, a dead-letter path and a recov
 | Performance | API latency, queue depth, worker memory, concurrency | k6 |
 | Accessibility | Keyboard, focus, labels, ARIA, contrast, reduced motion | Playwright plus axe |
 | Backup and restore | Failover, restore, integrity verification | Drill script |
-| Security | Auth boundaries, SSRF, CSRF, XSS, injection, path traversal, authz, object authorization, secret redaction, webhook forgery and replay, dependency and image scanning (spec:866) | ZAP, Trivy, audit |
+| Security | Object-level authorisation, token audience and expiry validation, CSRF, SSRF, XSS, secret-leak scan, upload limits, path traversal, webhook forgery and replay, and rate-limit tests (spec:866) | ZAP, Trivy, audit |
 
 ## Build sequence
 
@@ -39,7 +39,7 @@ Every service has health checks, bounded retries, a dead-letter path and a recov
 | 2 | Add circuit breakers on provider calls | integration service | Breaker opens and half-opens | 6 |
 | 3 | Implement exponential backoff with jitter and a DLQ per queue | worker | DLQ receives a poisoned job | 6 |
 | 4 | Classify failures: failed, unverified, delayed | orchestrator | Each class renders differently | 5 |
-| 5 | Build fault injection: timeouts, 429, 5xx, malformed body, partial write, stale job, restart | `tests/faults/` | Each path is covered | 8 |
+| 5 | Build fault injection for every case in spec:868: timeout, 429, 5xx, malformed body, partial write, stale job, restart, killed worker mid-job, duplicated queue event, provider success then timeout, corrupt model output, unavailable model, Redis outage, Postgres restart and expired OAuth grant | `tests/faults/` | Every listed case has one test that can fail | 8 |
 | 6 | Add structured logging with correlation IDs and a redaction allow-list | all services | Log scan finds no secret | 6 |
 | 7 | Finish the OpenTelemetry trace: gateway to DB to provider | observability | One trace spans the path | 6 |
 | 8 | Build metrics: latency histogram, queue depth, error rate, retries, breaker state, worker RSS, tokens, cost, approval wait | observability | Dashboards render | 7 |
