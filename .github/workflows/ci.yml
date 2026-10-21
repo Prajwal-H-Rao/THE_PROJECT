@@ -21,6 +21,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.23.4"
+
       - name: Install the tools
         run: python -m pip install --disable-pip-version-check ruff==0.17.1 mypy==2.4.0
 
@@ -34,6 +39,18 @@ jobs:
 
       - name: Typecheck the Python code
         run: mypy nova/tests/layout
+
+      - name: Test the Python service template
+        run: |
+          python -m pip install --disable-pip-version-check -r nova/services/_template/python/requirements.txt -r nova/services/_template/python/requirements-dev.txt
+          cd nova/services/_template/python && python -m pytest -q
+
+      - name: Build and test the TypeScript service template
+        run: |
+          cd nova/services/_template/typescript
+          npm ci
+          npm run build
+          npm test
 
       - name: Prove that the typecheck fails on a type error
         run: |

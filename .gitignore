@@ -23,6 +23,13 @@ nova/services/*/htmlcov/
 nova/services/*/playwright-report/
 nova/services/*/storybook-static/
 nova/services/*/test-results/
+nova/services/_template/*/build/
+nova/services/_template/*/coverage/
+nova/services/_template/*/dist/
+nova/services/_template/*/htmlcov/
+nova/services/_template/*/playwright-report/
+nova/services/_template/*/storybook-static/
+nova/services/_template/*/test-results/
 nova/workers/*/build/
 nova/workers/*/coverage/
 nova/workers/*/dist/

@@ -1,0 +1,17 @@
+# The tool settings for one service. The CI workflow runs these tools.
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+include = ["app/**/*.py", "tests/**/*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["app", "tests"]
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
