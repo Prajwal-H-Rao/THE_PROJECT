@@ -37,39 +37,42 @@ Every service has health checks, bounded retries, a dead-letter path and a recov
 |---|---|---|---|---|
 | 1 | Standardise `/health/live` and `/health/ready` across services | each service | Readiness fails when deps are down | 5 |
 | 2 | Add circuit breakers on provider calls | integration service | Breaker opens and half-opens | 6 |
-| 3 | Implement exponential backoff with jitter and a DLQ per queue | worker | DLQ receives a poisoned job | 6 |
+| 3 | Implement exponential backoff with jitter and a DLQ per queue. Never auto-retry a non-idempotent send (spec:173). | worker | DLQ receives a poisoned job, and a non-idempotent send runs once | 6 |
 | 4 | Classify failures: failed, unverified, delayed | orchestrator | Each class renders differently | 5 |
-| 5 | Build fault injection for every case in spec:868: timeout, 429, 5xx, malformed body, partial write, stale job, restart, killed worker mid-job, duplicated queue event, provider success then timeout, corrupt model output, unavailable model, Redis outage, Postgres restart and expired OAuth grant | `tests/faults/` | Every listed case has one test that can fail | 8 |
-| 6 | Add structured logging with correlation IDs and a redaction allow-list | all services | Log scan finds no secret | 6 |
-| 7 | Finish the OpenTelemetry trace: gateway to DB to provider | observability | One trace spans the path | 6 |
-| 8 | Build metrics: latency histogram, queue depth, error rate, retries, breaker state, worker RSS, tokens, cost, approval wait | observability | Dashboards render | 7 |
-| 9 | Add alerts with runbooks: sustained error rate, queue depth, provider auth failure, disk, cert expiry, restore failure, cost | `infra/alerts/` | Each alert links a runbook | 6 |
-| 10 | Expand the workflow test suite: pause, resume, approval, timeout, repair, cancel, stale | tests | All paths covered | 7 |
-| 11 | Add performance tests with realistic data volumes | `tests/perf/` | p95 recorded, no target claimed early | 6 |
-| 12 | Run the accessibility suite in CI | `tests/a11y/` | Critical issues fail CI | 5 |
-| 13 | Schedule automated backups with integrity verification | `infra/` | Verification runs per backup | 5 |
-| 14 | Run a restore drill into an empty environment | drill report | Restore passes the schema check | 6 |
-| 15 | Write recovery runbooks: provider outage, model down, DB restore, key rotation, queue drain, rollback, incident, GDPR export or delete | `docs/runbooks/` | Every runbook row carries one command and the output of one recorded run | 9 |
-| 16 | Render failure copy that names the last confirmed stage, a reason and a next safe step | web UI error states | An injected fault renders the stage, not a generic error | 4 |
-| 17 | Write the spec:845 runbooks (cluster access, audit logs, upgrade and patch, quota and cost alerts) and run the compromised parser pod drill | `docs/runbooks/` plus drill record | The record shows the parser pod reaching no DB and no internet | 6 |
-| 18 | Build a CI job that fails on a missing required test or an unverified optional claim | CI config | Missing test fails the build | 5 |
-| 19 | Deliver curriculum lab 10: tracing, metrics and one restore drill | `labs/lab10/` | The trace renders and the restore passes | 5 |
-This build sequence sums to 113 hours.
+| 5 | Write the spec:866 security test layer in `tests/security/`. Cover object auth, token audience and expiry. Add CSRF, SSRF and XSS cases. Add secret-leak scans, upload limits and path traversal. Add webhook forgery, replay and rate limits. | `tests/security/` | Each case runs and fails on a regression | 6 |
+| 6 | Build fault injection for the 8 spec:868 cases, plus timeout, 429, 5xx, malformed body, partial write, stale job and restart | `tests/faults/` | Every listed case has one test that can fail | 8 |
+| 7 | Add structured logging with correlation IDs and a redaction allow-list | all services | Log scan finds no secret | 6 |
+| 8 | Finish the OpenTelemetry trace: gateway to DB to provider | observability | One trace spans the path | 6 |
+| 9 | Build metrics: latency histogram, queue depth, error rate, retries, breaker state, worker RSS, tokens, cost, approval wait | observability | Each metric emits with the documented name. Dashboards come from `17-deployment-hardening` task 23 | 7 |
+| 10 | Add alerts with runbooks: sustained error rate, queue depth, provider auth failure, disk, cert expiry, restore failure, cost | `infra/alerts/` | Each alert links a runbook | 6 |
+| 11 | Expand the workflow test suite: pause, resume, approval, timeout, repair, cancel, stale | tests | All paths covered | 7 |
+| 12 | Add performance tests with realistic data volumes | `tests/perf/` | p95 recorded, no target claimed early | 6 |
+| 13 | Run the accessibility suite in CI | `tests/a11y/` | Critical issues fail CI | 5 |
+| 14 | Schedule automated backups with integrity verification | `infra/` | Verification runs per backup | 5 |
+| 15 | Run a restore drill into an empty environment | drill report | Restore passes the schema check | 6 |
+| 16 | Write recovery runbooks: provider outage, model down, DB restore, key rotation, queue drain, rollback, incident, GDPR export or delete | `docs/runbooks/` | Every runbook row carries one command and the output of one recorded run | 9 |
+| 17 | Render failure copy that names the last confirmed stage, a reason and a next safe step | web UI error states | An injected fault renders the stage, not a generic error | 4 |
+| 18 | Write the spec:845 runbooks: cluster access, audit logs, upgrade and patch, quota and cost alerts. Run the compromised parser pod drill against the `kind` cluster `17-deployment-hardening` builds earlier in P10. | `docs/runbooks/` plus drill record | The record shows the parser pod reaching no DB and no internet | 6 |
+| 19 | Build a CI job that fails on a missing required test or an unverified optional claim | CI config | Missing test fails the build | 5 |
+| 20 | Deliver curriculum lab 10: tracing, metrics and one restore drill | `labs/lab10/` | The trace renders and the restore passes | 5 |
+This build sequence sums to 119 hours.
 
 ## Acceptance tests
 
 - `test_readiness_fails_when_db_down` — readiness returns 503 while liveness stays 200.
 - `test_retry_uses_backoff_and_jitter` — timings match the schedule.
 - `test_dlq_receives_poisoned_job` — a job that always fails lands in the DLQ.
-- `test_no_non_idempotent_auto_retry` — a send without an idempotency key is not retried.
+- `test_no_non_idempotent_auto_retry` — the worker skips the retry when a send carries no idempotency key.
 - `test_partial_write_failure_leaves_no_partial_state` — the transaction rolls back.
 - `test_trace_spans_ui_to_db` — one trace covers the full path.
 - `test_no_secret_in_metrics_or_traces` — label and span scan is clean.
+- `test_rate_limit_blocks_over_limit_calls` — a burst over the limit returns 429, and the next window recovers.
+- `test_secret_leak_scan_finds_planted_secret` — a planted secret in a log or response fails the scan.
 - `test_restore_drill_passes` — a clean restore and schema check.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Standardise health checks and add circuit breakers plus the DLQ.
 2. Build fault injection and cover every failure path.

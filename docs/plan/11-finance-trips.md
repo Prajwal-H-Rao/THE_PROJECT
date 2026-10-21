@@ -28,19 +28,20 @@ Import, categorise and review transactions with evidence. Compute totals in code
 | 8 | Implement the ambiguous-import review queue | finance service | Queue surfaces only uncertain rows | 5 |
 | 9 | Compute totals, budgets and trends in code | finance service | Totals match a fixed fixture | 6 |
 | 10 | Add export and delete for the finance domain | finance service | Delete removes objects too | 4 |
-| 11 | Implement provider connection handling and account linking consent | integration service | Consent scope is explicit | 6 |
-| 12 | Add Plaid or India Account Aggregator behind a config flag | integration service | Flag off means CSV only | 6 |
+| 11 | Implement provider connection handling and account-linking consent inside the finance service. `20-pages-and-automations` adds the `integration-registry` that displays these connections in P9 | finance service | Consent scope is explicit | 6 |
+| 12 | Add Plaid or India Account Aggregator behind a config flag in the same local adapter. The P9 registry reads only its status. | finance service | Flag off means CSV only | 6 |
 | 13 | Create the trip table: dates, origin, destination, budget, status | migrations | Ownership indexed | 4 |
 | 14 | Implement route and fare estimation with a provider adapter | `services/trips-service/` | Estimates are labelled | 6 |
 | 15 | Implement itinerary draft, packing list and a pre-departure checklist | trip service | Checklist is deterministic | 5 |
 | 16 | Gate booking actions behind an approval grant | policy + trip service | Booking without approval fails | 5 |
-| 17 | Build the Finance and Trips page: period selector, net and cash-flow cards, category chart, import provenance and review queue; and for trips a map with stops, a route timeline, transport options and booking links | `apps/web/finance/` | The chart renders from stored transactions, every import shows its provenance, and booking links carry an estimate label (spec:408, spec:409, spec:222) | 6 |
+| 17 | Build the Finance and Trips page: period selector, net and cash-flow cards, category chart, import provenance and review queue. Trips add a map with stops, a route timeline, transport options and booking links. | `apps/web/finance/` | The chart renders from stored transactions. Every import shows its provenance. Booking links carry an estimate label (spec:408, spec:409). | 6 |
+| 18 | Register the trips operations with the policy layer: argument schema, resource scope, risk tier, quota and verifier (spec:193) | policy service | A trips call with an unregistered argument is rejected | 5 |
 
-This build sequence sums to 93 hours.
+This build sequence sums to 98 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Create the transaction table and the CSV importer with deduplication.
 2. Add the deterministic categoriser, then the model-drafted category path behind review.
@@ -58,6 +59,6 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 ## Risks
 
-- Provider integrations (Plaid, Account Aggregator) carry compliance weight. Keep the flag off until the terms are read.
+- Provider integrations (Plaid, Account Aggregator) carry compliance weight. Keep the flag off until you read the terms.
 - Floating-point money is a defect source. Use integer minor units everywhere.
 - A model-drafted category is a suggestion. Never let it reach a report without review when confidence is low.

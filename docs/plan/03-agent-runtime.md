@@ -1,6 +1,6 @@
 # Module 03 — Agent runtime and tool registry
 
-Phase P4. Spec headings: Request lifecycle, Agent Runtime & Tool Registry, Agent workflow and execution policy, Agentic and tool-calling protocol.
+Phase P5. Spec headings: Request lifecycle, Agent Runtime & Tool Registry, Agent workflow and execution policy, Agentic and tool-calling protocol.
 
 ## Goal
 
@@ -22,11 +22,11 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | # | Task | Artifact | Test | Hrs |
 |---|---|---|---|---|
 | 1 | Define the tool registry schema: `tool_id`, version, Pydantic in/out, owning service, task family, scopes, risk tier, idempotency, verifier | `services/agent-orchestrator/registry/` | Unknown field fails validation | 6 |
-| 2 | Register 8 read-only tools first: list inbox, read event, list tasks, search notes, list transactions, list openings, get profile, get audit | registry + schemas | Registry rejects an unregistered tool | 6 |
-| 3 | Register 6 write tools: draft email, create event, create task, create note, import statement, draft application | registry + schemas | Each write tool carries a risk tier | 6 |
+| 2 | Register 8 read-only tools: list inbox, read event, list tasks, search notes, list transactions, list openings, get profile, get audit | registry + schemas | Registry rejects an unregistered tool | 6 |
+| 3 | Register 6 write tools: draft email, create event, create task, create note, import statement, draft application. Enumerate the full operation set for each of the 7 families per spec:193 | registry + schemas | Each write tool carries a risk tier, and every family has an enumerated operation set | 6 |
 | 4 | Register 3 consequential tools: send email, submit application, connect account | registry + schemas | Each forces an approval | 4 |
 | 5 | Build the deterministic router from natural language to a task-family enum | `orchestrator/router/` | Out-of-scope text returns a fixed refusal | 6 |
-| 6 | Build the model gateway: provider allow-list, request shaping, redaction, timeout, quota | `services/model-gateway/` | Timeout and quota tests pass | 8 |
+| 6 | Build the model gateway: provider allow-list, request shaping, redaction, timeout, quota | `services/model-gateway/` | Timeout, quota and `num_ctx` truncation-marker tests pass | 8 |
 | 7 | Add Ollama as the default provider with a pinned digest | gateway config | Gateway rejects an unlisted model | 4 |
 | 8 | Implement the LangGraph state machine with a checkpointer | `orchestrator/workflows/` | Pause and resume restore exact state | 8 |
 | 9 | Put `interrupt()` before every consequential step | workflow code | No side effect runs before approval | 6 |
@@ -43,7 +43,7 @@ This build sequence sums to 98 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Define the tool registry and register the read-only tools.
 2. Build the deterministic router and the refusal path.

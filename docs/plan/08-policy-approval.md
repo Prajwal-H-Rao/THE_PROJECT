@@ -22,13 +22,13 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | # | Task | Artifact | Test | Hrs |
 |---|---|---|---|---|
 | 1 | Define the policy rule schema: actor, scope, sensitivity, target, blast radius, risk tier | policy service | Unknown field fails | 5 |
-| 2 | Encode per-action default policies for all 7 task families | `families.yaml` | Every registered tool has a rule | 6 |
+| 2 | Encode per-action default policies for all 7 task families | `families.yaml` | Every family in `families.yaml` has a default rule, and a family with no rule fails validation | 6 |
 | 3 | Implement the decision endpoint returning `allow`, `deny` or `needs_approval` | policy service | Decision is deterministic for the same input | 6 |
 | 4 | Create the approval record bound to payload hash, user, target, expiry and nonce | policy schema | Any byte change invalidates it | 7 |
 | 5 | Implement single-use consumption with a race test | policy service | Two concurrent approvals, one wins | 6 |
-| 6 | Implement expiry and revocation | policy service | Expired grant fails at the domain service | 5 |
-| 7 | Build the grant-verification helper that the domain services will call. The inbox, calendar and job services consume it in P6 and P8 | policy service | A grant issued for another service fails | 7 |
-| 8 | Build the approval card API: target, data preview, permissions, consequence, expiry, hash | policy service | Preview matches the executed payload | 5 |
+| 6 | Implement expiry and revocation | policy service | An expired or revoked grant fails the policy check. The domain services prove the same rule in P6 and P8 | 5 |
+| 7 | Build the grant-verification helper that domain services call. The inbox, calendar and job services consume it in P6 and P8. | policy service | A grant issued for another service fails | 7 |
+| 8 | Build the approval card API: target, data preview, permissions, consequence, expiry, hash. `09-inbox-calendar` and `12-jobs-agent` verify the live match in P6 and P8. | policy service | The card hash binds the preview, and a preview edited after hashing fails | 5 |
 | 9 | Support approve, reject, edit and expire outcomes | policy service | Edit re-hashes and re-routes to policy | 6 |
 | 10 | Implement the chat-approval policy: low-risk allow-list, payload binding, expiry and nonce checks | policy service | A high-risk payload is refused by the policy service with no channel involved | 5 |
 | 11 | Reject free-text approval at the policy boundary | policy service | A payload that carries free text instead of a bound action ID is refused | 4 |
@@ -41,7 +41,7 @@ This build sequence sums to 77 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Define the policy rule schema and encode the family defaults.
 2. Create the approval grant with payload-hash binding.
@@ -49,14 +49,14 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 ## Acceptance tests
 
-- `test_replayed_approval_denied` — the same grant cannot be consumed twice.
-- `test_expired_approval_denied` — expiry holds at the executing service.
+- `test_replayed_approval_denied` — the policy allows one consumption of a grant and rejects the second.
+- `test_expired_approval_denied` — the policy check rejects a grant past its expiry. `09-inbox-calendar` repeats the check at the executing service in P6.
 - `test_cross_user_approval_denied` — a grant for user A fails for user B.
 - `test_altered_payload_invalidates_approval` — one changed byte invalidates the grant.
 - `test_policy_change_invalidates_grant` — a version bump invalidates old grants.
 - `test_free_text_not_approval` — "yes" to an ambiguous action fails.
 - `test_bulk_action_cannot_enable_source` — a batch cannot add a new source or submit an application.
-- `test_preview_matches_execution` — the executed payload equals the previewed payload.
+- `test_preview_matches_execution` — the card hash binds the previewed payload, so any later edit fails the hash check. `12-jobs-agent` repeats the check against a live submission in P8.
 
 ## Risks
 

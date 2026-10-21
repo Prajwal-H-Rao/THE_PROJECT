@@ -46,23 +46,23 @@ The spec's 10-row matrix at line 788 is normative. Reproduce it as policy tests,
 | 5 | Encrypt OAuth refresh tokens at rest with envelope encryption | identity service | Ciphertext only in DB and logs | 6 |
 | 6 | Implement scopes per integration and per user | identity service | Scope escalation fails | 5 |
 | 7 | Implement the resource-ownership check in the repository base layer. Every service created later extends it | repository base layer | Cross-user read fails | 8 |
-| 8 | Build the service JWT validation middleware: issuer, audience, expiry, subject and scope, in the shared gateway path that every service inherits | gateway middleware | `alg: none` rejected | 6 |
+| 8 | Build the service JWT validation middleware: issuer, audience, expiry, subject, scope. Every service inherits it from the shared gateway path. | gateway middleware | `alg: none` rejected | 6 |
 | 9 | Add key rotation for workload keys | identity service | Old key fails after rotation | 5 |
 | 10 | Implement step-up authentication for sensitive changes | gateway | Sensitive route demands fresh TOTP | 5 |
 | 11 | Build the account-linking flow: one-time nonce issued only from a logged-in session | identity service | A nonce minted outside a logged-in session is refused | 6 |
 | 12 | Implement unlink and revoke | identity service | Revocation stops future access | 4 |
 | 13 | Add CORS allow-list, CSP, body and file limits, SSRF guard | gateway | Each control has a test | 6 |
 | 14 | Add rate limiting and account lockout | gateway | Lockout triggers and recovers | 4 |
-| 15 | Encode the 10 matrix rows as policy tests | policy service | All 10 pass | 5 |
+| 15 | Encode the 10 matrix rows as policy tests, against the rule schema `08-policy-approval` builds in tasks 1-3, before module 07 | policy service | All 10 pass | 5 |
 | 16 | Verify no token or secret appears in logs or traces | log scan test | Scan is clean | 3 |
-| 17 | Implement RBAC roles `admin` and `user`, checked by the policy layer on every tool call | identity + policy | A `user` role is denied on an admin-classified tool call (spec:235) | 6 |
-| 18 | Terminate TLS outside localhost, set HttpOnly and SameSite cookies, add CSRF protection for cookie-auth writes, a CORS allow-list and a content security policy | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:785) | 4 |
+| 17 | Implement RBAC roles `admin` and `user`, checked by the decision endpoint `08-policy-approval` builds in task 3 | identity + policy | A `user` role is denied on an admin-classified tool call (spec:235) | 6 |
+| 18 | Terminate TLS outside localhost. Set HttpOnly and SameSite cookies. Add CSRF protection, a CORS allow-list and a content security policy. | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:785) | 4 |
 
 This build sequence sums to 96 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Implement the OIDC flow with PKCE and secure cookies.
 2. Add TOTP and encrypted refresh tokens.
@@ -79,8 +79,8 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 - `test_revocation_stops_access` — a revoked grant returns 401 on the next call.
 - `test_no_secret_in_logs` — the log scan finds no token material.
 - `test_matrix_rows_all_pass` — all 10 authorization matrix rows hold.
-- `test_admin_role_restricted` — the policy layer denies an admin-classified tool call for the `user` role. `20-pages-and-automations` repeats the check on the built admin routes in P9.
-- `test_tls_and_csrf_hold` — a request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403.
+- `test_admin_role_restricted` — the policy layer denies an admin-classified tool call for the `user` role. `20-pages-and-automations` repeats the check on the privileged endpoints it builds in P9.
+- `test_tls_and_csrf_hold` — outside localhost the edge serves only HTTPS, and a cookie-auth write without a CSRF token returns 403.
 
 ## Risks
 

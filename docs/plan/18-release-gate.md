@@ -4,7 +4,7 @@ Phase P11. Spec headings: Non-Negotiable Security Invariants (Release Gate), Sug
 
 ## Goal
 
-All ten security invariants pass by test or by an operator-reviewed record. Gates A to G sign in order through a machine-readable state file. No risky feature ships to meet a date.
+All ten security invariants pass by test or by an operator-reviewed record. Gates A to G sign in order through a machine-readable state file at P11, from the evidence each phase produced. No earlier phase signs a gate. No risky feature ships to meet a date.
 
 ## The ten invariants (spec:1014-1023, binding)
 
@@ -31,10 +31,10 @@ Spec:713 gives the exit criteria. This plan adds a phase and a state file so ord
 |---|---|---|
 | A | P1 | Authenticated service boundaries. An unauthenticated private call is rejected. Images run non-root. No secrets in images. |
 | B | P3 | Safe parse with provenance. Evidence-bound fields or explicit unknown. Malicious and oversized fixtures fail safely. |
-| C | P4 | Approval-and-verification agent lifecycle. No unauthorised write. No fabricated success. |
+| C | P5 | Approval-and-verification agent lifecycle. No unauthorised write. No fabricated success. |
 | D | P6 | One functioning personal workflow. Provider IDs and persisted state verify results. Reminders survive restart without duplicates. |
-| E | P8 | Job discovery and drafting with safe human handoff. 250 plus 250 seeds. Source verification gates hold. No site-rule bypass. |
-| F | P9 | Telegram and WhatsApp where setup prerequisites permit. Unsigned and replayed webhooks rejected and deduplicated. Every privileged chat action requires a bound approval. |
+| E | P8 | Job discovery and drafting with safe human handoff. Exactly 250 IN plus 250 GLOBAL seeds. Source verification gates hold. Fresh opening provenance. Claim references stay truthful. No site-rule bypass. |
+| F | P9 | Telegram and WhatsApp where setup prerequisites permit. Unsigned and replayed webhooks rejected and deduplicated. Automations run once per trigger. Every privileged chat action requires a bound approval. |
 | G | P11 | Deploy, restore and security regression suite. All ten invariants pass. |
 
 ## Build sequence
@@ -60,15 +60,17 @@ Spec:713 gives the exit criteria. This plan adds a phase and a state file so ord
 | 17 | Schedule a post-release review and a claims-ledger re-check | `changes/` | Re-check dates recorded | 3 |
 | 18 | Run the final demo: gates, invariants, metrics and known limits, and record the output | `docs/release/demo.md` | The record names every gate and its state | 4 |
 | 19 | Run the threat-model review and record it as a release-gate input | `docs/release/threat-model.md` | Every spec:805 threat maps to a control or a documented gap | 5 |
-This build sequence sums to 89 hours.
+| 20 | Run production-like smoke tests on the core flows against a production-like stack | `docs/release/smoke.md` | Each core flow passes, and each known limit is recorded | 5 |
+This build sequence sums to 94 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Define `gates.json` and the ordering check.
 2. Map every invariant to a named test, then write tests 1 to 10.
-3. Run the restore and export drills, then generate the release report.
+3. Run the production-like smoke tests on the core flows.
+4. Run the restore and export drills, then generate the release report.
 
 ## Acceptance tests
 
@@ -88,5 +90,5 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 ## Risks
 
-- Evidence collection is easy to defer. Run the invariant tests from P4, not from P11.
+- Evidence collection is easy to defer. Run the invariant tests from P5, not from P11.
 - Record-based invariants invite a vague sign-off. Require the operator to paste the command output into the record.

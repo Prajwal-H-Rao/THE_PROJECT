@@ -39,16 +39,17 @@ Build the six pages the design spec names and no other module owns. Run automati
 | 14 | Show token-expiry and error explanations on each provider card | integrations UI | Expiry warning renders before failure | 4 |
 | 15 | Build the Activity & Security page: filterable audit timeline, session list, channel identities, alerts | `apps/web/activity/` | Timeline filters by actor and policy result | 7 |
 | 16 | Build the Settings page: profile, timezone, locale, appearance, retention, model selection, notifications, 2FA, export, delete | `apps/web/settings/` | Export and delete each complete a full cycle | 9 |
-| 17 | Apply the RBAC roles that `07-identity-authz` created in P2 to every page route and admin API | web UI + policy | A `user` role receives a 403 from each admin route | 6 |
-| 18 | Place the built admin routes behind the P4 network rule and separate them in the UI | network rule + UI | No chat path reaches an admin route | 4 |
+| 17 | Apply the P2 RBAC roles from `07-identity-authz` to every page route and to the privileged Activity and Security endpoints | web UI + policy | A `user` role receives a 403 from each privileged endpoint | 6 |
+| 18 | Place the privileged Activity and Security endpoints behind the P5 network rule and separate them in the UI | network rule + UI | No chat path reaches a privileged endpoint | 4 |
 | 19 | Expose component variants in Storybook | `.storybook/` | Storybook builds in CI | 5 |
 | 20 | Add Storybook interaction tests for the approval card and automation card | Storybook tests | Both tests fail when the card breaks | 5 |
+| 21 | Register the family 7 operations: automation runs, notification delivery and audit inspection (spec:191, spec:193) | policy service | An unregistered family 7 operation is denied | 5 |
 
-This build sequence sums to 121 hours.
+This build sequence sums to 126 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Build the Today and Assistant pages with the conversation API.
 2. Define the automation schema and run it on `scheduler-worker`.

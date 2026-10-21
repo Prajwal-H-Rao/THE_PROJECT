@@ -20,7 +20,7 @@ The spec decides these. This plan records the decision and the reason. Any devia
 | Validation | Pydantic v2 and pydantic-settings (431) | Joi, Zod in Python |
 | Database | PostgreSQL with Prisma (425) | MySQL, SQLite beyond local dev |
 | Queue | BullMQ on Redis (426) | RabbitMQ |
-| Python workers | Celery or RQ, pick one (433) | Ad-hoc threads |
+| Python workers | RQ on Redis (433). Chosen over Celery because one developer runs a small self-hosted system | Celery, ad-hoc threads |
 | Frontend | Next.js + React + Tailwind (427) | Vite-only, Svelte, Vue |
 | Auth | OAuth2 Google or GitHub OIDC (428) | DIY auth |
 | Agent workflow | LangGraph, LangChain selectively (432) | Raw LLM loops |
@@ -40,10 +40,10 @@ No MCP protocol appears in the spec. The tool contract is the fixed registry at 
 | 1 | Contracts before models | `19-tech-and-curriculum` | P1 |
 | 2 | One vertical slice: upload, Flask parser, evidence-linked profile, React review view | `06-document-ml-sandbox` then `12-jobs-agent` | P3 (parser) + P8 (review) |
 | 3 | Service identity and policy with the parser behind an authenticated endpoint | `06-document-ml-sandbox` | P3 |
-| 4 | Agent workflow `plan → validate → await_approval → execute → verify → audit` | `03-agent-runtime` | P4 |
+| 4 | Agent workflow `plan → validate → await_approval → execute → verify → audit` | `03-agent-runtime` | P5 |
 | 5 | Messaging channels: Telegram first, then WhatsApp | `14-channels` | P9 |
 | 6 | One domain integration: Gmail read-only, then draft and send | `09-inbox-calendar` | P6 |
-| 7 | Job search in permitted mode on a labelled set | `12-jobs-agent` | P8 |
+| 7 | Job search in permitted mode on a labelled set | `13-employer-registry` | P8 |
 | 8 | Docker hardening with isolation proofs | `17-deployment-hardening` | P10 |
 | 9 | Kubernetes policy lab on kind or k3d | `17-deployment-hardening` | P10 |
 | 10 | Production readiness: tracing, restore, scanning | `16-reliability-testing` | P10 |
@@ -60,27 +60,26 @@ Every lab still runs inside the NOVA repository. The owning module carries its h
 | 2 | Record version pins and licences for every dependency | `THIRD_PARTY.md` | Every entry names a licence | 4 |
 | 3 | Lab 1: contracts with OpenAPI and Pydantic fixtures | `labs/lab01/` | All six schemas validate a fixture | 5 |
 | 4 | Write source and design notes: every choice and every rejection with a reason | `docs/design-notes/` | Each rejected option has a reason | 5 |
-| 5 | Create the lab registry with all 12 labs and their owning module and phase, plus the CI workflow that runs the labs registered so far | `labs/registry.yaml` + `.github/workflows/labs.yml` | The registry has 12 rows, the workflow runs lab 1, and it fails when a registered lab has no runner | 4 |
+| 5 | Create the lab registry with all 12 labs. Each row has an owning module, a phase and a `planned` or `implemented` status. Add the CI workflow for the `implemented` rows. | `labs/registry.yaml` + `.github/workflows/labs.yml` | The registry has 12 rows, the workflow runs lab 1, and it fails when an `implemented` row has no runner | 4 |
 
 This build sequence sums to 22 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Confirm the technology table against spec:421-438 and record version pins.
-2. Deliver lab 1, then register the other 11 labs with the module file and phase that owns each.
-3. Write the source and design notes.
+2. Write the source and design notes.
+3. Deliver lab 1, then register the other 11 labs with the module file, phase and status that owns each.
 
 ## Acceptance tests
 
-- `test_registered_labs_run_in_ci` — the workflow runs lab 1, and fails when a registered lab has no runner.
+- `test_registered_labs_run_in_ci` — the workflow runs the labs marked `implemented`, and fails when an `implemented` row has no runner.
 - `test_every_dependency_names_a_licence` — a dependency without a licence fails the check.
 - `test_no_fastapi_service` — no Python service imports FastAPI, which spec:1007 supersedes.
-- `test_tool_contract_is_registry_not_mcp` — tools come from the registry at spec:500.
+- `test_tool_contract_is_registry_not_mcp` — the repo declares the registry at spec:500 as the tool source, and declares no MCP server. `03-agent-runtime` enforces the same rule against the live registry in P5.
 - `test_each_rejection_has_a_reason` — every row in the not-chosen column appears in `docs/design-notes/` with a reason.
-- `test_every_lab_has_an_owner` — each of the 12 labs names a module file and a phase.
-- `test_lab_registry_names_an_owner` — the registry lists 12 labs, and every row names a module file and a phase.
+- `test_every_lab_has_an_owner` — each of the 12 labs names a module file, a phase and a status.
 
 ## Risks
 

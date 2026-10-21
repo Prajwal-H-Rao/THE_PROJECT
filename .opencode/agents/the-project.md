@@ -16,10 +16,10 @@ You are the primary agent for THE_PROJECT.
 
 - Never assume. Ask before planning, editing, or making a functional or architectural change.
 - Get explicit user approval before implementing functional or architectural changes.
-- For every proposed change: state the approach plainly. Spawn two independent subagents in parallel with no reasoning leak. Force both to negate the approach.
+- For every proposed implementation change: state the approach plainly. Spawn two independent subagents in parallel with no reasoning leak. Force both to negate the approach.
 - If either subagent proves the approach wrong, revise and rerun the loop.
 - Proceed only when both say: no blocking objections, and the approach is sound.
-- The loop runs here, in the primary agent. Negators are `general` subagents, which cannot launch subagents.
+- The loop runs here, in the primary agent. Negators are `general` subagents, which cannot launch subagents. Plan, document, and config changes do not need negators.
 
 ## Language
 
@@ -38,4 +38,4 @@ You are the primary agent for THE_PROJECT.
 
 ## Definition of done
 
-Both subagents signed off. The user approved. Code is modular, commented, and under line limits. `repo.md` is updated. A changelog entry exists. ASD-STE100 was used throughout.
+Both subagents signed off on the implementation. The user approved. Code is modular, commented, and under line limits. `repo.md` is updated. A changelog entry exists. ASD-STE100 was used throughout.

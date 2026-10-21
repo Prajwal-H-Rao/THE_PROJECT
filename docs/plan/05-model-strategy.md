@@ -4,7 +4,7 @@ Phase P3. Spec headings: local model strategy, candidate shortlist, inference re
 
 ## Goal
 
-Pick the smallest local model that clears a measured quality floor on NOVA's own tools. P3 configures the local runtime. P4 puts the same runtime behind the model gateway. Never trust a model because it is local.
+Pick the smallest local model that clears a measured quality floor on NOVA's own tools. P3 configures the local runtime. P5 puts the same runtime behind the model gateway. Never trust a model because it is local.
 
 ## Hardware envelope
 
@@ -35,14 +35,14 @@ See `claims-ledger.md` C01 to C06. Re-check on P3 day 1, before task 1.
 | Embeddings | `BAAI/bge-small-en-v1.5` | 133 MB | English baseline |
 | Embeddings multilingual | `intfloat/multilingual-e5-small` | larger | Test on Hindi and Kannada |
 
-The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility checks. Treat as optional comparisons, not defaults.
+The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility checks. Spec:692 requires at least one alternative alongside the three Qwen sizes. Treat them as required benchmark entries, not defaults.
 
 ## Build sequence
 
 | # | Task | Artifact | Test | Hrs |
 |---|---|---|---|---|
 | 1 | Write a repeatable setup script: pull, pin digest, record size and license | `models/setup.sh` | Script reproduces the same digest | 4 |
-| 2 | Create `models/model-registry.yaml`, the path spec:957 names, with provider, ID, digest, quant, license, template version, `num_ctx`, latency, peak RAM/VRAM, eval date | `models/` | Registry validates against a schema | 4 |
+| 2 | Create `models/model-registry.yaml` at the spec:957 path. Add provider, ID, digest, quant, licence, template, `num_ctx`, latency, RAM/VRAM, hardware, tool-call quality and eval date. | `models/` | Registry validates against a schema | 4 |
 | 3 | Bind Ollama to loopback and the private container network only | Compose config | Public port scan fails | 3 |
 | 4 | Pin the model tag and digest in deployment config | Compose config | Drift fails CI | 2 |
 | 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request waits in queue order and never runs in parallel | 3 |
@@ -53,9 +53,9 @@ The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility
 | 10 | Record latency p50 and p95 plus peak VRAM and RAM | eval runner | Every candidate row carries all four numbers | 4 |
 | 11 | Decide and record the default with its reasoning | registry | The decision names one candidate and one eval run ID that exists | 3 |
 | 12 | Test llama.cpp as the fallback runtime | eval report | Same contracts hold | 6 |
-| 13 | Test the `0.8b` for classification only, and fence it from the tool registry | Compose network plus config | The `0.8b` container has no route to the tool registry port | 4 |
-| 14 | Add a deterministic fake model as the CI default, which `03-agent-runtime` reuses in P4 | `tests/fixtures/` | CI needs no GPU | 3 |
-| 15 | Deliver curriculum lab 11: three-model benchmark on identical fixtures | `labs/lab11/` | The report records RAM, VRAM and p95 for each model | 6 |
+| 13 | Test the `0.8b` for classification only. Fence it from the tool registry that `03-agent-runtime` binds in P5. Use a dummy listener in P3. | Compose network plus config | A dummy listener on the tool-registry port is unreachable from the `0.8b` container | 4 |
+| 14 | Add a deterministic fake model as the CI default, which `03-agent-runtime` reuses in P5 | `tests/fixtures/` | CI needs no GPU | 3 |
+| 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:692) | 6 |
 This build sequence sums to 69 hours.
 
 ## Release thresholds
@@ -69,7 +69,7 @@ If a candidate misses the tool-choice target, simplify the workflow or use deter
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Write the setup script and `models/model-registry.yaml`.
 2. Build the 250-case evaluation set.
@@ -77,13 +77,13 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 
 ## Acceptance tests
 
-- `test_registry_schema_complete` — a row missing digest, quant, licence, `num_ctx` or eval date fails.
+- `test_registry_schema_complete` — a row missing digest, quant, licence, `num_ctx`, tested hardware, tool-call quality or eval date fails.
 - `test_ollama_not_public` — a request to the model port from outside the private network fails.
-- `test_context_capped_at_4k` — any request above the configured `num_ctx` comes back truncated, and the truncation marker is present. `03-agent-runtime` repeats the check at the gateway in P4.
+- `test_context_capped_at_4k` — a request above the configured `num_ctx` returns within the context bound, with no error and no hang. `03-agent-runtime` adds the truncation marker at the gateway in P5 and repeats the check there.
 - `test_eval_set_has_250_cases` — a count below 250 fails the runner.
 - `test_false_tool_call_rate_reported` — the report contains a number for out-of-scope false calls.
 - `test_decision_cites_existing_run` — the default model names an eval run ID that resolves.
-- `test_08b_cannot_reach_write_tools` — the classification model container has no route to the tool registry port.
+- `test_08b_cannot_reach_write_tools` — a dummy listener on the tool-registry port is unreachable from the `0.8b` container. `03-agent-runtime` repeats the check against the live registry in P5.
 - `test_ci_runs_without_gpu` — the evaluation job passes on a machine with no GPU.
 
 ## Risks

@@ -50,7 +50,7 @@ This build sequence sums to 96 hours.
 - `test_mutated_body_fails_signature` — one changed byte fails.
 - `test_replayed_whatsapp_rejected` — an old valid message fails the window check.
 - `test_duplicate_delivery_noop` — the same message ID processes once.
-- `test_wrong_telegram_secret_rejected` — 403.
+- `test_wrong_telegram_secret_rejected` — the adapter answers 403 and drops the message.
 - `test_callback_bound_to_payload_hash` — a callback for a different payload fails.
 - `test_cross_user_callback_rejected` — user A's button cannot approve user B.
 - `test_free_text_not_approval` — free text never approves a consequential action.

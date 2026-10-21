@@ -19,7 +19,15 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 ## Extraction envelope
 
-Every field carries: raw object hash, parser or model version, `field_name`, `value`, `source_ref`, `confidence` or an uncertainty state, and `review_status`. High-impact facts (degree, employer, dates, money, work authorisation) need evidence or user confirmation when uncertain.
+Every field carries all of the following:
+- Raw object hash.
+- Parser or model version.
+- `field_name` and `value`.
+- `source_ref`.
+- `confidence`, or an uncertainty state.
+- `review_status`.
+
+High-impact facts need evidence or user confirmation when uncertain. High-impact facts are degree, employer, dates, money and work authorisation.
 
 ## Build sequence
 
@@ -34,22 +42,23 @@ Every field carries: raw object hash, parser or model version, `field_name`, `va
 | 7 | CSV and XLSX with pandas, column provenance | parser | Encoding and locale variants pass | 6 |
 | 8 | TXT and bank statement paths | parser | Statement rows keep row and column refs | 5 |
 | 9 | OCR as an isolated fallback only when native text is insufficient | worker | Low confidence is surfaced, not hidden | 8 |
-| 10 | Route parsing through a queue worker, not the request worker | worker | Request worker holds no parser library | 5 |
-| 11 | Sandbox the worker: non-root, read-only root, tmpfs, dropped capabilities, seccomp, resource limits | `Dockerfile`, Compose | Escape fixture fails | 8 |
-| 12 | Prove the worker cannot reach Postgres or the internet | Compose test | Connection attempts fail | 4 |
-| 13 | Reject encrypted, invalid, oversized and scanned-beyond-limit fixtures | fixture corpus | Each fixture fails safely | 5 |
-| 14 | Store the parsed result object and return the pointer | storage | Result is content-addressed | 4 |
-| 15 | Wire the ML service for classification and embeddings behind the same sandbox rules | `services/ml-service/` | Same isolation tests pass | 6 |
-| 16 | Reject citation IDs that do not resolve to a stored span | validator | Fabricated citation fails | 4 |
-| 17 | Scan uploads for malware where tooling is available, before parse | ingest + worker | An infected fixture is quarantined, not parsed (spec:518) | 5 |
-| 18 | Deliver the parser half of curriculum lab 2: upload to Flask parser to evidence-linked profile. `12-jobs-agent` adds the React review view in P8 | `labs/lab02/` | Malformed and large inputs are rejected, and every field carries its span | 5 |
-| 19 | Deliver curriculum lab 3: parser behind an authenticated internal endpoint, two identities, one allowed call and one denied | `labs/lab03/` | The denied call returns 403 and the parser cannot reach Postgres | 4 |
-| 20 | Run the NLP extraction step over parsed text: skills and experience, each carrying the source span it came from | `services/ml-service/resume/` | Every extracted skill resolves to a stored span, and an unsupported field stays unknown (spec:224, spec:520) | 5 |
-This build sequence sums to 106 hours.
+| 10 | Provision the RQ worker runtime on Redis. Keep it separate from the Flask web workers. Add task timeouts and a dead-letter path (spec:433). | `workers/document-worker/` | A parser job runs in the worker process, and the Flask process holds no parser library | 5 |
+| 11 | Route parsing through a queue worker, not the request worker | worker | Request worker holds no parser library | 5 |
+| 12 | Sandbox the worker: non-root, read-only root, tmpfs, dropped capabilities, seccomp, resource limits | `Dockerfile`, Compose | Escape fixture fails | 8 |
+| 13 | Prove the worker cannot reach Postgres or the internet | Compose test | Connection attempts fail | 4 |
+| 14 | Reject encrypted, invalid, oversized and scanned-beyond-limit fixtures | fixture corpus | Each fixture fails safely | 5 |
+| 15 | Store the parsed result object and return the pointer | storage | Result is content-addressed | 4 |
+| 16 | Wire `workers/inference-worker/` and its `services/ml-service/` API for classification and embeddings under the same sandbox rules | `workers/inference-worker/` | Same isolation tests pass | 6 |
+| 17 | Reject citation IDs that do not resolve to a stored span | validator | Fabricated citation fails | 4 |
+| 18 | Scan uploads for malware where tooling is available, before parse | ingest + worker | An infected fixture is quarantined, not parsed (spec:518) | 5 |
+| 19 | Deliver the parser half of curriculum lab 2: upload to Flask parser to evidence-linked profile. `12-jobs-agent` adds the review view in P8. | `labs/lab02/` | Malformed and large inputs are rejected, and every field carries its span | 5 |
+| 20 | Deliver curriculum lab 3: parser behind an authenticated internal endpoint, two identities, one allowed call and one denied | `labs/lab03/` | The denied call returns 403 and the parser cannot reach Postgres | 4 |
+| 21 | Run the NLP extraction step over parsed text: skills and experience, each carrying the source span it came from | `services/ml-service/resume/` | Every extracted skill resolves to a stored span, and an unsupported field stays unknown (spec:224, spec:520) | 5 |
+This build sequence sums to 111 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 30 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
 
 1. Write the Pydantic contracts and the Flask app factory.
 2. Build quarantine and the PDF parser with spans.
@@ -61,10 +70,10 @@ Work these steps in order. A step names tasks from the table above. At 30 hours 
 - `test_oversized_upload_rejected` — the limit holds at the ingress and the worker.
 - `test_every_field_has_a_source_span` — no field returns without `source_ref` or an unknown state.
 - `test_low_confidence_surfaces_review` — OCR below threshold sets `review_status`.
-- `test_worker_cannot_reach_database` — connection refused.
-- `test_worker_has_no_egress` — outbound connection refused.
+- `test_worker_cannot_reach_database` — the network layer refuses the connection.
+- `test_worker_has_no_egress` — the network layer refuses every outbound connection.
 - `test_fabricated_citation_rejected` — an invented document ID fails validation.
-- `test_parser_rejects_active_content` — embedded scripts are inert and never executed.
+- `test_parser_rejects_active_content` — the parser keeps embedded scripts inert and never executes them.
 
 ## Risks
 

@@ -19,9 +19,10 @@ This file lists installed skills and configured agent rules. Give it to any agen
 - Never assume. Ask before planning, editing, or functional/architectural change.
 - Get explicit user approval before implementing functional or architectural changes.
 - Read repo.md first. Use repo.md to target files instead of rescanning the repo.
-- For every proposed change, state approach plainly, spawn two independent subagents in parallel with no reasoning leak, and force both to negate the approach.
+- For every proposed implementation change, state approach plainly, spawn two independent subagents in parallel with no reasoning leak, and force both to negate the approach.
 - If either subagent proves the approach wrong, revise and rerun the loop.
 - Proceed only when both say: no blocking objections, approach is sound.
+- Plan, document, and config changes do not need negators.
 - Files must be under 200 lines. Split into modules first.
 - Each module does one job.
 - Every file/module gets a header comment. Each function gets a one-line purpose comment. Comment WHY for non-obvious logic.
@@ -29,7 +30,7 @@ This file lists installed skills and configured agent rules. Give it to any agen
 - Never strip trust-boundary validation, error handling, security, or accessibility basics.
 - After every successful change: update repo.md, add changes/YYYY-MM-DD-short-slug.md, ask before commit.
 - Responses, reports, repo.md entries, changelog entries, commit messages, and code comments follow ASD-STE100: short active sentences, one idea per sentence, exact terms, no ceremony.
-- Definition of done: both subagents signed off, user approved, code is modular/commented/under line limits, repo.md updated, changelog entry exists.
+- Definition of done: both subagents signed off on the implementation, user approved, code is modular/commented/under line limits, repo.md updated, changelog entry exists.
 
 ## Installed skills
 

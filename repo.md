@@ -18,12 +18,12 @@ This repo has two purposes.
 - `changes/` — changelog entries. One file per change.
 - `NOVA_Full_Updated_Spec.md` — NOVA spec. Source of truth for all NOVA content. 1542 lines, 74 fence-aware headings.
 - `NOVA_Employer_Targets_500.csv` — seed employer registry. 500 rows: 250 `IN`, 250 `GLOBAL`.
-- `docs/plan/` — NOVA build plan. 24 files: index, schedule, claims ledger, coverage map, 20 module files. 358 tasks, 1920 base hours, 11 phases.
+- `docs/plan/` — NOVA build plan. 24 files: index, schedule, claims ledger, coverage map, 20 module files. 372 tasks, 2000 base hours, 11 phases. Scheduled at 40 h/week with AI agents: 1271 agent hours, 1529 buffered. Release 1 (P1 to P4) lands 2027-01-01. Full scope lands 2027-07-10.
 - `README.md` — repo readme. Present at the root, not covered elsewhere.
 
 Machine-global files live outside this repo:
 
-- `~/.config/opencode/AGENTS.md` — global invariants. ASD-STE100, repo.md first, approval before implementation, negation-loop scope, stub-honesty.
+- `~/.config/opencode/AGENTS.md` — global invariants. ASD-STE100, repo.md first, approval before implementation, implementation-only negation loop, stub-honesty.
 - `~/.config/opencode/opencode.json` — global config. Registers the `local-agent-skills` source.
 - `~/.config/opencode/skills/` — global-scope skills. 266 stubs.
 - `~/.config/opencode/local-agent-skills/` — local agent skills. 45 stubs. Registered via the global `skills` array.
@@ -60,9 +60,9 @@ Read any downloaded `SKILL.md` before you trust it. It is third-party agent inst
 ## The custom agent
 
 - ID: `the-project`. File: `.opencode/agents/the-project.md`. Mode: `primary`.
-- It is the dedicated primary agent for this repo. Its system prompt carries the manifest rules: repo.md first, the negation loop, the code rules, and the unconditional ASD-STE100 mandate.
+- It is the dedicated primary agent for this repo. Its system prompt carries the manifest rules: repo.md first, the implementation-only negation loop, the code rules, and the unconditional ASD-STE100 mandate.
 - It sets no model. The model is switchable at any time in OpenCode and is not tied to the agent.
-- `opencode.json` allows the parent to spawn `the-project` as a subagent. `general` and `explore` stay allowed for the negation loop. Every other subagent is denied.
+- `opencode.json` allows the parent to spawn `the-project` as a subagent. `general` and `explore` stay allowed for the implementation negation loop. Every other subagent is denied.
 
 ## Loading the agent
 

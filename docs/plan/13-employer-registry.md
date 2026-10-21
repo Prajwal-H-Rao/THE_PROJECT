@@ -6,6 +6,8 @@ Phase P8. Spec headings: employer registry, lifecycle, source priority, polling,
 
 Import 500 seed employers. Verify each source before any poll. Track openings with provenance, freshness, dedup and a source-status surface.
 
+This module interleaves with `12-jobs-agent` inside P8. See rule 4 in `schedule.md`. Build tasks 1 to 17 first, then tasks 18 to 25 after `12` tasks 8 to 21.
+
 ## Constraints (spec, binding)
 
 - Spec:555: "Every company/source starts as `needs_verification`; the agent must verify the official employer identity, canonical career page and permitted source before polling it."
@@ -37,7 +39,7 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 |---|---|---|---|---|
 | 1 | Write the CSV importer against the 11-column header | `services/employer-registry-service/import/` | Fails on a missing or renamed column | 6 |
 | 2 | Enforce exactly 250 `IN` plus 250 `GLOBAL` and unique `normalized_name` | importer | 499 or 501 rows fails | 4 |
-| 3 | Own the seed artifact: copy the repo CSV to `data/employer-seed-v1.csv`, the path spec:955 names, and keep it versioned data rather than configuration | `data/employer-seed-v1.csv` | The file has the 11-column header, 500 rows, and no populated `career_url` | 5 |
+| 3 | Own the seed artifact. Copy the repo CSV to `data/employer-seed-v1.csv`, the path spec:955 path. Keep it versioned data, not configuration. | `data/employer-seed-v1.csv` | The file has the 11-column header, 500 rows, and no populated `career_url` | 5 |
 | 4 | Record alias relationships in a separate reviewed table | alias schema | No alias is silently discarded | 5 |
 | 5 | Implement the full spec:559 lifecycle: six pipeline states plus six health states, with legal transitions only | registry service | An illegal transition fails | 7 |
 | 6 | Add the `verified_permitted` gate: no poll before `source_permission_reviewed` | worker | Unverified source is never polled | 6 |
@@ -46,29 +48,30 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 | 9 | Implement the Lever Postings adapter with `?mode=xml` fallback (C08) | connector | Adapter contract passes | 5 |
 | 10 | Implement the Ashby public posting adapter with `listedOnly=true` (C09) | connector | Adapter contract passes | 5 |
 | 11 | Implement the SmartRecruiters posting adapter, tier-tolerant (C10) | connector | Missing tier returns `unsupported`, not an error | 5 |
-| 12 | Build the permitted-public-page extractor with structured data first, and gate enablement on a completed review record | connector | An enabled source row carries a `source_evidence_url` and a review timestamp | 8 |
-| 13 | Create `employer_targets`, `employer_job_sources` from spec:587-623, plus service-owned opening, match and run tables | migrations | Matches the spec SQL | 7 |
-| 14 | Implement backoff, timeout, circuit breaker and per-source rate limits | worker | Breaker opens and recovers | 7 |
-| 15 | Implement the scheduled poll: 24h default, jitter, concurrency cap, ETag and Last-Modified | worker | No source exceeds its limit | 6 |
-| 16 | Build the run record: timing, HTTP status class, records seen/new/updated/closed, dedupe, error class, correlation ID | registry schema | No full HTML stored, no secrets stored | 5 |
-| 17 | Add canonical ID normalisation and exact plus fuzzy duplicate detection | job service | Duplicate rate reported | 6 |
-| 18 | Implement freshness, changed-field, stale and closed thresholds | job service | Stale openings flagged | 5 |
-| 19 | Build the source-status surface: verified, stale, failed, rate-limited, manual, unsupported, paused | web UI | Status renders per source with a reason | 5 |
-| 20 | Add the seed-list maintenance rules: reviewed diff imports, add only through review, disable on repeated health failure | registry service | A blind overwrite import fails review | 6 |
-| 21 | Implement export and delete of user matching and application data without touching the shared seed | registry service | Shared seed survives a user delete | 5 |
-| 22 | Build the Jobs to Companies page: search, filters, counts from persisted records, pause/resume, history | web UI | Counts come from queries, not constants | 7 |
-| 23 | Deliver curriculum lab 12: seed import with the 250/250 assertion and 10 manual pilots | `labs/lab12/` | The import assertion passes and 10 pilots are marked verified | 4 |
-| 24 | Build saved filters and alert controls: daily digest, urgent match, company priority and mute, role family, experience, India city mode, work authorisation, salary band, keyword | `jobs-service/filters/` | Each control round-trips and the digest job reads the saved set | 8 |
-This build sequence sums to 139 hours.
+| 12 | Deliver curriculum lab 7: one permitted ATS source with a labelled ranking set, using the connector from task 8 | `labs/lab07/` | The ranking report renders from the labelled set | 5 |
+| 13 | Build the permitted-public-page extractor with structured data first, and gate enablement on a completed review record | connector | An enabled source row carries a `source_evidence_url` and a review timestamp | 8 |
+| 14 | Extend `employer_targets` and `employer_job_sources` from spec:587-623 on the P1 base schema `02-data-and-audit`. Add the service-owned opening, match and run tables. | migrations | Matches the spec SQL. Adds the five spec:561 fields the SQL omits: alternate names, remote preference, experience band, compensation preference and visa needs | 7 |
+| 15 | Implement backoff, timeout, circuit breaker and per-source rate limits | worker | Breaker opens and recovers | 7 |
+| 16 | Implement the scheduled poll: 24h default, jitter, concurrency cap, ETag and Last-Modified | worker | No source exceeds its limit | 6 |
+| 17 | Build the run record: timing, HTTP status class, records seen/new/updated/closed, dedupe, error class, correlation ID | registry schema | No full HTML stored, no secrets stored | 5 |
+| 18 | Add canonical ID normalisation and exact plus fuzzy duplicate detection | job service | Duplicate rate reported | 6 |
+| 19 | Implement freshness, changed-field, stale and closed thresholds | job service | Stale openings flagged | 5 |
+| 20 | Build the source-status surface: verified, stale, failed, rate-limited, manual, unsupported, paused | web UI | Status renders per source with a reason | 5 |
+| 21 | Add the seed-list maintenance rules: reviewed diff imports, add only through review, disable on repeated health failure | registry service | A blind overwrite import fails review | 6 |
+| 22 | Implement export and delete of user matching and application data without touching the shared seed | registry service | Shared seed survives a user delete | 5 |
+| 23 | Build the Jobs to Companies page: search, filters, counts from persisted records, pause/resume, history | web UI | Counts come from queries, not constants | 7 |
+| 24 | Deliver curriculum lab 12: seed import with the 250/250 assertion and 10 manual pilots | `labs/lab12/` | The import assertion passes and 10 pilots are marked verified | 4 |
+| 25 | Build saved filters and alerts: daily digest, urgent match, company priority and mute. Filter on role family, experience, city mode, work authorisation, salary band and keyword. | `jobs-service/filters/` | Each control round-trips and the digest job reads the saved set | 8 |
+This build sequence sums to 144 hours.
 
 ## Acceptance criteria (spec:634-639)
 
 - Exactly 500 distinct seed employer names: 250 `IN`, 250 `GLOBAL`, no duplicate `normalized_name`.
 - All 500 start as targets only. Poll no source until you have verified identity, URL and access mode, and marked the row `verified_permitted`.
-- Every displayed job carries a provenance URL, retrieval timestamp, source ID or canonical URL, and a current or stale state. No hallucinated job reaches the list.
+- Every displayed job carries a provenance URL, a retrieval timestamp, a source ID, and a current or stale state. No hallucinated job reaches the list.
 - Public ATS read access and application submission are separate. Keep application automation off until you verify a permitted submission path.
 - Rate limits, `403`, CAPTCHA and parser failures lead to bounded backoff or manual/paused status, never evasion.
-- The user can add, remove and disable companies and export or delete their own data without deleting the shared seed.
+- The user can add, remove and disable companies. The user can also export or delete their own data without deleting the shared seed.
 
 ## Acceptance tests
 

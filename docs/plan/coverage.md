@@ -55,7 +55,7 @@ The first module column names the primary owner.
 | 632 | Acceptance criteria (registry) | `13-employer-registry` |
 | 641 | Implementation & Learning Curriculum | `19-tech-and-curriculum` |
 | 680 | Curriculum order and practical labs | `19-tech-and-curriculum` |
-| 695 | Roadmap & Milestones | `schedule.md` |
+| 695 | Roadmap & Milestones | `schedule.md`, `18-release-gate` |
 | 717 | Microservice Catalogue, Contracts and Ownership | `01-architecture`, all domain modules |
 | 747 | Example API and event conventions | `02-data-and-audit` |
 | 754 | WhatsApp and Telegram Interaction | `14-channels` |
