@@ -3,6 +3,7 @@
 import re
 
 import diff_doc
+import ignored_paths
 import record_paths
 import tree_checks
 
@@ -106,24 +107,31 @@ def owner_evidence(section, relative):
     return False
 
 
-def stated_allow_list(extra):
-    """Return the allow-list prefixes that the extra paths section states."""
+def stated_allow_lists(extra):
+    """Return every allow-list that the extra paths section states."""
+    found = []
     for sentence in extra.split(". "):
         text = sentence.strip()
         if not text.startswith(ALLOW_LIST_SENTENCE):
             continue
         text = text[len(ALLOW_LIST_SENTENCE):].strip().rstrip(".")
         parts = text.replace(",", " and ").split(" and ")
-        return sorted(part.strip() for part in parts if part.strip())
-    return []
+        found.append(sorted(part.strip() for part in parts if part.strip()))
+    return found
 
 
 def check_allow_list(extra, prefixes):
     """Check that the extra paths section states the allow-list of the checker."""
-    stated = stated_allow_list(extra)
-    if stated != sorted(prefixes):
-        return "the extra paths section states the allow-list %s, not %s" % (
-            stated, sorted(prefixes))
+    stated = stated_allow_lists(extra)
+    problems = []
+    if not stated:
+        problems.append("the extra paths section states no allow-list")
+    for stated_list in stated:
+        if stated_list != sorted(prefixes):
+            problems.append("the extra paths section states the allow-list %s, not %s" % (
+                stated_list, sorted(prefixes)))
+    if problems:
+        return "; ".join(problems)
     return None
 
 
@@ -132,7 +140,8 @@ def check_named_files(index, extra):
     names = sorted(set(PY_FILE.findall(extra)))
     missing = [
         name for name in names
-        if not (index.tree_root / "tests" / "layout" / name).is_file()
+        if not ignored_paths.is_ignored(name)
+        and not (index.tree_root / "tests" / "layout" / name).is_file()
     ]
     if missing:
         return "the extra paths section names missing files: " + ", ".join(missing)

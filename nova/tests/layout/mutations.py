@@ -151,7 +151,15 @@ def missing_artifact_pattern(work):
     path = work / ".gitignore"
     lines = [
         line for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip() != "node_modules/"
+        if line.strip() != "**/node_modules/"
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return True
+
+
+def deep_source_directory(work):
+    """Add a source directory that carries an output name below the package root."""
+    path = tree(work) / "services" / "audit-service" / "src" / "build"
+    path.mkdir(parents=True)
+    (path / "model.py").write_text('"""Source."""\n')
     return True

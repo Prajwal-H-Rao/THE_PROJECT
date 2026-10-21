@@ -14,7 +14,7 @@ REQUIRED_SECTIONS = (
 )
 
 COPY_ROWS = re.compile(r"the same (\d+) rows")
-SERVICE_CLAIM = re.compile(r"each of the (\d+) catalogue services to appear exactly once")
+SERVICE_CLAIM = re.compile(r"each of the (\d+) catalogue services to appear exactly once\.")
 
 
 def check_required_sections(sections):

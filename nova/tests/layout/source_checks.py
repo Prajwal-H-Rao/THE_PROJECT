@@ -114,10 +114,20 @@ def binding_problems(sentence, names, references, texts):
         for task in range(first, last + 1):
             text = texts.get(module, {}).get(task, "")
             for name in names:
-                if normalise(name) not in text:
+                if not names_path(text, name):
                     problems.append("%s names %s but module %s task %d does not" % (
                         sentence, name, module, task))
     return problems
+
+
+def names_path(text, name):
+    """Return True when the task text holds the whole path name."""
+    path = normalise(name)
+    if "/" not in path:
+        # A short category name is a plain word in the task text.
+        return path in text
+    # A path must match as a whole token. A prefix of a longer path does not count.
+    return ("`" + path + "`") in text or ("`" + path + "/`") in text or (" " + path + " ") in text
 
 
 def absence_problems(sentence, names, plan):

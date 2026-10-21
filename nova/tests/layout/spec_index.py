@@ -70,7 +70,7 @@ def walk_fence(lines):
     """Return each fence path with its spec line number and its kind."""
     first, last = fence_bounds(lines)
     found = []
-    stack = []
+    stack: list[str] = []
     for index in range(first, last):
         raw = lines[index]
         text = raw.split("#", 1)[0].rstrip()

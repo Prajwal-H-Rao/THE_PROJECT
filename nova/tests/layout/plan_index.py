@@ -16,7 +16,7 @@ ROW_SPLIT = re.compile(r"(\d+) catalogue-only, (\d+) layout-only and (\d+) renam
 # The plan task row that states the service count of the service map.
 SERVICE_MODULE = "01"
 SERVICE_TASK = 16
-SERVICE_REQUIREMENT = re.compile(r"Each of the (\d+) catalogue services appears exactly once")
+SERVICE_REQUIREMENT = re.compile(r"Each of the (\d+) catalogue services appears exactly once\Z")
 
 
 def owned_path(token):

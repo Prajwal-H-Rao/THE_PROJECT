@@ -1,0 +1,83 @@
+"""List the mutations and the scenarios that the layout check suite runs."""
+
+import ci_mutations
+import mutations
+import path_mutations
+import plan_mutations
+import record_mutations
+
+# Each mutation names the check that must reject it.
+MUTATIONS = [
+    ("A", "missing layout directory", mutations.missing_directory),
+    ("B", "stray top-level directory", mutations.stray_directory),
+    ("B", "source directory with an output name", mutations.deep_source_directory),
+    ("C", "nine row diff", record_mutations.short_diff),
+    ("D", "wrong row kind", record_mutations.wrong_split),
+    ("E", "wrong catalogue-only name", record_mutations.wrong_catalogue_name),
+    ("F", "telegram and whatsapp swap", record_mutations.swap_channels),
+    ("G", "missing spec citation", record_mutations.missing_citation),
+    ("H", "empty leaf directory", mutations.empty_leaf),
+    ("I", "copied spec file", mutations.copied_spec_file),
+    ("I", "wrong omitted file count", record_mutations.wrong_omitted_count),
+    ("J", "bad module task reference", record_mutations.bad_task_reference),
+    ("K", "wrong deferred spec item", record_mutations.wrong_deferred_item),
+    ("L", "mismatched task 16 copy", mutations.mismatched_copy),
+    ("L", "mangled task 16 copy", mutations.mangled_copy),
+    ("L", "task 16 copy with a false citation", mutations.false_citation_copy),
+    ("M", "wrong scope count", record_mutations.wrong_scope_count),
+    ("M", "wrong leaf count", record_mutations.wrong_leaf_count),
+    ("N", "missing named module file", record_mutations.missing_module_file),
+    ("O", "unnamed module file", mutations.unnamed_module_file),
+    ("P", "file in the deferred directory", mutations.file_in_deferred_directory),
+    ("P", "bare placeholder file", mutations.bare_placeholder),
+    ("Q", "wrong allow-list statement", record_mutations.wrong_allow_list),
+    ("Q", "second allow-list statement", record_mutations.second_allow_list),
+    ("R", "bad spec citation", record_mutations.bad_spec_citation),
+    ("S", "bad plan citation", record_mutations.bad_plan_citation),
+    ("S", "plan citation without a line", record_mutations.plan_citation_without_line),
+    ("S", "plan citation with other words", record_mutations.plan_citation_with_other_words),
+    ("T", "wrong task binding", record_mutations.wrong_task_binding),
+    ("T", "renamed plan artifact", plan_mutations.rename_owned_artifact),
+    ("U", "missing ignore file", mutations.missing_gitignore),
+    ("U", "missing artifact pattern", mutations.missing_artifact_pattern),
+    ("V", "renamed section", record_mutations.renamed_section),
+    ("W", "wrong ignored directory list", path_mutations.wrong_ignored_list),
+    ("W", "wrong ignored output names", path_mutations.wrong_output_names),
+    ("W", "wrong ignored file list", path_mutations.wrong_ignored_files),
+    ("W", "wrong ignored directory suffix list", path_mutations.wrong_ignored_directory_suffixes),
+    ("W", "wrong ignored file suffix list", path_mutations.wrong_ignored_file_suffixes),
+    ("X", "missing extra path", path_mutations.missing_extra_path),
+    ("X", "wrong extra path", path_mutations.wrong_extra_path),
+    ("X", "missing path group", path_mutations.missing_path_group),
+    ("X", "unnamed checker group", path_mutations.unnamed_checker_group),
+    ("X", "wrong group count", path_mutations.wrong_group_count),
+    ("X", "extra path in a group", path_mutations.extra_group_name),
+    ("X", "sixth path group", path_mutations.sixth_path_group),
+    ("X", "swapped group ordinals", path_mutations.swap_group_ordinals),
+    ("Y", "wrong copy row count", record_mutations.wrong_copy_rows),
+    ("Y", "wrong service count", record_mutations.wrong_service_count),
+    ("Y", "second copy row count", record_mutations.second_copy_rows),
+    ("Y", "second service count", record_mutations.second_service_count),
+    ("Y", "weakened service claim", record_mutations.weaken_service_claim),
+    ("Y", "plan service count", plan_mutations.plan_service_count),
+    ("Y", "plan requirement", plan_mutations.plan_requirement),
+    ("Y", "weakened plan requirement", plan_mutations.weaken_service_requirement),
+    ("Z", "owned path that the checker skips", plan_mutations.owned_build_path),
+    ("AA", "missing typecheck step", ci_mutations.remove_typecheck_step),
+    ("AA", "unpinned ruff", ci_mutations.unpin_ruff),
+    ("AA", "missing tool config", ci_mutations.drop_tool_config),
+    ("AA", "continue on error", ci_mutations.add_continue_on_error),
+    ("AA", "path filter", ci_mutations.add_path_filter),
+    ("AA", "missing push trigger", ci_mutations.remove_push_trigger),
+    ("AA", "gutted proof step", ci_mutations.gut_proof_step),
+    ("AA", "typecheck scope drift", ci_mutations.drift_typecheck_scope),
+    ("AA", "proof scope drift", ci_mutations.proof_scope_drift),
+]
+
+# The scenarios name the changes that the checks must accept.
+SCENARIOS = [
+    ("build output under nova/", mutations.build_output),
+    ("later module output under nova/", mutations.later_module_output),
+    ("bypass marker in a comment", ci_mutations.comment_bypass),
+    ("wider typecheck scope", ci_mutations.widen_typecheck_scope),
+]

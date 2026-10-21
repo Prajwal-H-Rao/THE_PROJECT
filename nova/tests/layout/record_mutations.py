@@ -165,3 +165,19 @@ def second_service_count(work):
         work,
         "each of the 23 catalogue services to appear exactly once.",
         "each of the 24 catalogue services to appear exactly once.")
+
+
+def weaken_service_claim(work):
+    """Let the record claim that a service may appear twice."""
+    return replace_diff(
+        work,
+        "each of the 23 catalogue services to appear exactly once.",
+        "each of the 23 catalogue services to appear exactly once or twice.")
+
+
+def second_allow_list(work):
+    """Add a second allow-list to the extra paths section."""
+    return insert_diff(
+        work,
+        "The allow-list holds tests/layout, labs and db.",
+        "The allow-list holds tests/layout and labs.")

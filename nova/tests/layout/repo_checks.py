@@ -19,21 +19,6 @@ def active_patterns(text):
     return found
 
 
-def covers(patterns, name):
-    """Return True when the patterns ignore a path by name."""
-    base = name.rstrip("/")
-    decision = False
-    for pattern in patterns:
-        # Git takes the last pattern that matches, so a negation wins.
-        if pattern.startswith("!"):
-            if pattern[1:].rstrip("/") == base:
-                decision = False
-            continue
-        if pattern.rstrip("/") == base:
-            decision = True
-    return decision
-
-
 def check_gitignore(repo_root):
     """Check that the repo root ignore file covers the build output."""
     path = repo_root / IGNORE_FILE_NAME
@@ -41,8 +26,8 @@ def check_gitignore(repo_root):
         return "the repo root holds no " + IGNORE_FILE_NAME
     patterns = active_patterns(path.read_text(encoding="utf-8"))
     missing = [
-        name for name in ignored_paths.gitignore_patterns()
-        if not covers(patterns, name)
+        pattern for pattern in ignored_paths.gitignore_patterns()
+        if pattern not in patterns
     ]
     if missing:
         return "the " + IGNORE_FILE_NAME + " holds no " + ", ".join(missing)

@@ -2,13 +2,32 @@
 
 from mutations import insert_diff, replace_diff
 
+IGNORED_DIRECTORIES = (
+    "The always ignored names are __pycache__, node_modules, .next, .turbo, .venv, venv, "
+    ".pytest_cache, .mypy_cache and .ruff_cache."
+)
+
 
 def wrong_ignored_list(work):
-    """Change the ignored directories that the extra paths section states."""
+    """Change the always ignored names that the extra paths section states."""
     return replace_diff(
         work,
-        "The ignored directories are __pycache__, node_modules, .next, .turbo, .venv, venv, .pytest_cache, .mypy_cache, .ruff_cache, build, coverage, dist, htmlcov, playwright-report, test-results and storybook-static.",
-        "The ignored directories are __pycache__, node_modules and .next.")
+        IGNORED_DIRECTORIES,
+        "The always ignored names are __pycache__, node_modules and .next.")
+
+
+OUTPUT_NAMES = (
+    "The ignored output names are build, coverage, dist, htmlcov, playwright-report, "
+    "storybook-static and test-results."
+)
+
+
+def wrong_output_names(work):
+    """Change the ignored output names that the extra paths section states."""
+    return replace_diff(
+        work,
+        OUTPUT_NAMES,
+        "The ignored output names are build and dist.")
 
 
 def wrong_ignored_files(work):
@@ -87,5 +106,18 @@ def sixth_path_group(work):
     """Add a path group that the record does not count."""
     return insert_diff(
         work,
-        "The fifth is the repo-root .gitignore.",
+        "The fifth is the repo-root .gitignore, the pyproject.toml and the .github/workflows/ci.yml.",
         "The sixth is the phantom path nowhere/.")
+
+
+def swap_group_ordinals(work):
+    """Swap the ordinals of the first and the fifth path groups."""
+    if not replace_diff(
+        work,
+        "The first is docs/layout-diff.md.",
+        "The fifth is docs/layout-diff.md."):
+        return False
+    return replace_diff(
+        work,
+        "The fifth is the repo-root",
+        "The first is the repo-root")

@@ -9,27 +9,42 @@ REQUIREMENT_CHANGE = "appears at most once"
 
 # The plan row that names the checker directory.
 CHECKER_TEXT = "`nova/tests/layout/` checks"
-CHECKER_CHANGE = "`nova/build/` checks"
+CHECKER_CHANGE = "`nova/services/audit-service/build/` checks"
+
+# The plan row that names the employer registry importer.
+REGISTRY_ROW = "docs/plan/13-employer-registry.md"
+REGISTRY_TEXT = "`services/employer-registry-service/import/`"
+REGISTRY_CHANGE = "`services/employer-registry-service/importer/`"
 
 
 def plan_service_count(work):
     """Change the service count that the plan states."""
-    return replace_plan(work, SERVICE_TEXT, SERVICE_CHANGE)
+    return replace_plan(work, SERVICE_ROW, SERVICE_TEXT, SERVICE_CHANGE)
 
 
 def plan_requirement(work):
     """Weaken the service requirement that the plan states."""
-    return replace_plan(work, REQUIREMENT_TEXT, REQUIREMENT_CHANGE)
+    return replace_plan(work, SERVICE_ROW, REQUIREMENT_TEXT, REQUIREMENT_CHANGE)
 
 
 def owned_build_path(work):
     """Name a path that the checker skips in a plan row."""
-    return replace_plan(work, CHECKER_TEXT, CHECKER_CHANGE)
+    return replace_plan(work, SERVICE_ROW, CHECKER_TEXT, CHECKER_CHANGE)
 
 
-def replace_plan(work, old, new):
-    """Replace a string in the plan copy of a work directory."""
-    path = work / SERVICE_ROW
+def weaken_service_requirement(work):
+    """Let the plan accept a service more than once."""
+    return replace_plan(work, SERVICE_ROW, SERVICE_TEXT, SERVICE_TEXT + " or twice")
+
+
+def rename_owned_artifact(work):
+    """Rename a plan artifact to a longer path with the same prefix."""
+    return replace_plan(work, REGISTRY_ROW, REGISTRY_TEXT, REGISTRY_CHANGE)
+
+
+def replace_plan(work, relative, old, new):
+    """Replace a string in one plan file of a work directory."""
+    path = work / relative
     text = path.read_text(encoding="utf-8")
     if old not in text:
         return False

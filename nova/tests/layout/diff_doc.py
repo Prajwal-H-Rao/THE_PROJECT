@@ -26,9 +26,9 @@ def table_cells(line):
 
 def tables(lines):
     """Return the layout difference tables of a document, one list per table."""
-    found = []
+    found: list[list[dict[str, str]]] = []
     header = None
-    table = []
+    table: list[dict[str, str]] = []
     for line in lines:
         cells = table_cells(line)
         if not cells:
@@ -45,7 +45,7 @@ def tables(lines):
                 header = {name: index for index, name in enumerate(names)}
                 table = []
             continue
-        row = {}
+        row: dict[str, str] = {}
         for name, index in header.items():
             row[name] = clean_cell(cells[index]) if index < len(cells) else ""
         table.append(row)
@@ -63,7 +63,7 @@ def sections(lines):
     """Return the text of each named section, keyed by the heading text."""
     found = {}
     heading = None
-    body = []
+    body: list[str] = []
     for line in lines:
         if line.startswith("## "):
             if heading is not None:
