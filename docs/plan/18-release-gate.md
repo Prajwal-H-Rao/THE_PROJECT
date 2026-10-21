@@ -39,33 +39,31 @@ Spec:713 gives the exit criteria. This plan adds a phase and a state file so ord
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Define `gates.json`: gate ID, phase, state `open` or `signed`, signer, timestamp, evidence paths | `docs/release/gates.json` | Schema rejects an unknown field | 4 |
-| 2 | Write a gate-ordering check: a gate can sign only when every earlier gate is signed | `tests/release/gates/` | Signing G before A fails | 4 |
-| 3 | Map each of the ten invariants to a named test file or a named record path | `tests/release/manifest.json` | An invariant with no path fails the manifest check | 4 |
-| 4 | Write invariant 1 and 2 tests with a hostile fake model | release tests | All pass | 6 |
-| 5 | Write invariant 3 tests across web, API, channel and worker | release tests | All pass | 6 |
-| 6 | Write invariant 4 tests: model wording and `requires_approval` never authorise | release tests | All pass | 5 |
-| 7 | Write invariant 5 approval replay, race and escalation tests | release tests | All pass | 6 |
-| 8 | Collect invariant 6 evidence from the Compose and Kubernetes isolation suites | release tests | All pass | 4 |
-| 9 | Collect invariant 7 image scan and `USER` results | scan record | No critical CVE, non-root confirmed | 4 |
-| 10 | Write invariant 8 tests: absent evidence renders unverified, never done | release tests | UI shows `unknown` | 5 |
-| 11 | Write invariant 9 audit redaction scan | release tests | Scan is clean | 4 |
-| 12 | Write invariant 10 CI trigger test: a prompt or schema change reruns the suite | CI config | A planted change triggers a rerun | 5 |
-| 13 | Run the recovery drills: backup restore, export, deletion (spec:711 release gate, not an invariant) | `docs/release/drills.md` | Restore and export pass against a recorded command transcript | 7 |
-| 14 | Write the operator checklist with the exact command per record-based invariant | `docs/release/` | Each row names one command and one expected output | 4 |
-| 15 | Write the runbook index mapping every alert name to a runbook file | `docs/runbooks/index.md` | A script fails if an alert has no file | 4 |
-| 16 | Produce the release report from `gates.json` and `manifest.json` | `docs/release/report.md` | Report is generated, not hand-written | 5 |
-| 17 | Schedule a post-release review and a claims-ledger re-check | `changes/` | Re-check dates recorded | 3 |
-| 18 | Run the final demo: gates, invariants, metrics and known limits, and record the output | `docs/release/demo.md` | The record names every gate and its state | 4 |
-| 19 | Run the threat-model review and record it as a release-gate input | `docs/release/threat-model.md` | Every spec:805 threat maps to a control or a documented gap | 5 |
-| 20 | Run production-like smoke tests on the core flows against a production-like stack | `docs/release/smoke.md` | Each core flow passes, and each known limit is recorded | 5 |
-This build sequence sums to 94 hours.
-
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Define `gates.json`: gate ID, phase, state `open` or `signed`, signer, timestamp, evidence paths | `docs/release/gates.json` | Schema rejects an unknown field |
+| 2 | Write a gate-ordering check: a gate can sign only when every earlier gate is signed | `tests/release/gates/` | Signing G before A fails |
+| 3 | Map each of the ten invariants to a named test file or a named record path | `tests/release/manifest.json` | An invariant with no path fails the manifest check |
+| 4 | Write invariant 1 and 2 tests with a hostile fake model | release tests | All pass |
+| 5 | Write invariant 3 tests across web, API, channel and worker | release tests | All pass |
+| 6 | Write invariant 4 tests: model wording and `requires_approval` never authorise | release tests | All pass |
+| 7 | Write invariant 5 approval replay, race and escalation tests | release tests | All pass |
+| 8 | Collect invariant 6 evidence from the Compose and Kubernetes isolation suites | release tests | All pass |
+| 9 | Collect invariant 7 image scan and `USER` results | scan record | No critical CVE, non-root confirmed |
+| 10 | Write invariant 8 tests: absent evidence renders unverified, never done | release tests | UI shows `unknown` |
+| 11 | Write invariant 9 audit redaction scan | release tests | Scan is clean |
+| 12 | Write invariant 10 CI trigger test: a prompt or schema change reruns the suite | CI config | A planted change triggers a rerun |
+| 13 | Run the recovery drills: backup restore, export, deletion (spec:711 release gate, not an invariant) | `docs/release/drills.md` | Restore and export pass against a recorded command transcript |
+| 14 | Write the operator checklist with the exact command per record-based invariant | `docs/release/` | Each row names one command and one expected output |
+| 15 | Write the runbook index mapping every alert name to a runbook file | `docs/runbooks/index.md` | A script fails if an alert has no file |
+| 16 | Produce the release report from `gates.json` and `manifest.json` | `docs/release/report.md` | Report is generated, not hand-written |
+| 17 | Schedule a post-release review and a claims-ledger re-check | `changes/` | Re-check dates recorded |
+| 18 | Run the final demo: gates, invariants, metrics and known limits, and record the output | `docs/release/demo.md` | The record names every gate and its state |
+| 19 | Run the threat-model review and record it as a release-gate input | `docs/release/threat-model.md` | Every spec:805 threat maps to a control or a documented gap |
+| 20 | Run production-like smoke tests on the core flows against a production-like stack | `docs/release/smoke.md` | Each core flow passes, and each known limit is recorded |
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Define `gates.json` and the ordering check.
 2. Map every invariant to a named test, then write tests 1 to 10.

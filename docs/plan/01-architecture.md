@@ -20,31 +20,29 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Create the monorepo tree from the spec layout at spec:913, then record the diff against the catalogue | `nova/` tree, `docs/layout-diff.md` | The diff has exactly 10 rows: 3 catalogue-only, 2 layout-only and 5 renamed entries | 4 |
-| 2 | Add lint, typecheck and a single CI workflow | `.github/workflows/ci.yml` | CI fails on a type error | 3 |
-| 3 | Write the service skeleton template | `services/_template/` | Template builds and serves `/health/live` | 4 |
-| 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs | `services/api-gateway/` | Gateway rejects an unauthenticated request | 8 |
-| 5 | Add Postgres with one schema and one role per service | `infra/compose/`, `db/init/` | Service A cannot read service B's schema | 6 |
-| 6 | Add Redis and one BullMQ queue | `services/api-gateway/queues/` | Job survives a container restart | 4 |
-| 7 | Add MinIO with per-service prefixes | `infra/compose/` | Worker in prefix A cannot list prefix B | 4 |
-| 8 | Implement workload identity: signed service JWTs with issuer, audience, expiry and scope | `packages/contracts/`, gateway middleware | Missing and invalid tokens are rejected | 8 |
-| 9 | Add default-deny network rules in Compose and prove them on a placeholder untrusted container | `infra/compose/` | The placeholder untrusted container cannot reach Postgres | 5 |
-| 10 | Define `/health/live` and `/health/ready` on every service created so far | each existing service | Health returns no secret material | 4 |
-| 11 | Wire OpenTelemetry correlation IDs across gateway, services and workers | `infra/observability/` | One trace spans UI to DB | 6 |
-| 12 | Publish versioned OpenAPI for two services | `packages/contracts/` | Contract test fails on a breaking change | 6 |
-| 13 | Implement the event envelope and outbox pattern | `packages/contracts/` | Consumer records the event ID once | 5 |
-| 14 | Build images for the services created so far: multi-stage, pinned digest, non-root, no secrets | each new `Dockerfile` | A container reports a non-zero uid. No secret string from the repo appears in the image layers. `17-deployment-hardening` adds the Trivy scan in P10. | 4 |
-| 15 | Scaffold `apps/web` as a Next.js + React + Tailwind app with a build script | `apps/web/` | `npm run build` succeeds from a clean checkout | 5 |
-| 16 | Write `docs/architecture`: service map, trust boundaries, data flow and the layout diff | `docs/architecture/` | Each of the 23 catalogue services appears exactly once | 5 |
-| 17 | Add the public HTTPS edge: a reverse proxy with a certificate and hostname, or a tunnel for local work | `infra/edge/` | An HTTPS request from outside reaches the gateway, and plain HTTP does not answer | 6 |
-
-This build sequence sums to 87 hours.
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Create the monorepo tree from the spec layout at spec:913, then record the diff against the catalogue | `nova/` tree, `nova/docs/layout-diff.md`, `nova/tests/layout/` checks | The diff has exactly 10 rows: 3 catalogue-only, 2 layout-only and 5 renamed entries |
+| 2 | Add lint, typecheck and a single CI workflow | `.github/workflows/ci.yml` | CI fails on a type error |
+| 3 | Write the service skeleton template | `services/_template/` | Template builds and serves `/health/live` |
+| 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs | `services/api-gateway/` | Gateway rejects an unauthenticated request |
+| 5 | Add Postgres with one schema and one role per service | `infra/compose/`, `db/init/` | Service A cannot read service B's schema |
+| 6 | Add Redis and one BullMQ queue | `services/api-gateway/queues/` | Job survives a container restart |
+| 7 | Add MinIO with per-service prefixes | `infra/compose/` | Worker in prefix A cannot list prefix B |
+| 8 | Implement workload identity: signed service JWTs with issuer, audience, expiry and scope | `packages/contracts/`, gateway middleware | Missing and invalid tokens are rejected |
+| 9 | Add default-deny network rules in Compose and prove them on a placeholder untrusted container | `infra/compose/` | The placeholder untrusted container cannot reach Postgres |
+| 10 | Define `/health/live` and `/health/ready` on every service created so far | each existing service | Health returns no secret material |
+| 11 | Wire OpenTelemetry correlation IDs across gateway, services and workers | `infra/observability/` | One trace spans UI to DB |
+| 12 | Publish versioned OpenAPI for two services | `packages/contracts/` | Contract test fails on a breaking change |
+| 13 | Implement the event envelope and outbox pattern | `packages/contracts/` | Consumer records the event ID once |
+| 14 | Build images for the services created so far: multi-stage, pinned digest, non-root, no secrets | each new `Dockerfile` | A container reports a non-zero uid. No secret string from the repo appears in the image layers. `17-deployment-hardening` adds the Trivy scan in P10. |
+| 15 | Scaffold `apps/web` as a Next.js + React + Tailwind app with a build script | `apps/web/` | `npm run build` succeeds from a clean checkout |
+| 16 | Write `docs/architecture`: service map, trust boundaries, data flow and the layout diff at `docs/architecture/layout-diff.md` | `docs/architecture/` | Each of the 23 catalogue services appears exactly once |
+| 17 | Add the public HTTPS edge: a reverse proxy with a certificate and hostname, or a tunnel for local work | `infra/edge/` | An HTTPS request from outside reaches the gateway, and plain HTTP does not answer |
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Create the tree and the CI workflow.
 2. Write the service skeleton template.

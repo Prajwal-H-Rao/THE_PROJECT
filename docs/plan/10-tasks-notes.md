@@ -16,33 +16,31 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Create the task table: title, due, priority, status, owner, recurrence rule | migrations | Unique constraint on owner and id | 4 |
-| 2 | Implement the task CRUD service with ownership checks | task service | Cross-user read fails | 5 |
-| 3 | Implement recurrence with a deterministic rule parser | task service | RRULE cases pass | 6 |
-| 4 | Register the task tool family: create, list, complete, reschedule, search | tool registry | Out-of-scope ops denied | 5 |
-| 5 | Build the reminder scheduler as an outbox-driven job | `services/notification-service/` | Job survives restart | 6 |
-| 6 | Add idempotent delivery keyed on reminder ID | notification service | Two workers, one delivery | 6 |
-| 7 | Implement the escalation policy for missed reminders | notification service | Escalation fires once | 4 |
-| 8 | Add the reminder delivery log with provider message ID | notification schema | Delivery row proves success | 4 |
-| 9 | Create the note table with tags, links and a full-text index | migrations | Full-text search passes | 4 |
-| 10 | Add object storage for long note bodies | notes schema | Pointer resolves to the object | 3 |
-| 11 | Implement note create, update and version history | note service | History restores a prior version | 5 |
-| 12 | Wire local embeddings from `workers/inference-worker/` as an optional index | `services/ml-service/` | Vector row deleted with the note | 5 |
-| 13 | Implement search: full-text first, vector as a rerank | note service | Search returns note IDs | 5 |
-| 14 | Register the note tool family: create, search, read, link, summarise | tool registry | Overwrite requires confirmation | 5 |
-| 15 | Build the Tasks and Notes page: list, board and calendar views, snooze and overdue states, tagged notes with linked references | `apps/web/tasks/` | Every view renders from real data, an overdue task shows its overdue state, and no view shows sample data (spec:407) | 6 |
-| 16 | Add timezone-safe due-time handling | task service | DST boundary case passes | 5 |
-| 17 | Add task and reminder metrics: queue backlog, delivery latency | observability | Alert fires on backlog | 3 |
-| 18 | Add per-item export and per-item delete for notes and remembered facts | note service | One note exports and deletes without touching others | 5 |
-| 19 | Build remembered-fact controls: per-item source, edit, deletion and forget action | notes schema + web UI | A forgotten fact leaves no row and no vector | 5 |
-This build sequence sums to 91 hours.
-
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Create the task table: title, due, priority, status, owner, recurrence rule | migrations | Unique constraint on owner and id |
+| 2 | Implement the task CRUD service with ownership checks | task service | Cross-user read fails |
+| 3 | Implement recurrence with a deterministic rule parser | task service | RRULE cases pass |
+| 4 | Register the task tool family: create, list, complete, reschedule, search | tool registry | Out-of-scope ops denied |
+| 5 | Build the reminder scheduler as an outbox-driven job | `services/notification-service/` | Job survives restart |
+| 6 | Add idempotent delivery keyed on reminder ID | notification service | Two workers, one delivery |
+| 7 | Implement the escalation policy for missed reminders | notification service | Escalation fires once |
+| 8 | Add the reminder delivery log with provider message ID | notification schema | Delivery row proves success |
+| 9 | Create the note table with tags, links and a full-text index | migrations | Full-text search passes |
+| 10 | Add object storage for long note bodies | notes schema | Pointer resolves to the object |
+| 11 | Implement note create, update and version history | note service | History restores a prior version |
+| 12 | Wire local embeddings from `workers/inference-worker/` as an optional index | `services/ml-service/` | Vector row deleted with the note |
+| 13 | Implement search: full-text first, vector as a rerank | note service | Search returns note IDs |
+| 14 | Register the note tool family: create, search, read, link, summarise | tool registry | Overwrite requires confirmation |
+| 15 | Build the Tasks and Notes page: list, board and calendar views, snooze and overdue states, tagged notes with linked references | `apps/web/tasks/` | Every view renders from real data, an overdue task shows its overdue state, and no view shows sample data (spec:407) |
+| 16 | Add timezone-safe due-time handling | task service | DST boundary case passes |
+| 17 | Add task and reminder metrics: queue backlog, delivery latency | observability | Alert fires on backlog |
+| 18 | Add per-item export and per-item delete for notes and remembered facts | note service | One note exports and deletes without touching others |
+| 19 | Build remembered-fact controls: per-item source, edit, deletion and forget action | notes schema + web UI | A forgotten fact leaves no row and no vector |
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Create the task table and the CRUD service with ownership checks.
 2. Build the reminder outbox worker with idempotent delivery.

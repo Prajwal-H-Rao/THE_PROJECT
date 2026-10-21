@@ -55,7 +55,7 @@ The first module column names the primary owner.
 | 632 | Acceptance criteria (registry) | `13-employer-registry` |
 | 641 | Implementation & Learning Curriculum | `19-tech-and-curriculum` |
 | 680 | Curriculum order and practical labs | `19-tech-and-curriculum` |
-| 695 | Roadmap & Milestones | `schedule.md`, `18-release-gate` |
+| 695 | Roadmap & Milestones | `README.md`, `18-release-gate` |
 | 717 | Microservice Catalogue, Contracts and Ownership | `01-architecture`, all domain modules |
 | 747 | Example API and event conventions | `02-data-and-audit` |
 | 754 | WhatsApp and Telegram Interaction | `14-channels` |
@@ -102,11 +102,11 @@ Four headings hold data, not prose. Do not copy the rows into a plan file. Refer
 | Revision note (supersedes modular monolith and FastAPI) | 1007 | `19-tech-and-curriculum` |
 | Status | 4 | `README.md` |
 | Executive Summary | 6 | `README.md` |
-| Suggested delivery gates A to G | 713 | `schedule.md`, `18-release-gate` |
-| Evaluation metrics | 715 | `schedule.md` |
+| Suggested delivery gates A to G | 713 | `README.md`, `18-release-gate` |
+| Evaluation metrics | 715 | `order-and-constraints.md`, `18-release-gate` |
 | Compose local layout rules | 970 | `01-architecture`, `17-deployment-hardening` |
 | Audit redaction rules | 903 | `02-data-and-audit`, `16-reliability-testing` |
 | 4K context rule and docker.sock ban on the model container | 496 | `05-model-strategy` |
 | Kubernetes acceptance gate | 847 | `17-deployment-hardening` |
 | Appendix B preamble (list is not a ranking) | 1028 | `13-employer-registry` |
-| Optional cloud lab rule | 691, 710 | `schedule.md` (deferred, with reason) |
+| Optional cloud lab rule | 691, 710 | `order-and-constraints.md` (deferred, with reason) |

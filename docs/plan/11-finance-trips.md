@@ -16,32 +16,30 @@ Import, categorise and review transactions with evidence. Compute totals in code
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Create the transaction table: amount, currency, date, merchant, category, source, hash | migrations | Duplicate hash is rejected | 5 |
-| 2 | Implement CSV and OFX import with encoding and locale variants | `services/finance-service/ingest/` | Each fixture imports | 7 |
-| 3 | Implement PDF statement parsing through the sandboxed document service | finance + document service | Rows keep row and column refs | 6 |
-| 4 | Add content-addressed deduplication across imports | finance service | Re-import is a no-op | 5 |
-| 5 | Implement deterministic currency conversion with a dated rate table | finance service | Rounding cases pass | 5 |
-| 6 | Build the rule-based categoriser with override history | finance service | Rules are deterministic | 6 |
-| 7 | Add the model-drafted category path with confidence and reason | finance + gateway | Low confidence forces review | 6 |
-| 8 | Implement the ambiguous-import review queue | finance service | Queue surfaces only uncertain rows | 5 |
-| 9 | Compute totals, budgets and trends in code | finance service | Totals match a fixed fixture | 6 |
-| 10 | Add export and delete for the finance domain | finance service | Delete removes objects too | 4 |
-| 11 | Implement provider connection handling and account-linking consent inside the finance service. `20-pages-and-automations` adds the `integration-registry` that displays these connections in P9 | finance service | Consent scope is explicit | 6 |
-| 12 | Add Plaid or India Account Aggregator behind a config flag in the same local adapter. The P9 registry reads only its status. | finance service | Flag off means CSV only | 6 |
-| 13 | Create the trip table: dates, origin, destination, budget, status | migrations | Ownership indexed | 4 |
-| 14 | Implement route and fare estimation with a provider adapter | `services/trips-service/` | Estimates are labelled | 6 |
-| 15 | Implement itinerary draft, packing list and a pre-departure checklist | trip service | Checklist is deterministic | 5 |
-| 16 | Gate booking actions behind an approval grant | policy + trip service | Booking without approval fails | 5 |
-| 17 | Build the Finance and Trips page: period selector, net and cash-flow cards, category chart, import provenance and review queue. Trips add a map with stops, a route timeline, transport options and booking links. | `apps/web/finance/` | The chart renders from stored transactions. Every import shows its provenance. Booking links carry an estimate label (spec:408, spec:409). | 6 |
-| 18 | Register the trips operations with the policy layer: argument schema, resource scope, risk tier, quota and verifier (spec:193) | policy service | A trips call with an unregistered argument is rejected | 5 |
-
-This build sequence sums to 98 hours.
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Create the transaction table: amount, currency, date, merchant, category, source, hash | migrations | Duplicate hash is rejected |
+| 2 | Implement CSV and OFX import with encoding and locale variants | `services/finance-service/ingest/` | Each fixture imports |
+| 3 | Implement PDF statement parsing through the sandboxed document service | finance + document service | Rows keep row and column refs |
+| 4 | Add content-addressed deduplication across imports | finance service | Re-import is a no-op |
+| 5 | Implement deterministic currency conversion with a dated rate table | finance service | Rounding cases pass |
+| 6 | Build the rule-based categoriser with override history | finance service | Rules are deterministic |
+| 7 | Add the model-drafted category path with confidence and reason | finance + gateway | Low confidence forces review |
+| 8 | Implement the ambiguous-import review queue | finance service | Queue surfaces only uncertain rows |
+| 9 | Compute totals, budgets and trends in code | finance service | Totals match a fixed fixture |
+| 10 | Add export and delete for the finance domain | finance service | Delete removes objects too |
+| 11 | Implement provider connection handling and account-linking consent inside the finance service. `20-pages-and-automations` adds the `integration-registry` that displays these connections in P9 | finance service | Consent scope is explicit |
+| 12 | Add Plaid or India Account Aggregator behind a config flag in the same local adapter. The P9 registry reads only its status. | finance service | Flag off means CSV only |
+| 13 | Create the trip table: dates, origin, destination, budget, status | migrations | Ownership indexed |
+| 14 | Implement route and fare estimation with a provider adapter | `services/trips-service/` | Estimates are labelled |
+| 15 | Implement itinerary draft, packing list and a pre-departure checklist | trip service | Checklist is deterministic |
+| 16 | Gate booking actions behind an approval grant | policy + trip service | Booking without approval fails |
+| 17 | Build the Finance and Trips page: period selector, net and cash-flow cards, category chart, import provenance and review queue. Trips add a map with stops, a route timeline, transport options and booking links. | `apps/web/finance/` | The chart renders from stored transactions. Every import shows its provenance. Booking links carry an estimate label (spec:408, spec:409). |
+| 18 | Register the trips operations with the policy layer: argument schema, resource scope, risk tier, quota and verifier (spec:193) | policy service | A trips call with an unregistered argument is rejected |
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Create the transaction table and the CSV importer with deduplication.
 2. Add the deterministic categoriser, then the model-drafted category path behind review.

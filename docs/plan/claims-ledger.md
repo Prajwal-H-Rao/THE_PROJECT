@@ -12,7 +12,7 @@ External facts this plan depends on. I fetched each source on 2026-10-12. Proven
 
 ## Rule
 
-Only `verified` permits automated polling. A `stale` or `unverifiable` claim forces the connector task to `manual_only`. Each `Recheck before` date is the **start** of the earliest phase that uses the row. The re-check runs on phase day 1, before task 1.
+Only `verified` permits automated polling. A `stale` or `unverifiable` claim forces the connector task to `manual_only`. Each `Recheck before` date is a verification deadline. Re-check the row before the dependent module's first task.
 
 ## Ledger
 
@@ -51,8 +51,8 @@ These spec statements need verification at implementation time. They have no off
 
 | Spec statement | Verify when | Fallback |
 |---|---|---|
-| Design tokens are recommendations, not claims that the Figma file was edited (spec:417) | On P4 day 1 | Measure contrast in the built UI |
-| Do not claim a matching false-positive target before an evaluation set exists (spec:715) | On P8 day 1 | Report ranking quality as unmeasured |
+| Design tokens are recommendations, not claims that the Figma file was edited (spec:417) | Before the P4 tasks start | Measure contrast in the built UI |
+| Do not claim a matching false-positive target before an evaluation set exists (spec:715) | Before the P8 tasks start | Report ranking quality as unmeasured |
 | Recheck the exact publisher and revision for `Qwen/Qwen3-4B-Instruct-2507` (spec:459) | If the alternative planner is tested | Use the Qwen3.5 family only |
-| Plaid or India Account Aggregator for finance import (spec:222) | On P7 day 1 | CSV and PDF upload only |
+| Plaid or India Account Aggregator for finance import (spec:222) | Before the P7 tasks start | CSV and PDF upload only |
 | Meta business verification and WABA setup prerequisites (spec:767) | Before P9 WhatsApp | Ship Telegram only |

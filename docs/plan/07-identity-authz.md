@@ -37,32 +37,30 @@ The spec's 10-row matrix at line 788 is normative. Reproduce it as policy tests,
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Implement the OIDC authorization-code flow with state and PKCE | identity service | Replay of `state` fails | 8 |
-| 2 | Issue session cookies: `HttpOnly`, `Secure`, `SameSite` | gateway | CSRF on cookie writes fails | 5 |
-| 3 | Implement TOTP enrolment and login | identity service | Wrong code rejected, replay rejected | 6 |
-| 4 | Add email plus OTP for password reset | identity service | Token is single-use and time-boxed | 4 |
-| 5 | Encrypt OAuth refresh tokens at rest with envelope encryption | identity service | Ciphertext only in DB and logs | 6 |
-| 6 | Implement scopes per integration and per user | identity service | Scope escalation fails | 5 |
-| 7 | Implement the resource-ownership check in the repository base layer. Every service created later extends it | repository base layer | Cross-user read fails | 8 |
-| 8 | Build the service JWT validation middleware: issuer, audience, expiry, subject, scope. Every service inherits it from the shared gateway path. | gateway middleware | `alg: none` rejected | 6 |
-| 9 | Add key rotation for workload keys | identity service | Old key fails after rotation | 5 |
-| 10 | Implement step-up authentication for sensitive changes | gateway | Sensitive route demands fresh TOTP | 5 |
-| 11 | Build the account-linking flow: one-time nonce issued only from a logged-in session | identity service | A nonce minted outside a logged-in session is refused | 6 |
-| 12 | Implement unlink and revoke | identity service | Revocation stops future access | 4 |
-| 13 | Add CORS allow-list, CSP, body and file limits, SSRF guard | gateway | Each control has a test | 6 |
-| 14 | Add rate limiting and account lockout | gateway | Lockout triggers and recovers | 4 |
-| 15 | Encode the 10 matrix rows as policy tests, against the rule schema `08-policy-approval` builds in tasks 1-3, before module 07 | policy service | All 10 pass | 5 |
-| 16 | Verify no token or secret appears in logs or traces | log scan test | Scan is clean | 3 |
-| 17 | Implement RBAC roles `admin` and `user`, checked by the decision endpoint `08-policy-approval` builds in task 3 | identity + policy | A `user` role is denied on an admin-classified tool call (spec:235) | 6 |
-| 18 | Terminate TLS outside localhost. Set HttpOnly and SameSite cookies. Add CSRF protection, a CORS allow-list and a content security policy. | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:785) | 4 |
-
-This build sequence sums to 96 hours.
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Implement the OIDC authorization-code flow with state and PKCE | identity service | Replay of `state` fails |
+| 2 | Issue session cookies: `HttpOnly`, `Secure`, `SameSite` | gateway | CSRF on cookie writes fails |
+| 3 | Implement TOTP enrolment and login | identity service | Wrong code rejected, replay rejected |
+| 4 | Add email plus OTP for password reset | identity service | Token is single-use and time-boxed |
+| 5 | Encrypt OAuth refresh tokens at rest with envelope encryption | identity service | Ciphertext only in DB and logs |
+| 6 | Implement scopes per integration and per user | identity service | Scope escalation fails |
+| 7 | Implement the resource-ownership check in the repository base layer. Every service created later extends it | repository base layer | Cross-user read fails |
+| 8 | Build the service JWT validation middleware: issuer, audience, expiry, subject, scope. Every service inherits it from the shared gateway path. | gateway middleware | `alg: none` rejected |
+| 9 | Add key rotation for workload keys | identity service | Old key fails after rotation |
+| 10 | Implement step-up authentication for sensitive changes | gateway | Sensitive route demands fresh TOTP |
+| 11 | Build the account-linking flow: one-time nonce issued only from a logged-in session | identity service | A nonce minted outside a logged-in session is refused |
+| 12 | Implement unlink and revoke | identity service | Revocation stops future access |
+| 13 | Add CORS allow-list, CSP, body and file limits, SSRF guard | gateway | Each control has a test |
+| 14 | Add rate limiting and account lockout | gateway | Lockout triggers and recovers |
+| 15 | Encode the 10 matrix rows as policy tests, against the rule schema `08-policy-approval` builds in tasks 1-3, before module 07 | policy service | All 10 pass |
+| 16 | Verify no token or secret appears in logs or traces | log scan test | Scan is clean |
+| 17 | Implement RBAC roles `admin` and `user`, checked by the decision endpoint `08-policy-approval` builds in task 3 | identity + policy | A `user` role is denied on an admin-classified tool call (spec:235) |
+| 18 | Terminate TLS outside localhost. Set HttpOnly and SameSite cookies. Add CSRF protection, a CORS allow-list and a content security policy. | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:785) |
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Implement the OIDC flow with PKCE and secure cookies.
 2. Add TOTP and encrypted refresh tokens.
@@ -84,6 +82,6 @@ Work these steps in order. A step names tasks from the table above. At 40 hours 
 
 ## Risks
 
-- Google OAuth app verification has an external lead time. Use the test-user list until it clears. Track it in `schedule.md`.
+- Google OAuth app verification has an external lead time. Use the test-user list until it clears. Track it in `order-and-constraints.md`.
 - Self-managed TOTP has recovery risk. Offer email plus OTP as the recovery path, and document it.
 - Ownership checks belong in the repository layer. A missing check in one endpoint is a data leak. Add a route-level test that scans for it.

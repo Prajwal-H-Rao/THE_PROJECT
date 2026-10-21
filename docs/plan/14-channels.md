@@ -20,30 +20,28 @@ Two channels carry reading, notifications, confirmations and low-risk approvals.
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Implement WhatsApp signature verification over the raw body with constant-time compare | `services/whatsapp-adapter/` | Truncated and mutated bodies fail | 7 |
-| 2 | Implement `GET /webhooks/whatsapp` verify-token challenge | adapter | Wrong challenge fails | 3 |
-| 3 | Implement message-ID idempotency with a dedup store | adapter | Duplicate delivery is a no-op | 5 |
-| 4 | Add replay protection: timestamp window plus nonce store | adapter | An old signed message fails | 5 |
-| 5 | Build the outbound sender with per-user rate limits and opt-in state | adapter | Opt-out stops delivery | 5 |
-| 6 | Implement Telegram secret-token header check | `telegram/` | Wrong token returns 403 | 3 |
-| 7 | Implement Telegram update offset handling and delivery retry | telegram | Retry does not double-process | 5 |
-| 8 | Create the Telegram bot, set a high-entropy `secret_token`, and configure HTTPS webhook delivery | bot config plus `setWebhook` | A request without the secret header returns 403 | 4 |
-| 9 | Build the inbound sanitiser that treats text as untrusted data | adapters | Injection in inbound text cannot change policy | 5 |
-| 10 | Implement the action preview card for chat approvals | adapter + policy | Preview hash matches the grant | 6 |
-| 11 | Implement inline button callbacks with signature or secret verification | adapter | Callback for another user fails | 6 |
-| 12 | Restrict chat approvals to the low-risk allow-list | policy | High risk routes to the web surface | 4 |
-| 13 | Reject free-text approvals | adapter | "yes" to an ambiguous action fails | 4 |
-| 14 | Add notification templates: reminder, approval request, digest, job alert | notification service | Templates render with no secret material | 5 |
-| 15 | Implement delivery receipts and failure handling with backoff | notification service | Failure is audited, not silent | 5 |
-| 16 | Add redaction: no tokens, personal content or prompt text in logs | adapters + tests | Log scan is clean | 4 |
-| 17 | Consume the P2 single-use linking nonce in the channel account-linking flow | identity + adapters | A channel-stated email cannot bind without redeeming a P2 nonce | 6 |
-| 18 | Add webhook and delivery metrics | observability | Dedup and failure rates render | 4 |
-| 19 | Build the channel settings page: link, unlink, mute, opt-out | web UI | Playwright flow passes | 5 |
-| 20 | Deliver curriculum lab 5: Telegram webhook locally, WhatsApp behind a flag | `labs/lab05/` | Signature and dedup tests pass | 5 |
-This build sequence sums to 96 hours.
-
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Implement WhatsApp signature verification over the raw body with constant-time compare | `services/whatsapp-adapter/` | Truncated and mutated bodies fail |
+| 2 | Implement `GET /webhooks/whatsapp` verify-token challenge | adapter | Wrong challenge fails |
+| 3 | Implement message-ID idempotency with a dedup store | adapter | Duplicate delivery is a no-op |
+| 4 | Add replay protection: timestamp window plus nonce store | adapter | An old signed message fails |
+| 5 | Build the outbound sender with per-user rate limits and opt-in state | adapter | Opt-out stops delivery |
+| 6 | Implement Telegram secret-token header check | `telegram/` | Wrong token returns 403 |
+| 7 | Implement Telegram update offset handling and delivery retry | telegram | Retry does not double-process |
+| 8 | Create the Telegram bot, set a high-entropy `secret_token`, and configure HTTPS webhook delivery | bot config plus `setWebhook` | A request without the secret header returns 403 |
+| 9 | Build the inbound sanitiser that treats text as untrusted data | adapters | Injection in inbound text cannot change policy |
+| 10 | Implement the action preview card for chat approvals | adapter + policy | Preview hash matches the grant |
+| 11 | Implement inline button callbacks with signature or secret verification | adapter | Callback for another user fails |
+| 12 | Restrict chat approvals to the low-risk allow-list | policy | High risk routes to the web surface |
+| 13 | Reject free-text approvals | adapter | "yes" to an ambiguous action fails |
+| 14 | Add notification templates: reminder, approval request, digest, job alert | notification service | Templates render with no secret material |
+| 15 | Implement delivery receipts and failure handling with backoff | notification service | Failure is audited, not silent |
+| 16 | Add redaction: no tokens, personal content or prompt text in logs | adapters + tests | Log scan is clean |
+| 17 | Consume the P2 single-use linking nonce in the channel account-linking flow | identity + adapters | A channel-stated email cannot bind without redeeming a P2 nonce |
+| 18 | Add webhook and delivery metrics | observability | Dedup and failure rates render |
+| 19 | Build the channel settings page: link, unlink, mute, opt-out | web UI | Playwright flow passes |
+| 20 | Deliver curriculum lab 5: Telegram webhook locally, WhatsApp behind a flag | `labs/lab05/` | Signature and dedup tests pass |
 ## Acceptance tests
 
 - `test_unsigned_whatsapp_rejected` — no signature returns 401.
@@ -59,7 +57,7 @@ This build sequence sums to 96 hours.
 
 ## External gates
 
-Meta business verification and WABA setup carry weeks of lead time (see `schedule.md`). Telegram bot token takes minutes. Ship Telegram first and mark WhatsApp `blocked-by-claim` until verification clears.
+Meta business verification and WABA setup carry weeks of lead time (see `order-and-constraints.md`). Telegram bot token takes minutes. Ship Telegram first and mark WhatsApp `blocked-by-claim` until verification clears.
 
 ## Risks
 

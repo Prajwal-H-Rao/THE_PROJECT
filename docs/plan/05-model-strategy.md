@@ -22,7 +22,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 ## Verified claims
 
-See `claims-ledger.md` C01 to C06. Re-check on P3 day 1, before task 1.
+See `claims-ledger.md` C01 to C06. Re-check before the first P3 task.
 
 ## Candidate table
 
@@ -39,25 +39,23 @@ The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Write a repeatable setup script: pull, pin digest, record size and license | `models/setup.sh` | Script reproduces the same digest | 4 |
-| 2 | Create `models/model-registry.yaml` at the spec:957 path. Add provider, ID, digest, quant, licence, template, `num_ctx`, latency, RAM/VRAM, hardware, tool-call quality and eval date. | `models/` | Registry validates against a schema | 4 |
-| 3 | Bind Ollama to loopback and the private container network only | Compose config | Public port scan fails | 3 |
-| 4 | Pin the model tag and digest in deployment config | Compose config | Drift fails CI | 2 |
-| 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request waits in queue order and never runs in parallel | 3 |
-| 6 | Measure CPU-only and GPU-assisted runs separately | eval report | The report has a CPU block and a GPU block, each with peak RAM and p95 | 5 |
-| 7 | Build the 250-case evaluation set: supported tasks, ambiguity, out-of-scope, wrong tool, invalid args, injection, multilingual, multi-turn | `tests/model-eval/` | Set has 250 cases and a manifest | 12 |
-| 8 | Score exact tool-name accuracy and per-field argument accuracy | eval runner | Report per case and worst slice | 6 |
-| 9 | Score schema rejection rate and out-of-scope false-tool-call rate | eval runner | The report prints both rates as numbers | 4 |
-| 10 | Record latency p50 and p95 plus peak VRAM and RAM | eval runner | Every candidate row carries all four numbers | 4 |
-| 11 | Decide and record the default with its reasoning | registry | The decision names one candidate and one eval run ID that exists | 3 |
-| 12 | Test llama.cpp as the fallback runtime | eval report | Same contracts hold | 6 |
-| 13 | Test the `0.8b` for classification only. Fence it from the tool registry that `03-agent-runtime` binds in P5. Use a dummy listener in P3. | Compose network plus config | A dummy listener on the tool-registry port is unreachable from the `0.8b` container | 4 |
-| 14 | Add a deterministic fake model as the CI default, which `03-agent-runtime` reuses in P5 | `tests/fixtures/` | CI needs no GPU | 3 |
-| 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:692) | 6 |
-This build sequence sums to 69 hours.
-
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Write a repeatable setup script: pull, pin digest, record size and license | `models/setup.sh` | Script reproduces the same digest |
+| 2 | Create `models/model-registry.yaml` at the spec:957 path. Add provider, ID, digest, quant, licence, template, `num_ctx`, latency, RAM/VRAM, hardware, tool-call quality and eval date. | `models/` | Registry validates against a schema |
+| 3 | Bind Ollama to loopback and the private container network only | Compose config | Public port scan fails |
+| 4 | Pin the model tag and digest in deployment config | Compose config | Drift fails CI |
+| 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request waits in queue order and never runs in parallel |
+| 6 | Measure CPU-only and GPU-assisted runs separately | eval report | The report has a CPU block and a GPU block, each with peak RAM and p95 |
+| 7 | Build the 250-case evaluation set: supported tasks, ambiguity, out-of-scope, wrong tool, invalid args, injection, multilingual, multi-turn | `tests/model-eval/` | Set has 250 cases and a manifest |
+| 8 | Score exact tool-name accuracy and per-field argument accuracy | eval runner | Report per case and worst slice |
+| 9 | Score schema rejection rate and out-of-scope false-tool-call rate | eval runner | The report prints both rates as numbers |
+| 10 | Record latency p50 and p95 plus peak VRAM and RAM | eval runner | Every candidate row carries all four numbers |
+| 11 | Decide and record the default with its reasoning | registry | The decision names one candidate and one eval run ID that exists |
+| 12 | Test llama.cpp as the fallback runtime | eval report | Same contracts hold |
+| 13 | Test the `0.8b` for classification only. Fence it from the tool registry that `03-agent-runtime` binds in P5. Use a dummy listener in P3. | Compose network plus config | A dummy listener on the tool-registry port is unreachable from the `0.8b` container |
+| 14 | Add a deterministic fake model as the CI default, which `03-agent-runtime` reuses in P5 | `tests/fixtures/` | CI needs no GPU |
+| 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:692) |
 ## Release thresholds
 
 - 100 percent of unauthorised or out-of-scope tool proposals blocked by deterministic enforcement. This is policy, not model quality.
@@ -69,7 +67,7 @@ If a candidate misses the tool-choice target, simplify the workflow or use deter
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Write the setup script and `models/model-registry.yaml`.
 2. Build the 250-case evaluation set.
@@ -90,4 +88,4 @@ Work these steps in order. A step names tasks from the table above. At 40 hours 
 
 - No ledger row justifies a model choice. Only the 250-case evaluation gate does (spec:510). Run it before you set a default.
 - The 9b model was not in the spec. Add it only if 4b fails and latency allows.
-- Model cards and tags change. Re-check the ledger on the first day of P3 and again before any swap.
+- Model cards and tags change. Re-check the ledger before the first P3 task and again before any swap.

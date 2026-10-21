@@ -32,34 +32,32 @@ Planning, Approval required, Executing, Verified success, Failed/uncertain, and 
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Copy the spec:282-311 CSS token block verbatim. Append the four chart keys from the spec:272-275 colour table, which the block omits. | `apps/web/styles/tokens.css` | The copied block matches spec:282-311 byte for byte, and the four `--nova-chart-*` keys carry both theme values | 3 |
-| 2 | Build the theme switch with persistence and system preference | web app | Both themes render from the same keys | 4 |
-| 3 | Implement the 25-row token table as a typed token file | `tokens.ts` | Typed file has exactly 25 color keys | 4 |
-| 4 | Implement the 11 `type.*` tokens from spec:320-330, then the spec:332 rules on spacing, caps and tabular numerals | `typography.css` | All 11 tokens resolve, long-word overflow passes, and a money and a date value render with tabular numerals | 5 |
-| 5 | Implement spacing on the 4px base, then copy the layout dimension table from spec:338-358 | `spacing.css` | Spacing tokens are multiples of 4, and the layout values match spec:338-358 | 4 |
-| 6 | Build Button with all variants and states: default, hover, active, focus-visible, loading, disabled | `components/Button/` | Focus-visible present on every control | 5 |
-| 7 | Build TextField, TextArea, Select, Combobox with invalid, read-only and no-results states | `components/` | `aria-describedby` links the error | 8 |
-| 8 | Build Card, Badge, Tabs, Dialog, Drawer, DataTable, Timeline with specified states | `components/` | Dialog traps focus and closes safely | 9 |
-| 9 | Build ChatMessage, ApprovalCard, FileDropzone, EmptyState, Skeleton, Toast, DatePicker | `components/` | ApprovalCard shows hash, expiry and consequence | 9 |
-| 10 | Build the 10 domain card variants: email, event, task, note, transaction, trip, job, application, approval, document | `components/cards/` | Each of the 10 cards renders default, loading, empty, error and denied states | 8 |
-| 11 | Implement all six agent UI states with honest copy | `components/agent-states/` | No `done` renders before verification | 6 |
-| 12 | Build the action preview: target, exact fields, permissions, side effects, reversibility, expiry, policy rationale. Each domain page verifies the live match in P6 to P9 | `components/ActionPreview/` | The rendered preview matches the tool-call fixture exactly | 7 |
-| 13 | Add approval, rejection, edit and expiry outcomes, keyboard reachable | ActionPreview | Full flow works without a mouse | 6 |
-| 14 | Implement responsive layouts at 640, 768, 1024, 1280 and 1536, plus 320 for chat | layouts | Screenshot tests at each width | 7 |
-| 15 | Build the app shell: navigation, command palette, user menu, theme, status, audit link | `apps/web/shell/` | Navigation is keyboard reachable | 7 |
-| 16 | Add reduced-motion and high-contrast support | global styles | Preference changes take effect | 4 |
-| 17 | Set up Playwright. Write the sign-in and approval-rejection flows that every domain page reuses. Sign-in seeds a P2 local session, so the OIDC gate cannot block it (spec:869). | `apps/web/e2e/` | Both flows run against the local stack and fail on a regression | 10 |
-| 18 | Run an accessibility pass: contrast, labels, focus order, ARIA, keyboard, hit targets 40-44px | `a11y-report.json` | The report lists zero violations of severity critical, and every entry carries an element selector | 7 |
-| 19 | Test with a screen reader: navigation, focus announcements and action previews | `a11y-screen-reader.md` | The record lists each flow tested and its result (spec:388, spec:869) | 5 |
-| 20 | Add the empty, loading, offline and permission-denied state for every shared component | components | Each state renders, none shows fake data | 5 |
-
-This build sequence sums to 123 hours.
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Copy the spec:282-311 CSS token block verbatim. Append the four chart keys from the spec:272-275 colour table, which the block omits. | `apps/web/styles/tokens.css` | The copied block matches spec:282-311 byte for byte, and the four `--nova-chart-*` keys carry both theme values |
+| 2 | Build the theme switch with persistence and system preference | web app | Both themes render from the same keys |
+| 3 | Implement the 25-row token table as a typed token file | `tokens.ts` | Typed file has exactly 25 color keys |
+| 4 | Implement the 11 `type.*` tokens from spec:320-330, then the spec:332 rules on spacing, caps and tabular numerals | `typography.css` | All 11 tokens resolve, long-word overflow passes, and a money and a date value render with tabular numerals |
+| 5 | Implement spacing on the 4px base, then copy the layout dimension table from spec:338-358 | `spacing.css` | Spacing tokens are multiples of 4, and the layout values match spec:338-358 |
+| 6 | Build Button with all variants and states: default, hover, active, focus-visible, loading, disabled | `components/Button/` | Focus-visible present on every control |
+| 7 | Build TextField, TextArea, Select, Combobox with invalid, read-only and no-results states | `components/` | `aria-describedby` links the error |
+| 8 | Build Card, Badge, Tabs, Dialog, Drawer, DataTable, Timeline with specified states | `components/` | Dialog traps focus and closes safely |
+| 9 | Build ChatMessage, ApprovalCard, FileDropzone, EmptyState, Skeleton, Toast, DatePicker | `components/` | ApprovalCard shows hash, expiry and consequence |
+| 10 | Build the 10 domain card variants: email, event, task, note, transaction, trip, job, application, approval, document | `components/cards/` | Each of the 10 cards renders default, loading, empty, error and denied states |
+| 11 | Implement all six agent UI states with honest copy | `components/agent-states/` | No `done` renders before verification |
+| 12 | Build the action preview: target, exact fields, permissions, side effects, reversibility, expiry, policy rationale. Each domain page verifies the live match in P6 to P9 | `components/ActionPreview/` | The rendered preview matches the tool-call fixture exactly |
+| 13 | Add approval, rejection, edit and expiry outcomes, keyboard reachable | ActionPreview | Full flow works without a mouse |
+| 14 | Implement responsive layouts at 640, 768, 1024, 1280 and 1536, plus 320 for chat | layouts | Screenshot tests at each width |
+| 15 | Build the app shell: navigation, command palette, user menu, theme, status, audit link | `apps/web/shell/` | Navigation is keyboard reachable |
+| 16 | Add reduced-motion and high-contrast support | global styles | Preference changes take effect |
+| 17 | Set up Playwright. Write the sign-in and approval-rejection flows that every domain page reuses. Sign-in seeds a P2 local session, so the OIDC gate cannot block it (spec:869). | `apps/web/e2e/` | Both flows run against the local stack and fail on a regression |
+| 18 | Run an accessibility pass: contrast, labels, focus order, ARIA, keyboard, hit targets 40-44px | `a11y-report.json` | The report lists zero violations of severity critical, and every entry carries an element selector |
+| 19 | Test with a screen reader: navigation, focus announcements and action previews | `a11y-screen-reader.md` | The record lists each flow tested and its result (spec:388, spec:869) |
+| 20 | Add the empty, loading, offline and permission-denied state for every shared component | components | Each state renders, none shows fake data |
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Copy the CSS tokens and build the theme switch.
 2. Build Button and TextField with every state, then the action preview.

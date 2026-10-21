@@ -1,0 +1,22 @@
+# Keep the byte-code cache and the build output out of the repository.
+__pycache__/
+node_modules/
+.next/
+.turbo/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+coverage/
+dist/
+htmlcov/
+playwright-report/
+test-results/
+storybook-static/
+*.egg-info/
+.coverage
+*.pyc
+*.pyo
+*.tsbuildinfo

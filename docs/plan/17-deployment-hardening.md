@@ -24,36 +24,34 @@ Docker Compose is the MVP runtime. Kubernetes is the local target. Model and par
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Write the hardened base image: non-root UID, read-only root, pinned digest | `infra/images/base/` | `USER` is non-zero | 4 |
-| 2 | Convert every Dockerfile to multi-stage with pinned digests and no build args holding secrets | each `Dockerfile` | Image scan passes | 7 |
-| 3 | Add `.dockerignore` and a secret scan on the build context | CI | No secret in any layer | 4 |
-| 4 | Write the default-deny Compose network with per-service exceptions | `infra/compose/` | Parser cannot reach Postgres | 6 |
-| 5 | Add the ML and document profile: no DB route, no secrets, egress to an allow-list, resource limits | Compose profile | Profile test passes | 6 |
-| 6 | Run the model service on loopback and the private network only | Compose config | Public scan fails | 3 |
-| 7 | Enforce read-only root filesystems and tmpfs scratch on ML and parser containers | Compose | Write outside tmpfs fails | 5 |
-| 8 | Add resource limits: CPU, memory, PID count, file descriptors | Compose | A runaway process is killed | 4 |
-| 9 | Wire the egress proxy with an allow-list for model, parser and connector workloads | `infra/egress/` | Blocked host fails | 7 |
-| 10 | Prove no Docker socket or host path is mounted | Compose test | Mount check passes | 4 |
-| 11 | Build the Kubernetes manifests: Namespaces, NetworkPolicy, ResourceQuota, LimitRange | `infra/k8s/base/` | Manifest validation passes | 8 |
-| 12 | Apply Pod Security Admission with `restricted` and the documented exceptions | `infra/k8s/` | A privileged pod is rejected | 6 |
-| 13 | Add Kustomize overlays for `kind` and for the optional EKS target, over the base manifests | `infra/k8s/overlays/` | The kind overlay applies cleanly and differs from base only in overlay fields (spec:676, spec:709) | 5 |
-| 14 | Build the local `kind` cluster target with pinned node image | `infra/k8s/overlays/kind/` | `make kind-up` works from a clean checkout | 5 |
-| 15 | Add seccomp, capability dropping and `allowPrivilegeEscalation: false` | manifests | Scan passes | 5 |
-| 16 | Use external `SecretRef` files with least privilege and documented rotation | manifests | No secret in an env var | 6 |
-| 17 | Add non-root FSGroup, dedicated ServiceAccounts and token automount control | manifests | Default SA cannot read secrets | 5 |
-| 18 | Run a private registry with per-environment pull credentials and image signing | `infra/registry/` | Unsigned image is rejected | 6 |
-| 19 | Add multi-arch builds for amd64 and arm64 | CI | Both images build | 4 |
-| 20 | Add namespace isolation, bounded resources, service accounts and default-deny network policy to the kind cluster, per spec:833-845 | manifests | Every namespace enforces Restricted Pod Security and default-deny egress | 7 |
-| 21 | Add rolling deploys, preStop hooks and a version endpoint per service | manifests + services | Zero-downtime roll passes | 6 |
-| 22 | Re-run the P5 scope-lock red-team suite against the deployed kind services. Prove no code path or Kubernetes permission changes a workload spec. | `labs/lab09-proofs/` | The suite passes against the cluster, and a workload-spec edit attempt is denied (spec:709, spec:847) | 6 |
-| 23 | Set up Prometheus scrape annotations, OpenTelemetry sidecars and dashboards | `infra/observability/` | Metrics scrape succeeds | 5 |
-| 24 | Run Trivy, Grype and pip-audit in CI; fail on critical CVEs | CI config | A planted CVE fails the build | 5 |
-| 25 | Deliver curriculum lab 8: hardened Dockerfile passing the isolation checks | `labs/lab08/` | Non-root and no-egress tests pass | 5 |
-| 26 | Deliver curriculum lab 9: kind cluster with three namespaces and default-deny | `labs/lab09/` | A cross-namespace call fails | 6 |
-This build sequence sums to 140 hours.
-
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Write the hardened base image: non-root UID, read-only root, pinned digest | `infra/images/base/` | `USER` is non-zero |
+| 2 | Convert every Dockerfile to multi-stage with pinned digests and no build args holding secrets | each `Dockerfile` | Image scan passes |
+| 3 | Add `.dockerignore` and a secret scan on the build context | CI | No secret in any layer |
+| 4 | Write the default-deny Compose network with per-service exceptions | `infra/compose/` | Parser cannot reach Postgres |
+| 5 | Add the ML and document profile: no DB route, no secrets, egress to an allow-list, resource limits | Compose profile | Profile test passes |
+| 6 | Run the model service on loopback and the private network only | Compose config | Public scan fails |
+| 7 | Enforce read-only root filesystems and tmpfs scratch on ML and parser containers | Compose | Write outside tmpfs fails |
+| 8 | Add resource limits: CPU, memory, PID count, file descriptors | Compose | A runaway process is killed |
+| 9 | Wire the egress proxy with an allow-list for model, parser and connector workloads | `infra/egress/` | Blocked host fails |
+| 10 | Prove no Docker socket or host path is mounted | Compose test | Mount check passes |
+| 11 | Build the Kubernetes manifests: Namespaces, NetworkPolicy, ResourceQuota, LimitRange | `infra/k8s/base/` | Manifest validation passes |
+| 12 | Apply Pod Security Admission with `restricted` and the documented exceptions | `infra/k8s/` | A privileged pod is rejected |
+| 13 | Add Kustomize overlays for `kind` and for the optional EKS target, over the base manifests | `infra/k8s/overlays/` | The kind overlay applies cleanly and differs from base only in overlay fields (spec:676, spec:709) |
+| 14 | Build the local `kind` cluster target with pinned node image | `infra/k8s/overlays/kind/` | `make kind-up` works from a clean checkout |
+| 15 | Add seccomp, capability dropping and `allowPrivilegeEscalation: false` | manifests | Scan passes |
+| 16 | Use external `SecretRef` files with least privilege and documented rotation | manifests | No secret in an env var |
+| 17 | Add non-root FSGroup, dedicated ServiceAccounts and token automount control | manifests | Default SA cannot read secrets |
+| 18 | Run a private registry with per-environment pull credentials and image signing | `infra/registry/` | Unsigned image is rejected |
+| 19 | Add multi-arch builds for amd64 and arm64 | CI | Both images build |
+| 20 | Add namespace isolation, bounded resources, service accounts and default-deny network policy to the kind cluster, per spec:833-845 | manifests | Every namespace enforces Restricted Pod Security and default-deny egress |
+| 21 | Add rolling deploys, preStop hooks and a version endpoint per service | manifests + services | Zero-downtime roll passes |
+| 22 | Re-run the P5 scope-lock red-team suite against the deployed kind services. Prove no code path or Kubernetes permission changes a workload spec. | `labs/lab09-proofs/` | The suite passes against the cluster, and a workload-spec edit attempt is denied (spec:709, spec:847) |
+| 23 | Set up Prometheus scrape annotations, OpenTelemetry sidecars and dashboards | `infra/observability/` | Metrics scrape succeeds |
+| 24 | Run Trivy, Grype and pip-audit in CI; fail on critical CVEs | CI config | A planted CVE fails the build |
+| 25 | Deliver curriculum lab 8: hardened Dockerfile passing the isolation checks | `labs/lab08/` | Non-root and no-egress tests pass |
+| 26 | Deliver curriculum lab 9: kind cluster with three namespaces and default-deny | `labs/lab09/` | A cross-namespace call fails |
 
 ## Acceptance tests
 
@@ -69,7 +67,7 @@ This build sequence sums to 140 hours.
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Harden the base image and convert every Dockerfile to multi-stage.
 2. Write the default-deny Compose network and the ML profile.

@@ -19,29 +19,27 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Define the policy rule schema: actor, scope, sensitivity, target, blast radius, risk tier | policy service | Unknown field fails | 5 |
-| 2 | Encode per-action default policies for all 7 task families | `families.yaml` | Every family in `families.yaml` has a default rule, and a family with no rule fails validation | 6 |
-| 3 | Implement the decision endpoint returning `allow`, `deny` or `needs_approval` | policy service | Decision is deterministic for the same input | 6 |
-| 4 | Create the approval record bound to payload hash, user, target, expiry and nonce | policy schema | Any byte change invalidates it | 7 |
-| 5 | Implement single-use consumption with a race test | policy service | Two concurrent approvals, one wins | 6 |
-| 6 | Implement expiry and revocation | policy service | An expired or revoked grant fails the policy check. The domain services prove the same rule in P6 and P8 | 5 |
-| 7 | Build the grant-verification helper that domain services call. The inbox, calendar and job services consume it in P6 and P8. | policy service | A grant issued for another service fails | 7 |
-| 8 | Build the approval card API: target, data preview, permissions, consequence, expiry, hash. `09-inbox-calendar` and `12-jobs-agent` verify the live match in P6 and P8. | policy service | The card hash binds the preview, and a preview edited after hashing fails | 5 |
-| 9 | Support approve, reject, edit and expire outcomes | policy service | Edit re-hashes and re-routes to policy | 6 |
-| 10 | Implement the chat-approval policy: low-risk allow-list, payload binding, expiry and nonce checks | policy service | A high-risk payload is refused by the policy service with no channel involved | 5 |
-| 11 | Reject free-text approval at the policy boundary | policy service | A payload that carries free text instead of a bound action ID is refused | 4 |
-| 12 | Audit every allow and deny with policy version and correlation ID | audit service | Both outcomes recorded | 4 |
-| 13 | Add policy version to every decision and pin it in the grant | policy schema | A policy change invalidates old grants | 4 |
-| 14 | Implement bulk-action policy: no silent enable of new sources or applications | policy service | Batch test fails on escalation | 4 |
-| 15 | Add approval wait and expiry metrics | observability | Metric renders | 3 |
-
-This build sequence sums to 77 hours.
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Define the policy rule schema: actor, scope, sensitivity, target, blast radius, risk tier | policy service | Unknown field fails |
+| 2 | Encode per-action default policies for all 7 task families | `families.yaml` | Every family in `families.yaml` has a default rule, and a family with no rule fails validation |
+| 3 | Implement the decision endpoint returning `allow`, `deny` or `needs_approval` | policy service | Decision is deterministic for the same input |
+| 4 | Create the approval record bound to payload hash, user, target, expiry and nonce | policy schema | Any byte change invalidates it |
+| 5 | Implement single-use consumption with a race test | policy service | Two concurrent approvals, one wins |
+| 6 | Implement expiry and revocation | policy service | An expired or revoked grant fails the policy check. The domain services prove the same rule in P6 and P8 |
+| 7 | Build the grant-verification helper that domain services call. The inbox, calendar and job services consume it in P6 and P8. | policy service | A grant issued for another service fails |
+| 8 | Build the approval card API: target, data preview, permissions, consequence, expiry, hash. `09-inbox-calendar` and `12-jobs-agent` verify the live match in P6 and P8. | policy service | The card hash binds the preview, and a preview edited after hashing fails |
+| 9 | Support approve, reject, edit and expire outcomes | policy service | Edit re-hashes and re-routes to policy |
+| 10 | Implement the chat-approval policy: low-risk allow-list, payload binding, expiry and nonce checks | policy service | A high-risk payload is refused by the policy service with no channel involved |
+| 11 | Reject free-text approval at the policy boundary | policy service | A payload that carries free text instead of a bound action ID is refused |
+| 12 | Audit every allow and deny with policy version and correlation ID | audit service | Both outcomes recorded |
+| 13 | Add policy version to every decision and pin it in the grant | policy schema | A policy change invalidates old grants |
+| 14 | Implement bulk-action policy: no silent enable of new sources or applications | policy service | Batch test fails on escalation |
+| 15 | Add approval wait and expiry metrics | observability | Metric renders |
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Define the policy rule schema and encode the family defaults.
 2. Create the approval grant with payload-hash binding.

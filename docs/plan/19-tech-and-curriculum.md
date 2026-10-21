@@ -50,23 +50,21 @@ No MCP protocol appears in the spec. The tool contract is the fixed registry at 
 | 11 | Small-model agent benchmark on identical fixtures | `05-model-strategy` | P3 |
 | 12 | 500-employer directory import and pilot verification | `13-employer-registry` | P8 |
 
-Every lab still runs inside the NOVA repository. The owning module carries its hours and its test.
+Every lab still runs inside the NOVA repository. The owning module carries its test.
 
 ## Build sequence
 
-| # | Task | Artifact | Test | Hrs |
-|---|---|---|---|---|
-| 1 | Confirm each technology row against spec:421-438 | this file | No deviation without a design note | 4 |
-| 2 | Record version pins and licences for every dependency | `THIRD_PARTY.md` | Every entry names a licence | 4 |
-| 3 | Lab 1: contracts with OpenAPI and Pydantic fixtures | `labs/lab01/` | All six schemas validate a fixture | 5 |
-| 4 | Write source and design notes: every choice and every rejection with a reason | `docs/design-notes/` | Each rejected option has a reason | 5 |
-| 5 | Create the lab registry with all 12 labs. Each row has an owning module, a phase and a `planned` or `implemented` status. Add the CI workflow for the `implemented` rows. | `labs/registry.yaml` + `.github/workflows/labs.yml` | The registry has 12 rows, the workflow runs lab 1, and it fails when an `implemented` row has no runner | 4 |
-
-This build sequence sums to 22 hours.
+| # | Task | Artifact | Test |
+|---|---|---|---|
+| 1 | Confirm each technology row against spec:421-438 | this file | No deviation without a design note |
+| 2 | Record version pins and licences for every dependency | `THIRD_PARTY.md` | Every entry names a licence |
+| 3 | Lab 1: contracts with OpenAPI and Pydantic fixtures | `labs/lab01/` | All six schemas validate a fixture |
+| 4 | Write source and design notes: every choice and every rejection with a reason | `docs/design-notes/` | Each rejected option has a reason |
+| 5 | Create the lab registry with all 12 labs. Each row has an owning module, a phase and a `planned` or `implemented` status. Add the CI workflow for the `implemented` rows. | `labs/registry.yaml` + `.github/workflows/labs.yml` | The registry has 12 rows, the workflow runs lab 1, and it fails when an `implemented` row has no runner |
 
 ## Build order
 
-Work these steps in order. A step names tasks from the table above. At 40 hours per week a phase spans several weeks, so a step may run into the next week.
+Work these steps in order. A step names tasks from the table above.
 
 1. Confirm the technology table against spec:421-438 and record version pins.
 2. Write the source and design notes.
@@ -84,5 +82,5 @@ Work these steps in order. A step names tasks from the table above. At 40 hours 
 ## Risks
 
 - Labs drift from the code they teach. Build each lab from the real service code, not from a copy.
-- A lab scheduled before its owning module cannot run. The phase column above is binding; if a phase slips, its lab slips with it.
+- A lab scheduled before its owning module cannot run. The phase column above is binding; if a phase moves, its lab moves with it.
 - Parts of the comparison table go stale. Record a re-check date in `claims-ledger.md` before you rely on a row.

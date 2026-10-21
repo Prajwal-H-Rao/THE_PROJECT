@@ -4,10 +4,11 @@ Project map for THE_PROJECT. Read this first. Use it to target files instead of 
 
 ## Purpose
 
-This repo has two purposes.
+This repo has three purposes.
 
 1. It holds an OpenCode agent setup. The source of truth is `AGENT_CONFIG.md`. It lists the mandatory agent rules and the full skill manifest. The setup turns that manifest into working OpenCode configuration.
-2. It holds the NOVA build plan. The source of truth is `NOVA_Full_Updated_Spec.md`. `docs/plan/` turns that spec into an ordered build schedule.
+2. It holds the NOVA build plan. The source of truth is `NOVA_Full_Updated_Spec.md`. `docs/plan/` turns that spec into an ordered feature plan.
+3. It holds the NOVA monorepo tree. The source of truth is `NOVA_Full_Updated_Spec.md`. `nova/` holds the layout that the spec names. `nova/docs/layout-diff.md` records the difference between the spec catalogue and the spec layout.
 
 ## Layout
 
@@ -18,7 +19,9 @@ This repo has two purposes.
 - `changes/` — changelog entries. One file per change.
 - `NOVA_Full_Updated_Spec.md` — NOVA spec. Source of truth for all NOVA content. 1542 lines, 74 fence-aware headings.
 - `NOVA_Employer_Targets_500.csv` — seed employer registry. 500 rows: 250 `IN`, 250 `GLOBAL`.
-- `docs/plan/` — NOVA build plan. 24 files: index, schedule, claims ledger, coverage map, 20 module files. 372 tasks, 2000 base hours, 11 phases. Scheduled at 40 h/week with AI agents: 1271 agent hours, 1529 buffered. Release 1 (P1 to P4) lands 2027-01-01. Full scope lands 2027-07-10.
+- `docs/plan/` — NOVA build plan. 24 files: index, order-and-constraints, claims ledger, coverage map, 20 module files. 372 tasks, 11 phases. No dates and no hour estimates. The plan holds feature order and constraints only.
+- `nova/` — NOVA monorepo tree. 54 directories below the root, 44 leaf directories, 43 `.gitkeep` placeholders. `nova/docs/layout-diff.md` records the 10 catalogue-to-layout differences. `nova/tests/layout/` holds the checker for the tree and the record. It holds 18 modules.
+- `.gitignore` — repo root ignore file. Keeps the byte-code cache and the build output out of git.
 - `README.md` — repo readme. Present at the root, not covered elsewhere.
 
 Machine-global files live outside this repo:
@@ -81,3 +84,10 @@ Read any downloaded `SKILL.md` before you trust it. It is third-party agent inst
 - Stubs: 312. Unique IDs: 312. Nested `autoinvoke` flags: 312.
 - Global 266, local 45, project 1.
 - `AGENT_CONFIG.md`: 348 lines. sha256 `d31286006116d615390f3c56fafb67bfeffba017f8f4fc9ef160a9b84c645415`.
+
+## Verified tree counts (2026-10-21)
+
+- Tree: 54 directories below `nova/`, 44 leaf directories, 43 `.gitkeep` placeholders.
+- Catalogue: 23 entries. Deployable layout paths: 22. Exact name matches: 15.
+- Layout diff: 10 rows. 3 catalogue-only, 2 layout-only, 5 renamed.
+- Checker: 26 checks, 48 mutations, 2 acceptance scenarios.
