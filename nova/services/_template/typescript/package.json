@@ -1,0 +1,19 @@
+{
+  "name": "@nova/service-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The TypeScript service template. Copy it to a service directory.",
+  "type": "module",
+  "engines": {
+    "node": "22.23.4"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "start": "node dist/main.js",
+    "test": "node --test \"dist/test/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/node": "22.19.1",
+    "typescript": "5.9.3"
+  }
+}

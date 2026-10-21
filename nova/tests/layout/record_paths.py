@@ -49,6 +49,7 @@ def expected_groups(index):
         [tree_checks.CHECKER_DIRECTORY] + checker_modules(),
         [tree_checks.PLACEHOLDER_NAME],
         repo_files(),
+        [tree_checks.TEMPLATE_DIRECTORY],
     ]
 
 

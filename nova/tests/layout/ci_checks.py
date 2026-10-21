@@ -31,7 +31,20 @@ BYPASS_MARKERS = ("continue-on-error", "paths:")
 PROOF_MARKERS = ("type_error_proof.py", "-ne 1")
 
 # The commands that the workflow must carry.
-REQUIRED_COMMANDS = ("run: ruff check .", "run: mypy ")
+REQUIRED_COMMANDS = (
+    "run: ruff check .",
+    "run: mypy ",
+    "python -m pytest -q",
+    "npm ci",
+    "npm run build",
+    "npm test",
+)
+
+# The paths that the template commands must name.
+TEMPLATE_PATHS = (
+    "nova/services/_template/python",
+    "nova/services/_template/typescript",
+)
 
 # The scope of the typecheck in the workflow and in the config.
 MYPY_SCOPE = re.compile(r"mypy (\S+)")
@@ -82,6 +95,9 @@ def check_ci_workflow(repo_root):
     for command in REQUIRED_COMMANDS:
         if command not in code:
             problems.append("the CI workflow holds no command " + command.strip())
+    for path in TEMPLATE_PATHS:
+        if path not in text:
+            problems.append("the CI workflow does not test " + path)
     if PYTHON_VERSION not in text:
         problems.append("the CI workflow does not use Python " + PYTHON_VERSION)
     problems += trigger_problems(code)

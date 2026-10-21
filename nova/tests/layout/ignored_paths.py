@@ -41,10 +41,18 @@ IGNORED_FILE_SUFFIXES = (".pyc", ".pyo", ".tsbuildinfo")
 PACKAGE_ROOTS = ("services", "workers", "packages")
 WEB_ROOT = ("apps", "web")
 
+# The template roots. They hold the build output of the service templates.
+TEMPLATE_ROOTS = (
+    ("services", "_template", "python"),
+    ("services", "_template", "typescript"),
+)
+
 
 def is_output_root(parts):
     """Return True when the path parts name a package root."""
     if tuple(parts) == WEB_ROOT:
+        return True
+    if tuple(parts) in TEMPLATE_ROOTS:
         return True
     return len(parts) == 2 and parts[0] in PACKAGE_ROOTS
 
@@ -78,6 +86,7 @@ def scoped_pattern(name):
     return [
         "nova/apps/web/" + name + "/",
         "nova/services/*/" + name + "/",
+        "nova/services/_template/*/" + name + "/",
         "nova/workers/*/" + name + "/",
         "nova/packages/*/" + name + "/",
     ]
@@ -102,6 +111,7 @@ def sample_paths():
     for name in OUTPUT_NAMES:
         paths.append("nova/apps/web/" + name + "/")
         paths.append("nova/services/audit-service/" + name + "/")
+        paths.append("nova/services/_template/typescript/" + name + "/")
         paths.append("nova/workers/scheduler-worker/" + name + "/")
         paths.append("nova/packages/design-system/" + name + "/")
     paths += ["nova/" + name for name in IGNORED_FILES]

@@ -6,8 +6,8 @@ import ignored_paths
 EXTRA_DIRECTORY_PREFIXES = ("tests/layout", "labs", "db")
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 54
-EXPECTED_LEAVES = 44
+EXPECTED_DIRECTORIES = 61
+EXPECTED_LEAVES = 47
 EXPECTED_PLACEHOLDERS = 43
 
 # The header that every placeholder file holds.
@@ -21,6 +21,9 @@ DEFERRED_DIRECTORY = "infra/terraform/aws"
 
 # The directory that holds the checker modules.
 CHECKER_DIRECTORY = "tests/layout"
+
+# The directory that holds the service templates.
+TEMPLATE_DIRECTORY = "services/_template"
 
 
 def walk_directories(root):
