@@ -15,4 +15,4 @@ COPY app ./app
 RUN useradd --system --uid 10001 --no-create-home nova
 USER nova
 EXPOSE 8000
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "app:create_app()"]
+CMD gunicorn --bind 0.0.0.0:${NOVA_PORT:-8000} --workers 2 "app:create_app()"

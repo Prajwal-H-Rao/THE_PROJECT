@@ -55,7 +55,7 @@ The spec's 10-row matrix at line 792 is normative. Reproduce it as policy tests,
 | 14 | Add rate limiting and account lockout | gateway | Lockout triggers and recovers |
 | 15 | Encode the 10 matrix rows as policy tests, against the rule schema `08-policy-approval` builds in tasks 1-3, before module 07 | policy service | All 10 pass |
 | 16 | Verify no token or secret appears in logs or traces | log scan test | Scan is clean |
-| 17 | Implement RBAC roles `admin` and `user`, checked by the decision endpoint `08-policy-approval` builds in task 3 | identity + policy | A `user` role is denied on an admin-classified tool call (spec:237) |
+| 17 | Implement RBAC roles `admin`, `user` and `viewer`, checked by the decision endpoint `08-policy-approval` builds in task 3 | identity + policy | A `user` role is denied on an admin-classified tool call (spec:237) |
 | 18 | Terminate TLS outside localhost. Set HttpOnly and SameSite cookies. Add CSRF protection, a CORS allow-list and a content security policy. | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:789) |
 
 ## Build order

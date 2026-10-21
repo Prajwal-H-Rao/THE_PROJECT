@@ -50,7 +50,7 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 | 11 | Implement the SmartRecruiters posting adapter, tier-tolerant (C10) | connector | Missing tier returns `unsupported`, not an error |
 | 12 | Deliver curriculum lab 7: one permitted ATS source with a labelled ranking set, using the connector from task 8 | `labs/lab07/` | The ranking report renders from the labelled set |
 | 13 | Build the permitted-public-page extractor with structured data first, and gate enablement on a completed review record | connector | An enabled source row carries a `source_evidence_url` and a review timestamp |
-| 14 | Extend `employer_targets` and `employer_job_sources` from spec:590-625 on the P1 base schema `02-data-and-audit`. Add the service-owned opening, match and run tables. | migrations | Matches the spec SQL. Adds the five spec:564 fields the SQL omits: alternate names, remote preference, experience band, compensation preference and visa needs |
+| 14 | Extend `employer_targets` and `employer_job_sources` from spec:590-626 on the P1 base schema `02-data-and-audit`. Add the service-owned opening, match and run tables. | migrations | Matches the spec SQL. Adds the five spec:564 fields the SQL omits: alternate names, remote preference, experience band, compensation preference and visa needs |
 | 15 | Implement backoff, timeout, circuit breaker and per-source rate limits | worker | Breaker opens and recovers |
 | 16 | Implement the scheduled poll: 24h default, jitter, concurrency cap, ETag and Last-Modified | worker | No source exceeds its limit |
 | 17 | Build the run record: timing, HTTP status class, records seen/new/updated/closed, dedupe, error class, correlation ID | registry schema | No full HTML stored, no secrets stored |
@@ -62,7 +62,7 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 | 23 | Build the Jobs to Companies page: search, filters, counts from persisted records, pause/resume, history | web UI | Counts come from queries, not constants |
 | 24 | Deliver curriculum lab 12: seed import with the 250/250 assertion and 10 manual pilots | `labs/lab12/` | The import assertion passes and 10 pilots are marked verified |
 | 25 | Build saved filters and alerts: daily digest, urgent match, company priority and mute. Filter on role family, experience, city mode, work authorisation, salary band and keyword. | `jobs-service/filters/` | Each control round-trips and the digest job reads the saved set |
-## Acceptance criteria (spec:637-641)
+## Acceptance criteria (spec:637-642)
 
 - Exactly 500 distinct seed employer names: 250 `IN`, 250 `GLOBAL`, no duplicate `normalized_name`.
 - All 500 start as targets only. Poll no source until you have verified identity, URL and access mode, and marked the row `verified_permitted`.

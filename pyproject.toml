@@ -9,6 +9,6 @@ select = ["E", "F", "W", "I"]
 
 [tool.mypy]
 python_version = "3.12"
-files = ["nova/tests/layout"]
+files = ["nova"]
 ignore_missing_imports = true
 check_untyped_defs = true

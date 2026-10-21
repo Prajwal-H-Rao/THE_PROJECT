@@ -21,7 +21,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Define the MCP tool definition: `tool_id`, version, strict input and output, owning service, task family, scopes, risk tier, idempotency, verifier | `packages/contracts/mcp/` | Unknown field fails validation |
+| 1 | Register the tools against the MCP tool definition that `21-mcp-surface` wrote in task 1 | `packages/contracts/mcp/` | Unknown field fails validation |
 | 2 | Register 8 read-only tools: list inbox, read event, list tasks, search notes, list transactions, list openings, get profile, get audit | MCP tool catalogue | The catalogue rejects an unregistered tool |
 | 3 | Register 6 write tools: draft email, create event, create task, create note, import statement, draft application. Enumerate the full operation set for each of the 7 families per spec:195 | MCP tool catalogue | Each write tool carries a risk tier, and every family has an enumerated operation set |
 | 4 | Register 3 consequential tools: send email, submit application, connect account | MCP tool catalogue | Each forces an approval |

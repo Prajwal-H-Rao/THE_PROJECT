@@ -6,7 +6,7 @@ Phase P11. Spec headings: Non-Negotiable Security Invariants (Release Gate), Sug
 
 All ten security invariants pass by test or by an operator-reviewed record. Gates A to G sign in order through a machine-readable state file at P11, from the evidence each phase produced. No earlier phase signs a gate. No risky feature ships to meet a date.
 
-## The ten invariants (spec:1018-1026, binding)
+## The ten invariants (spec:1018-1027, binding)
 
 Spec:1016: "every item below must be demonstrated by automated test or an operator-reviewed test record."
 

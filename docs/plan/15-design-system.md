@@ -18,15 +18,15 @@ One token file drives both themes. Every component carries all of its specified 
 - Spec:419: "The design tokens are design recommendations to verify in the final Figma implementation, not claims that the Figma file was edited."
 - Spec:399: "each module implements each applicable state rather than a blank page or fake sample data" for empty, loading, offline and permission-denied.
 
-## Design token set (spec:253-276, 25 rows)
+## Design token set (spec:253-277, 25 rows)
 
 Dark and light values are both specified. Copy them; do not invent new keys.
 
 `--nova-bg`, `--nova-bg-sidebar`, `--nova-surface-1`, `--nova-surface-2`, `--nova-surface-3`, `--nova-text`, `--nova-text-muted`, `--nova-text-subtle`, `--nova-border`, `--nova-border-strong`, `--nova-primary`, `--nova-primary-hover`, `--nova-on-primary`, `--nova-secondary`, `--nova-success`, `--nova-warning`, `--nova-danger`, `--nova-info`, `--nova-pending`, `--nova-focus-ring`, `--nova-overlay`, `--nova-chart-1`, `--nova-chart-2`, `--nova-chart-3`, `--nova-chart-4`.
 
-The CSS block at spec:284-312 adds radii `--nova-radius-xs/sm/md/lg/xl/pill` and shadows `--nova-shadow-sm/md/lg`. The block omits the four chart keys. Take those from the colour table at spec:274-276. Spacing keys are `space-0` to `space-20` on a 4px base, not CSS custom properties in the block. Fonts are Inter and JetBrains Mono (spec:318).
+The CSS block at spec:284-313 adds radii `--nova-radius-xs/sm/md/lg/xl/pill` and shadows `--nova-shadow-sm/md/lg`. The block omits the four chart keys. Take those from the colour table at spec:274-277. Spacing keys are `space-0` to `space-20` on a 4px base, not CSS custom properties in the block. Fonts are Inter and JetBrains Mono (spec:318).
 
-## Agent UI states (spec:394-398)
+## Agent UI states (spec:394-399)
 
 Planning, Approval required, Executing, Verified success, Failed/uncertain, and Empty/loading/offline/permission-denied. Six states, not four.
 
@@ -34,11 +34,11 @@ Planning, Approval required, Executing, Verified success, Failed/uncertain, and 
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Copy the spec:284-312 CSS token block verbatim. Append the four chart keys from the spec:274-276 colour table, which the block omits. | `apps/web/styles/tokens.css` | The copied block matches spec:284-312 byte for byte, and the four `--nova-chart-*` keys carry both theme values |
+| 1 | Copy the spec:284-313 CSS token block verbatim. Append the four chart keys from the spec:274-277 colour table, which the block omits. | `apps/web/styles/tokens.css` | The copied block matches spec:284-313 byte for byte, and the four `--nova-chart-*` keys carry both theme values |
 | 2 | Build the theme switch with persistence and system preference | web app | Both themes render from the same keys |
 | 3 | Implement the 25-row token table as a typed token file | `tokens.ts` | Typed file has exactly 25 color keys |
-| 4 | Implement the 11 `type.*` tokens from spec:322-331, then the spec:334 rules on spacing, caps and tabular numerals | `typography.css` | All 11 tokens resolve, long-word overflow passes, and a money and a date value render with tabular numerals |
-| 5 | Implement spacing on the 4px base, then copy the layout dimension table from spec:340-359 | `spacing.css` | Spacing tokens are multiples of 4, and the layout values match spec:340-359 |
+| 4 | Implement the 11 `type.*` tokens from spec:322-332, then the spec:334 rules on spacing, caps and tabular numerals | `typography.css` | All 11 tokens resolve, long-word overflow passes, and a money and a date value render with tabular numerals |
+| 5 | Implement spacing on the 4px base, then copy the layout dimension table from spec:340-360 | `spacing.css` | Spacing tokens are multiples of 4, and the layout values match spec:340-360 |
 | 6 | Build Button with all variants and states: default, hover, active, focus-visible, loading, disabled | `components/Button/` | Focus-visible present on every control |
 | 7 | Build TextField, TextArea, Select, Combobox with invalid, read-only and no-results states | `components/` | `aria-describedby` links the error |
 | 8 | Build Card, Badge, Tabs, Dialog, Drawer, DataTable, Timeline with specified states | `components/` | Dialog traps focus and closes safely |
@@ -65,9 +65,9 @@ Work these steps in order. A step names tasks from the table above.
 
 ## Acceptance tests
 
-- `test_token_diff_empty` — the block copied from spec:284-312 matches byte for byte, and the four chart keys from spec:274-276 are present.
+- `test_token_diff_empty` — the block copied from spec:284-313 matches byte for byte, and the four chart keys from spec:274-277 are present.
 - `test_typed_token_file_has_25_keys` — the count is 25, not 24 or 26.
-- `test_spacing_base_is_4px` — every value in `spacing.css` is a multiple of 4, and the layout dimension table matches spec:340-359.
+- `test_spacing_base_is_4px` — every value in `spacing.css` is a multiple of 4, and the layout dimension table matches spec:340-360.
 - `test_focus_visible_on_every_control` — a crawl finds no interactive element without `:focus-visible`.
 - `test_status_not_color_alone` — each status carries an icon or a text label.
 - `test_no_unverified_done` — the success state never renders before the verifier passes.

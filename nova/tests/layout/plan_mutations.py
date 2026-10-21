@@ -16,6 +16,10 @@ REGISTRY_ROW = "docs/plan/13-employer-registry.md"
 REGISTRY_TEXT = "`services/employer-registry-service/import/`"
 REGISTRY_CHANGE = "`services/employer-registry-service/importer/`"
 
+# The plan rows that the citation mutations touch.
+ARCHITECTURE_ROW = "docs/plan/01-architecture.md"
+RUNTIME_ROW = "docs/plan/03-agent-runtime.md"
+
 
 def plan_service_count(work):
     """Change the service count that the plan states."""
@@ -40,6 +44,19 @@ def weaken_service_requirement(work):
 def rename_owned_artifact(work):
     """Rename a plan artifact to a longer path with the same prefix."""
     return replace_plan(work, REGISTRY_ROW, REGISTRY_TEXT, REGISTRY_CHANGE)
+
+
+def narrow_range(work):
+    """Drop the last line of a range citation in the plan."""
+    return replace_plan(work, ARCHITECTURE_ROW, "spec:727-749", "spec:727-748")
+
+
+def rename_quoted_word(work):
+    """Rename a word inside a quoted spec string in the plan."""
+    return replace_plan(
+        work, RUNTIME_ROW,
+        "The model is never permitted to choose arbitrary URLs",
+        "The model is never permitted to choose random URLs")
 
 
 def replace_plan(work, relative, old, new):

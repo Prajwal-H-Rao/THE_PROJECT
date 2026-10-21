@@ -38,12 +38,12 @@ jobs:
         run: ruff check .
 
       - name: Typecheck the Python code
-        run: mypy nova/tests/layout
+        run: mypy nova
 
       - name: Test the Python service template
         run: |
           python -m pip install --disable-pip-version-check -r nova/services/_template/python/requirements.txt -r nova/services/_template/python/requirements-dev.txt
-          cd nova/services/_template/python && python -m pytest -q
+          cd nova/services/_template/python && python -m compileall -q app && python -m pytest -q
 
       - name: Build and test the TypeScript service template
         run: |
@@ -57,7 +57,7 @@ jobs:
           proof=nova/tests/layout/type_error_proof.py
           printf 'def proof():\n    total: int = "twelve"\n    return total\n' > "$proof"
           set +e
-          output=$(mypy nova/tests/layout 2>&1)
+          output=$(mypy nova 2>&1)
           status=$?
           set -e
           rm -f "$proof"

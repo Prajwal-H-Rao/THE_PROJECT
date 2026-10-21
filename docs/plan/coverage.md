@@ -13,18 +13,18 @@ The first module column names the primary owner.
 | 12 | Architectural rules | `01-architecture` |
 | 25 | Logical architecture | `01-architecture` |
 | 67 | Request lifecycle | `03-agent-runtime` |
-| 77 | Service communication | `01-architecture`, `07-identity-authz` |
+| 77 | Service communication | `01-architecture`, `07-identity-authz`, `21-mcp-surface` |
 | 86 | Data Model (Schema Examples) | `02-data-and-audit` |
 | 143 | System Components | `01-architecture` |
 | 145 | Agent Runtime, MCP Surface & Tool Catalogue | `03-agent-runtime`, `21-mcp-surface` |
 | 169 | Agent workflow and execution policy | `03-agent-runtime`, `08-policy-approval` |
 | 177 | Scope Lock, Anti-Jailbreak and Allowed-Task Enforcement | `04-scope-lock` |
-| 183 | Allowed task families | `04-scope-lock`, `09-inbox-calendar`, `10-tasks-notes`, `11-finance-trips`, `12-jobs-agent` |
+| 183 | Allowed task families | `04-scope-lock`, `09-inbox-calendar`, `10-tasks-notes`, `11-finance-trips`, `12-jobs-agent`, `21-mcp-surface` |
 | 197 | Enforcement layers (all required) | `04-scope-lock` |
 | 210 | Operations that must never be exposed as agent tools | `04-scope-lock` |
 | 214 | Required red-team acceptance suite | `04-scope-lock`, `18-release-gate` |
 | 218 | Integrations and External APIs | `09-inbox-calendar`, `11-finance-trips`, `12-jobs-agent` |
-| 233 | Security & Access Control | `07-identity-authz` (RBAC roles, HTTPS), `20-pages-and-automations` (admin plane) |
+| 233 | Security & Access Control | `07-identity-authz` (RBAC roles, HTTPS), `20-pages-and-automations` (admin plane), `21-mcp-surface` (MCP server checks) |
 | 243 | UI/UX Design Specification | `15-design-system` |
 | 247 | Design tokens (source of truth) | `15-design-system` |
 | 281 | CSS tokens | `15-design-system` |
@@ -54,7 +54,7 @@ The first module column names the primary owner.
 | 631 | Dashboard and service behavior | `13-employer-registry`, `15-design-system` |
 | 635 | Acceptance criteria (registry) | `13-employer-registry` |
 | 644 | Implementation & Learning Curriculum | `19-tech-and-curriculum` |
-| 683 | Curriculum order and practical labs | `19-tech-and-curriculum` |
+| 683 | Curriculum order and practical labs | `19-tech-and-curriculum`, `21-mcp-surface` |
 | 699 | Roadmap & Milestones | `README.md`, `18-release-gate` |
 | 721 | Microservice Catalogue, Contracts and Ownership | `01-architecture`, all domain modules |
 | 751 | Example API and event conventions | `02-data-and-audit` |
@@ -99,14 +99,14 @@ Four headings hold data, not prose. Do not copy the rows into a plan file. Refer
 | Content | Line | Owner |
 |---|---|---|
 | Revision date | 3 | `19-tech-and-curriculum` |
-| Revision note (supersedes modular monolith and FastAPI) | 1007 | `19-tech-and-curriculum` |
+| Revision note (supersedes modular monolith and FastAPI) | 1011 | `19-tech-and-curriculum` |
 | Status | 4 | `README.md` |
 | Executive Summary | 6 | `README.md` |
-| Suggested delivery gates A to G | 713 | `README.md`, `18-release-gate` |
-| Evaluation metrics | 715 | `order-and-constraints.md`, `18-release-gate` |
-| Compose local layout rules | 970 | `01-architecture`, `17-deployment-hardening` |
-| Audit redaction rules | 903 | `02-data-and-audit`, `16-reliability-testing` |
-| 4K context rule and docker.sock ban on the model container | 496 | `05-model-strategy` |
-| Kubernetes acceptance gate | 847 | `17-deployment-hardening` |
-| Appendix B preamble (list is not a ranking) | 1028 | `13-employer-registry` |
-| Optional cloud lab rule | 691, 710 | `order-and-constraints.md` (deferred, with reason) |
+| Suggested delivery gates A to G | 717 | `README.md`, `18-release-gate` |
+| Evaluation metrics | 719 | `order-and-constraints.md`, `18-release-gate` |
+| Compose local layout rules | 974 | `01-architecture`, `17-deployment-hardening` |
+| Audit redaction rules | 907 | `02-data-and-audit`, `16-reliability-testing` |
+| 4K context rule and docker.sock ban on the model container | 499 | `05-model-strategy` |
+| Kubernetes acceptance gate | 851 | `17-deployment-hardening` |
+| Appendix B preamble (list is not a ranking) | 1032 | `13-employer-registry` |
+| Optional cloud lab rule | 694, 714 | `order-and-constraints.md` (deferred, with reason) |

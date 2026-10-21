@@ -55,6 +55,7 @@ The spec is explicit: prompt-level refusal is not the control. Narrow capability
 | 17 | Wire the suite into CI with a re-run trigger on model, prompt, schema, connector, dependency, policy or infrastructure change | CI config | A planted change to any listed input triggers a rerun |
 | 18 | Log denial reason codes and count them as a metric | observability | Denial rate alert fires |
 | 19 | Add the PII exfiltration attempt case from spec:871 | red-team suite | The attempt returns a denial and leaks no data |
+| 20 | Put the MCP surface inside the scope lock allow-list. The surface arrives from `21-mcp-surface` in P5 | `04-scope-lock` | A new tool family is refused until it is registered |
 
 ## Build order
 

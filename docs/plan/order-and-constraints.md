@@ -7,7 +7,7 @@ Order and constraints for `NOVA_Full_Updated_Spec.md`. The spec is the source of
 A phase may start only when its modules' inputs exist. Nine ordering rules apply:
 
 1. The design system at P4 must precede the domain pages at P6 to P9. Otherwise each domain page rebuilds tokens and components.
-2. Each curriculum lab runs in the phase that owns its artifact. `19-tech-and-curriculum.md` names that phase for all 12 labs.
+2. Each curriculum lab runs in the phase that owns its artifact. `19-tech-and-curriculum.md` names that phase for all 13 labs.
 3. A module task may name an artifact a later phase builds. When that happens the task targets a stub, a policy object or a local runtime config. It never waits for the later service. Each such row says so in its own words.
 4. Two modules in one phase may interleave when each owns half of one workflow. `12-jobs-agent` and `13-employer-registry` do. Neither module waits for the other to finish. Work them in this order:
    - `12` tasks 1 to 7, the jobs service.

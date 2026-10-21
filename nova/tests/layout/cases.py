@@ -72,6 +72,8 @@ MUTATIONS = [
     ("AA", "gutted proof step", ci_mutations.gut_proof_step),
     ("AA", "typecheck scope drift", ci_mutations.drift_typecheck_scope),
     ("AA", "proof scope drift", ci_mutations.proof_scope_drift),
+    ("AB", "narrowed range citation", plan_mutations.narrow_range),
+    ("AB", "renamed quoted word", plan_mutations.rename_quoted_word),
 ]
 
 # The scenarios name the changes that the checks must accept.

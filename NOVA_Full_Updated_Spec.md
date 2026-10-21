@@ -62,7 +62,7 @@ flowchart TB
   AGENT --> REDIS[(Redis: cache, locks, queues)]
 ```
 
-This diagram is a logical map; external integrations should be called only by their owning adapters. Every external action reaches its owning service through that service's MCP server. Model/inference workers receive bounded jobs and return candidate outputs; policy and domain services remain authoritative for permissions and outcomes.
+This diagram is a logical map; external integrations should be called only by their owning adapters. Every external action reaches its owning service through that service's MCP server. The MCP surface is the set of servers that the owning services run. It is not a separate process. Model/inference workers receive bounded jobs and return candidate outputs; policy and domain services remain authoritative for permissions and outcomes.
 
 ### Request lifecycle
 
@@ -81,7 +81,7 @@ This diagram is a logical map; external integrations should be called only by th
 - Authenticate every service-to-service call with workload identity: prefer mutual TLS where available and/or short-lived signed service tokens with strict issuer, audience, expiry, subject and scope validation. A user token is not a service identity. Services do not trust caller-supplied `user_id` without checking it against verified claims and resource ownership.
 - Apply network segmentation and egress policy so each service can contact only its required dependencies. Keep model workers on a separate network with no direct DB route and default-deny outbound network access.
 - In the MVP, implement service JWTs or mTLS-compatible identities in middleware with clear rotation; for AWS, use task-specific IAM roles for AWS APIs rather than static AWS keys. Containers must still be isolated and configured with least privilege.
-- External actions reach their owning service through that service's MCP server. The MCP server validates the tool arguments, checks the caller's service identity and scope, and records the decision in the audit trail.
+- External actions reach their owning service through that service's MCP server. The MCP server validates the tool arguments, checks the caller's service identity and scope, validates the action grant and the acting user's role, and records the decision in the audit trail. A write without a valid grant fails.
 
 ## Data Model (Schema Examples)
 

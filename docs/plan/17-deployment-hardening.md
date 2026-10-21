@@ -34,7 +34,7 @@ Docker Compose is the MVP runtime. Kubernetes is the local target. Model and par
 | 6 | Run the model service on loopback and the private network only | Compose config | Public scan fails |
 | 7 | Enforce read-only root filesystems and tmpfs scratch on ML and parser containers | Compose | Write outside tmpfs fails |
 | 8 | Add resource limits: CPU, memory, PID count, file descriptors | Compose | A runaway process is killed |
-| 9 | Wire the egress proxy with an allow-list for model, parser and connector workloads | `infra/egress/` | Blocked host fails |
+| 9 | Wire the egress proxy with an allow-list for model, parser, connector and browser worker workloads | `infra/egress/` | Blocked host fails |
 | 10 | Prove no Docker socket or host path is mounted | Compose test | Mount check passes |
 | 11 | Build the Kubernetes manifests: Namespaces, NetworkPolicy, ResourceQuota, LimitRange | `infra/k8s/base/` | Manifest validation passes |
 | 12 | Apply Pod Security Admission with `restricted` and the documented exceptions | `infra/k8s/` | A privileged pod is rejected |
@@ -45,7 +45,7 @@ Docker Compose is the MVP runtime. Kubernetes is the local target. Model and par
 | 17 | Add non-root FSGroup, dedicated ServiceAccounts and token automount control | manifests | Default SA cannot read secrets |
 | 18 | Run a private registry with per-environment pull credentials and image signing | `infra/registry/` | Unsigned image is rejected |
 | 19 | Add multi-arch builds for amd64 and arm64 | CI | Both images build |
-| 20 | Add namespace isolation, bounded resources, service accounts and default-deny network policy to the kind cluster, per spec:837-848 | manifests | Every namespace enforces Restricted Pod Security and default-deny egress |
+| 20 | Add namespace isolation, bounded resources, service accounts and default-deny network policy to the kind cluster, per spec:837-849 | manifests | Every namespace enforces Restricted Pod Security and default-deny egress |
 | 21 | Add rolling deploys, preStop hooks and a version endpoint per service | manifests + services | Zero-downtime roll passes |
 | 22 | Re-run the P5 scope-lock red-team suite against the deployed kind services. Prove no code path or Kubernetes permission changes a workload spec. | `labs/lab09-proofs/` | The suite passes against the cluster, and a workload-spec edit attempt is denied (spec:713, spec:851) |
 | 23 | Set up Prometheus scrape annotations, OpenTelemetry sidecars and dashboards | `infra/observability/` | Metrics scrape succeeds |

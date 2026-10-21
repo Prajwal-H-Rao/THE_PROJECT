@@ -10,6 +10,7 @@ Land module 01 task 3. Write the service skeleton template. The template must bu
 - Added `nova/services/_template/typescript/`. It holds the settings, the health endpoints, the service, the process entry point, a test that serves `/health/live`, a lock file, a `tsconfig.json` and a Dockerfile.
 - The Python template runs under gunicorn. The spec forbids `flask run`.
 - Each template test drives the real service. The Python test binds a socket and calls the endpoint over HTTP. The TypeScript test starts the server on an ephemeral port and calls it with `fetch`.
+- The CI workflow compiles the Python template before it runs the test, so the plan test that the template builds and serves the endpoint holds on both stacks.
 - The Python template pins every runtime dependency and every test dependency.
 - The TypeScript template uses the Node built-in HTTP server and the Node test runner. The only dependencies are the compiler and the Node types.
 - The TypeScript template compiles with `strict`, `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.
@@ -38,9 +39,9 @@ Land module 01 task 3. Write the service skeleton template. The template must bu
 - `npm run build` in the TypeScript template compiles. `npm test` passes four tests.
 - A mutation that stops the TypeScript service from answering the health path fails two tests.
 - `ruff check .` passes over the whole repository, the template included.
-- `mypy nova/tests/layout` passes on the 21 checker modules.
-- `python3 nova/tests/layout/check_layout.py` passes all 27 checks.
-- `python3 nova/tests/layout/test_layout_checks.py` rejects all 64 mutations. The four acceptance scenarios pass.
+- `mypy nova` passes on the 27 Python modules, the template included.
+- `python3 nova/tests/layout/check_layout.py` passes all 28 checks.
+- `python3 nova/tests/layout/test_layout_checks.py` rejects all 66 mutations. The four acceptance scenarios pass.
 - The tree counts stay at 61 directories, 47 leaf directories and 43 placeholders.
 
 ## Open items

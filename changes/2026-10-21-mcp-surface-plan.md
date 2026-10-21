@@ -6,7 +6,7 @@ Expose every external action through an MCP server. The MCP surface carries its 
 
 ## What changed
 
-- Added `docs/plan/21-mcp-surface.md`. The module holds 14 tasks. Its first task writes the MCP surface contract. Its second task builds the server library. Its third task builds the client. Its fourth task adds the roles. No MCP server exists before the contract and the authorization exist.
+- Added `docs/plan/21-mcp-surface.md`. The module holds 15 tasks. Its first task writes the MCP surface contract. Its second task builds the server library. Its third task makes the server validate the action grant and the acting user's role. Its fourth task builds the client. Its fifth task adds the roles. No MCP server exists before the contract and the authorization exist.
 - The new module owns the MCP tool catalogue, the roles, the approval binding, the audit, the bounded fetch tool, the browser worker and the per-service MCP servers.
 - `docs/plan/03-agent-runtime.md`: the title and the first four tasks now use the MCP tool definition and the MCP tool catalogue. The build order follows. A new acceptance test states that the orchestrator reaches a tool only through the MCP client.
 - `docs/plan/19-tech-and-curriculum.md`: the rule that forbade MCP is gone. The file now records the deviation and names the module that owns the surface. The test `test_tool_contract_is_registry_not_mcp` is replaced by `test_mcp_surface_is_scoped_and_authorized` and `test_mcp_deviation_has_a_design_note`. The design-note task names the deviation.
@@ -20,7 +20,7 @@ Expose every external action through an MCP server. The MCP surface carries its 
 ## Design decisions
 
 - MCP replaces the registry. The registry fields at spec:500 move onto the MCP tool definition. The checks of module 03 and module 04 move onto the MCP side.
-- The spec was not edited in this change. The later change `2026-10-21-spec-mcp-surface.md` edits it and remaps every citation. The deviation is also recorded in `docs/design-notes/`.
+- The spec was not edited in this change. The later change `2026-10-21-spec-mcp-surface.md` edits it and remaps every citation. The change is also recorded in `docs/design-notes/`.
 - The browser stays bounded. spec:501 forbids a generic browser tool, so the fetch tool reaches an allow-list of domains and the browser worker renders allow-listed pages only. It holds no credential.
 - The roles live in the policy service. Module 07 task 17 already defines `admin` and `user`. The new module adds `viewer` and maps each tool to the roles that may call it.
 - One MCP server per service. The permission boundary stays the service boundary, and a provider credential never leaves its owner.
@@ -30,9 +30,9 @@ Expose every external action through an MCP server. The MCP surface carries its 
 
 ## Verification
 
-- The task count is 386 across 21 module files. The phase counts match the task tables.
-- `python3 nova/tests/layout/check_layout.py` passes all 27 checks.
-- `python3 nova/tests/layout/test_layout_checks.py` rejects all 64 mutations. The four acceptance scenarios pass.
+- The task count is 388 across 21 module files. The phase counts match the task tables.
+- `python3 nova/tests/layout/check_layout.py` passes all 28 checks.
+- `python3 nova/tests/layout/test_layout_checks.py` rejects all 66 mutations. The four acceptance scenarios pass.
 - Every plan file stays under 200 lines.
 
 ## Open items

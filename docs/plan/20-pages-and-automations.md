@@ -39,7 +39,7 @@ Build the six pages the design spec names and no other module owns. Run automati
 | 14 | Show token-expiry and error explanations on each provider card | integrations UI | Expiry warning renders before failure |
 | 15 | Build the Activity & Security page: filterable audit timeline, session list, channel identities, alerts | `apps/web/activity/` | Timeline filters by actor and policy result |
 | 16 | Build the Settings page: profile, timezone, locale, appearance, retention, model selection, notifications, 2FA, export, delete | `apps/web/settings/` | Export and delete each complete a full cycle |
-| 17 | Apply the P2 RBAC roles from `07-identity-authz` to every page route and to the privileged Activity and Security endpoints | web UI + policy | A `user` role receives a 403 from each privileged endpoint |
+| 17 | Apply the P2 RBAC roles from `07-identity-authz` to every page route and to the privileged Activity and Security endpoints | web UI + policy | A `viewer` role receives a 403 from each write route, and a `user` role receives a 403 from each privileged endpoint |
 | 18 | Place the privileged Activity and Security endpoints behind the P5 network rule and separate them in the UI | network rule + UI | No chat path reaches a privileged endpoint |
 | 19 | Expose component variants in Storybook | `.storybook/` | Storybook builds in CI |
 | 20 | Add Storybook interaction tests for the approval card and automation card | Storybook tests | Both tests fail when the card breaks |

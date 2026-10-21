@@ -36,7 +36,7 @@ def remove_typecheck_step(work):
     """Remove the typecheck step from the CI workflow."""
     return replace_in_work(
         work, WORKFLOW,
-        "      - name: Typecheck the Python code\n        run: mypy nova/tests/layout\n",
+        "      - name: Typecheck the Python code\n        run: mypy nova\n",
         "")
 
 
@@ -90,7 +90,7 @@ def drift_typecheck_scope(work):
     """Make the workflow typecheck a path that the config does not hold."""
     return replace_in_work(
         work, WORKFLOW,
-        "        run: mypy nova/tests/layout\n",
+        "        run: mypy nova\n",
         "        run: mypy nova/services\n")
 
 
@@ -98,8 +98,8 @@ def proof_scope_drift(work):
     """Make the proof step typecheck another scope than the gate."""
     return replace_in_work(
         work, WORKFLOW,
-        "output=$(mypy nova/tests/layout 2>&1)",
-        "output=$(mypy nova 2>&1)")
+        "output=$(mypy nova 2>&1)",
+        "output=$(mypy nova/services 2>&1)")
 
 
 def comment_bypass(work):
@@ -114,9 +114,9 @@ def widen_typecheck_scope(work):
     """Widen the typecheck scope in the workflow and in the config."""
     if not replace_in_work(
         work, WORKFLOW,
-        "        run: mypy nova/tests/layout\n",
-        "        run: mypy nova\n"):
+        "        run: mypy nova\n",
+        "        run: mypy nova/services\n"):
         return False
-    replace_in_work(work, WORKFLOW, "output=$(mypy nova/tests/layout", "output=$(mypy nova")
+    replace_in_work(work, WORKFLOW, "output=$(mypy nova 2>&1)", "output=$(mypy nova/services 2>&1)")
     return replace_in_work(
-        work, CONFIG, 'files = ["nova/tests/layout"]', 'files = ["nova"]')
+        work, CONFIG, 'files = ["nova"]', 'files = ["nova/services"]')

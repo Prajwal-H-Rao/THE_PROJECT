@@ -17,7 +17,7 @@ This module interleaves with `13-employer-registry` inside P8. See rule 4 in `or
 - Spec:531: status moves "only from user input or source evidence."
 - Spec:719: "Do not claim a fixed matching false-positive target before building a representative evaluation set."
 
-## Flow (spec:521-530, 11 steps)
+## Flow (spec:521-531, 11 steps)
 
 1. Upload and quarantine: file object ID, SHA-256, type/size/page limits, malware scan where tooling is available, sandboxed parse.
 2. Extract: the parser returns text with page, paragraph, table and character-span provenance. Candidate fields carry `source_ref`, method and confidence.
@@ -38,7 +38,7 @@ This module interleaves with `13-employer-registry` inside P8. See rule 4 in `or
 | Listing lifecycle, dedupe, filters, ranking, drafts, application state | `jobs-service` | Spec:734 |
 | 500-employer registry, source status, polling schedules | `employer-registry-service` | See `13-employer-registry` |
 | ATS, feed and public-page adapters, incremental polling | `job-source-worker` | Spec:736 |
-| `resume_profile`, `job_listing`, `job_match`, `application_draft`, `application_submission` | `jobs-service` | Spec:535-538 |
+| `resume_profile`, `job_listing`, `job_match`, `application_draft`, `application_submission` | `jobs-service` | Spec:535-539 |
 
 ## Build sequence
 
@@ -65,7 +65,7 @@ This module interleaves with `13-employer-registry` inside P8. See rule 4 in `or
 | 19 | Build the Resume and Job Search page: upload, version history, profile, job cards, rationale, checklist, drafts, approval queue and status history | web UI | Playwright flow passes |
 | 20 | Add export, deletion and provider-revoke for resume and application records | job service | Export contains every user row |
 | 21 | Complete curriculum lab 2 with the React review view beside the supporting text | `labs/lab02/` | A field shows its source span, and an unknown field stays unknown |
-## Acceptance criteria (spec:548-553)
+## Acceptance criteria (spec:548-554)
 
 - Uploaded documents cannot access host secrets, network or DB, and cannot execute active content.
 - Every extracted material fact is source-linked or marked unknown or needs review.
