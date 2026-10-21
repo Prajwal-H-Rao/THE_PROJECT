@@ -8,14 +8,14 @@ Two channels carry reading, notifications, confirmations and low-risk approvals.
 
 ## Constraints (spec, binding)
 
-- Spec:756: "Treat each messaging service as a **channel adapter**, not as identity authority. Channels are optional views into the same policy-controlled agent; they do not receive extra permissions because a message arrives from a phone."
-- Spec:760: configure "a high-entropy `secret_token`" and "Validate the `X-Telegram-Bot-Api-Secret-Token` header and accept only expected update types."
-- Spec:761: "Record Telegram `update_id` and message/callback identifiers for deduplication. Return promptly after durable queueing."
-- Spec:762: "Never bind a Telegram numeric ID to a NOVA account merely because it states an email or username."
-- Spec:763: "Outbound callbacks/buttons are untrusted requests; verify actor, action ID, expiry, nonce and exact action hash server-side."
-- Spec:768: "verify webhook authenticity using the provider's currently documented signature procedure over the raw request body and the configured app secret, using constant-time comparison."
-- Spec:769: "Deduplicate inbound message IDs and status events; process retries idempotently; enforce per-user/provider rate limits, opt-in/consent and outbound message policies."
-- Spec:770: "Phone possession is not proof of NOVA account ownership on its own."
+- Spec:760: "Treat each messaging service as a **channel adapter**, not as identity authority. Channels are optional views into the same policy-controlled agent; they do not receive extra permissions because a message arrives from a phone."
+- Spec:764: configure "a high-entropy `secret_token`" and "Validate the `X-Telegram-Bot-Api-Secret-Token` header and accept only expected update types."
+- Spec:765: "Record Telegram `update_id` and message/callback identifiers for deduplication. Return promptly after durable queueing."
+- Spec:766: "Never bind a Telegram numeric ID to a NOVA account merely because it states an email or username."
+- Spec:767: "Outbound callbacks/buttons are untrusted requests; verify actor, action ID, expiry, nonce and exact action hash server-side."
+- Spec:772: "verify webhook authenticity using the provider's currently documented signature procedure over the raw request body and the configured app secret, using constant-time comparison."
+- Spec:773: "Deduplicate inbound message IDs and status events; process retries idempotently; enforce per-user/provider rate limits, opt-in/consent and outbound message policies."
+- Spec:774: "Phone possession is not proof of NOVA account ownership on its own."
 - Claim C12: WhatsApp signature is `X-Hub-Signature-256`, HMAC-SHA256 over the raw body, `sha256=` prefix.
 
 ## Build sequence

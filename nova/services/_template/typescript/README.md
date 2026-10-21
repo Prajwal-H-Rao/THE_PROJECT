@@ -27,4 +27,5 @@ npm run build
 ```
 
 The build is the typecheck. The compiler runs with `strict` and the build fails on a type error.
-The CI workflow runs the same commands.
+The CI workflow runs the build and the test. The test starts the real server on an ephemeral
+port and calls the health endpoint over HTTP.

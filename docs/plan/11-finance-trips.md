@@ -8,11 +8,11 @@ Import, categorise and review transactions with evidence. Compute totals in code
 
 ## Constraints (spec, binding)
 
-- Spec:822: "Use deterministic arithmetic for finance totals, scoring hard filters, due-time scheduling, currency/date conversion, permission decisions and job-application state transitions. Models may summarize these values but cannot be their source of truth."
-- Spec:188: finance family covers "import statements, normalize transactions, categorize, budget and summarize spending; no movement of money or financial transfers."
-- Spec:799: "Review ambiguous/large imports; never trust model sums alone."
-- Spec:737: finance-service keeps "import parser isolated; no bank credentials in model prompts."
-- Spec:409: trips show "Unconfirmed prices/times marked estimates; purchases require approval/manual checkout unless official authorized purchase integration exists."
+- Spec:826: "Use deterministic arithmetic for finance totals, scoring hard filters, due-time scheduling, currency/date conversion, permission decisions and job-application state transitions. Models may summarize these values but cannot be their source of truth."
+- Spec:190: finance family covers "import statements, normalize transactions, categorize, budget and summarize spending; no movement of money or financial transfers."
+- Spec:803: "Review ambiguous/large imports; never trust model sums alone."
+- Spec:741: finance-service keeps "import parser isolated; no bank credentials in model prompts."
+- Spec:411: trips show "Unconfirmed prices/times marked estimates; purchases require approval/manual checkout unless official authorized purchase integration exists."
 
 ## Build sequence
 
@@ -34,8 +34,8 @@ Import, categorise and review transactions with evidence. Compute totals in code
 | 14 | Implement route and fare estimation with a provider adapter | `services/trips-service/` | Estimates are labelled |
 | 15 | Implement itinerary draft, packing list and a pre-departure checklist | trip service | Checklist is deterministic |
 | 16 | Gate booking actions behind an approval grant | policy + trip service | Booking without approval fails |
-| 17 | Build the Finance and Trips page: period selector, net and cash-flow cards, category chart, import provenance and review queue. Trips add a map with stops, a route timeline, transport options and booking links. | `apps/web/finance/` | The chart renders from stored transactions. Every import shows its provenance. Booking links carry an estimate label (spec:408, spec:409). |
-| 18 | Register the trips operations with the policy layer: argument schema, resource scope, risk tier, quota and verifier (spec:193) | policy service | A trips call with an unregistered argument is rejected |
+| 17 | Build the Finance and Trips page: period selector, net and cash-flow cards, category chart, import provenance and review queue. Trips add a map with stops, a route timeline, transport options and booking links. | `apps/web/finance/` | The chart renders from stored transactions. Every import shows its provenance. Booking links carry an estimate label (spec:410, spec:411). |
+| 18 | Register the trips operations with the policy layer: argument schema, resource scope, risk tier, quota and verifier (spec:195) | policy service | A trips call with an unregistered argument is rejected |
 
 ## Build order
 

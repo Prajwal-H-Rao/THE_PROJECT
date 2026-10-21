@@ -8,16 +8,16 @@ Build the six pages the design spec names and no other module owns. Run automati
 
 ## Constraints (spec, binding)
 
-- Task family 7 (spec:191): "Integrations, automations, notifications and security: configure supported providers, run predefined schedules, link channels, inspect audit history, and manage the user's own security/session settings under step-up authentication where required."
-- Today (spec:403): "Every number links to its source records."
-- Assistant (spec:404): "Tool calls and source extracts are separate from assistant prose. Approval cards appear inline but open a detailed approval view."
-- Automations (spec:411): "preview changes before enabling; run history shows verified outcomes."
-- Integrations (spec:412): "Provider cards with connection status, granted scopes, last sync, reconnect/revoke action and token-expiry/error explanation."
-- Activity & Security (spec:413): the audit timeline carries "actor, resource, event, policy result and verification evidence."
-- Settings (spec:414) includes model/provider selection and account deletion.
-- Storybook (spec:417): "expose reusable component variants in Storybook."
-- RBAC (spec:235): "RBAC roles (admin vs user). Policy layer checks each tool call against user's permissions."
-- `scheduler-worker` (spec:745) "sends commands through APIs and verifies idempotency keys." It never writes to a domain table directly.
+- Task family 7 (spec:193): "Integrations, automations, notifications and security: configure supported providers, run predefined schedules, link channels, inspect audit history, and manage the user's own security/session settings under step-up authentication where required."
+- Today (spec:405): "Every number links to its source records."
+- Assistant (spec:406): "Tool calls and source extracts are separate from assistant prose. Approval cards appear inline but open a detailed approval view."
+- Automations (spec:413): "preview changes before enabling; run history shows verified outcomes."
+- Integrations (spec:414): "Provider cards with connection status, granted scopes, last sync, reconnect/revoke action and token-expiry/error explanation."
+- Activity & Security (spec:415): the audit timeline carries "actor, resource, event, policy result and verification evidence."
+- Settings (spec:416) includes model/provider selection and account deletion.
+- Storybook (spec:419): "expose reusable component variants in Storybook."
+- RBAC (spec:237): "RBAC roles (admin, user and viewer). The policy layer checks each MCP tool call against the caller's role and permissions. A viewer may read but not write."
+- `scheduler-worker` (spec:749) "sends commands through APIs and verifies idempotency keys." It never writes to a domain table directly.
 
 ## Build sequence
 
@@ -43,7 +43,7 @@ Build the six pages the design spec names and no other module owns. Run automati
 | 18 | Place the privileged Activity and Security endpoints behind the P5 network rule and separate them in the UI | network rule + UI | No chat path reaches a privileged endpoint |
 | 19 | Expose component variants in Storybook | `.storybook/` | Storybook builds in CI |
 | 20 | Add Storybook interaction tests for the approval card and automation card | Storybook tests | Both tests fail when the card breaks |
-| 21 | Register the family 7 operations: automation runs, notification delivery and audit inspection (spec:191, spec:193) | policy service | An unregistered family 7 operation is denied |
+| 21 | Register the family 7 operations: automation runs, notification delivery and audit inspection (spec:193, spec:195) | policy service | An unregistered family 7 operation is denied |
 
 ## Build order
 

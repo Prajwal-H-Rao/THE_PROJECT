@@ -6,9 +6,9 @@ Phase P11. Spec headings: Non-Negotiable Security Invariants (Release Gate), Sug
 
 All ten security invariants pass by test or by an operator-reviewed record. Gates A to G sign in order through a machine-readable state file at P11, from the evidence each phase produced. No earlier phase signs a gate. No risky feature ships to meet a date.
 
-## The ten invariants (spec:1014-1023, binding)
+## The ten invariants (spec:1018-1026, binding)
 
-Spec:1012: "every item below must be demonstrated by automated test or an operator-reviewed test record."
+Spec:1016: "every item below must be demonstrated by automated test or an operator-reviewed test record."
 
 | # | Invariant (spec wording) | Evidence type |
 |---|---|---|
@@ -25,7 +25,7 @@ Spec:1012: "every item below must be demonstrated by automated test or an operat
 
 ## Delivery gates A to G
 
-Spec:713 gives the exit criteria. This plan adds a phase and a state file so ordering is testable.
+Spec:717 gives the exit criteria. This plan adds a phase and a state file so ordering is testable.
 
 | Gate | Phase | Exit criteria |
 |---|---|---|
@@ -53,13 +53,13 @@ Spec:713 gives the exit criteria. This plan adds a phase and a state file so ord
 | 10 | Write invariant 8 tests: absent evidence renders unverified, never done | release tests | UI shows `unknown` |
 | 11 | Write invariant 9 audit redaction scan | release tests | Scan is clean |
 | 12 | Write invariant 10 CI trigger test: a prompt or schema change reruns the suite | CI config | A planted change triggers a rerun |
-| 13 | Run the recovery drills: backup restore, export, deletion (spec:711 release gate, not an invariant) | `docs/release/drills.md` | Restore and export pass against a recorded command transcript |
+| 13 | Run the recovery drills: backup restore, export, deletion (spec:715 release gate, not an invariant) | `docs/release/drills.md` | Restore and export pass against a recorded command transcript |
 | 14 | Write the operator checklist with the exact command per record-based invariant | `docs/release/` | Each row names one command and one expected output |
 | 15 | Write the runbook index mapping every alert name to a runbook file | `docs/runbooks/index.md` | A script fails if an alert has no file |
 | 16 | Produce the release report from `gates.json` and `manifest.json` | `docs/release/report.md` | Report is generated, not hand-written |
 | 17 | Schedule a post-release review and a claims-ledger re-check | `changes/` | Re-check dates recorded |
 | 18 | Run the final demo: gates, invariants, metrics and known limits, and record the output | `docs/release/demo.md` | The record names every gate and its state |
-| 19 | Run the threat-model review and record it as a release-gate input | `docs/release/threat-model.md` | Every spec:805 threat maps to a control or a documented gap |
+| 19 | Run the threat-model review and record it as a release-gate input | `docs/release/threat-model.md` | Every spec:809 threat maps to a control or a documented gap |
 | 20 | Run production-like smoke tests on the core flows against a production-like stack | `docs/release/smoke.md` | Each core flow passes, and each known limit is recorded |
 ## Build order
 
@@ -84,7 +84,7 @@ Work these steps in order. A step names tasks from the table above.
 - A waiver never authorises access.
 - A claims-ledger row marked `stale` blocks its dependent phase.
 - A missing test is a failed gate, not a documented risk.
-- Spec:711: "Do not launch a risky feature merely to meet the calendar." Defer it with a recorded reason.
+- Spec:715: "Do not launch a risky feature merely to meet the calendar." Defer it with a recorded reason.
 
 ## Risks
 

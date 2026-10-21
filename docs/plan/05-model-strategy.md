@@ -14,10 +14,10 @@ Pick the smallest local model that clears a measured quality floor on NOVA's own
 
 Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
-- Spec:423: "No model is trusted solely because it is local, quantized or popular."
-- Spec:496: "Do not infer that a catalogue's advertised 256K context is feasible on commodity hardware."
-- Spec:423: "Keep model access behind the gateway."
-- Spec:506: "The same tool contracts must work with a deterministic fake model, the chosen local model, and any explicitly enabled remote provider."
+- Spec:425: "No model is trusted solely because it is local, quantized or popular."
+- Spec:499: "Do not infer that a catalogue's advertised 256K context is feasible on commodity hardware."
+- Spec:425: "Keep model access behind the gateway."
+- Spec:509: "The same tool contracts must work with a deterministic fake model, the chosen local model, and any explicitly enabled remote provider."
 - Start at 4K context and one concurrent generation.
 
 ## Verified claims
@@ -35,14 +35,14 @@ See `claims-ledger.md` C01 to C06. Re-check before the first P3 task.
 | Embeddings | `BAAI/bge-small-en-v1.5` | 133 MB | English baseline |
 | Embeddings multilingual | `intfloat/multilingual-e5-small` | larger | Test on Hindi and Kannada |
 
-The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility checks. Spec:692 requires at least one alternative alongside the three Qwen sizes. Treat them as required benchmark entries, not defaults.
+The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility checks. Spec:695 requires at least one alternative alongside the three Qwen sizes. Treat them as required benchmark entries, not defaults.
 
 ## Build sequence
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
 | 1 | Write a repeatable setup script: pull, pin digest, record size and license | `models/setup.sh` | Script reproduces the same digest |
-| 2 | Create `models/model-registry.yaml` at the spec:957 path. Add provider, ID, digest, quant, licence, template, `num_ctx`, latency, RAM/VRAM, hardware, tool-call quality and eval date. | `models/` | Registry validates against a schema |
+| 2 | Create `models/model-registry.yaml` at the spec:961 path. Add provider, ID, digest, quant, licence, template, `num_ctx`, latency, RAM/VRAM, hardware, tool-call quality and eval date. | `models/` | Registry validates against a schema |
 | 3 | Bind Ollama to loopback and the private container network only | Compose config | Public port scan fails |
 | 4 | Pin the model tag and digest in deployment config | Compose config | Drift fails CI |
 | 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request waits in queue order and never runs in parallel |
@@ -53,9 +53,9 @@ The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility
 | 10 | Record latency p50 and p95 plus peak VRAM and RAM | eval runner | Every candidate row carries all four numbers |
 | 11 | Decide and record the default with its reasoning | registry | The decision names one candidate and one eval run ID that exists |
 | 12 | Test llama.cpp as the fallback runtime | eval report | Same contracts hold |
-| 13 | Test the `0.8b` for classification only. Fence it from the tool registry that `03-agent-runtime` binds in P5. Use a dummy listener in P3. | Compose network plus config | A dummy listener on the tool-registry port is unreachable from the `0.8b` container |
+| 13 | Test the `0.8b` for classification only. Fence it from the MCP surface that `21-mcp-surface` binds in P5. Use a dummy listener in P3. | Compose network plus config | A dummy listener on the MCP port is unreachable from the `0.8b` container |
 | 14 | Add a deterministic fake model as the CI default, which `03-agent-runtime` reuses in P5 | `tests/fixtures/` | CI needs no GPU |
-| 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:692) |
+| 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:695) |
 ## Release thresholds
 
 - 100 percent of unauthorised or out-of-scope tool proposals blocked by deterministic enforcement. This is policy, not model quality.
@@ -81,11 +81,11 @@ Work these steps in order. A step names tasks from the table above.
 - `test_eval_set_has_250_cases` — a count below 250 fails the runner.
 - `test_false_tool_call_rate_reported` — the report contains a number for out-of-scope false calls.
 - `test_decision_cites_existing_run` — the default model names an eval run ID that resolves.
-- `test_08b_cannot_reach_write_tools` — a dummy listener on the tool-registry port is unreachable from the `0.8b` container. `03-agent-runtime` repeats the check against the live registry in P5.
+- `test_08b_cannot_reach_write_tools` — a dummy listener on the MCP port is unreachable from the `0.8b` container. `21-mcp-surface` repeats the check against the live surface in P5.
 - `test_ci_runs_without_gpu` — the evaluation job passes on a machine with no GPU.
 
 ## Risks
 
-- No ledger row justifies a model choice. Only the 250-case evaluation gate does (spec:510). Run it before you set a default.
+- No ledger row justifies a model choice. Only the 250-case evaluation gate does (spec:513). Run it before you set a default.
 - The 9b model was not in the spec. Add it only if 4b fails and latency allows.
 - Model cards and tags change. Re-check the ledger before the first P3 task and again before any swap.

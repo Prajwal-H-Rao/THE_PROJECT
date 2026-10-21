@@ -82,7 +82,7 @@ def mangled_copy(work):
 def false_citation_copy(work):
     """Add a task 16 copy that cites a spec line the record does not cite."""
     path = tree(work) / "docs" / "architecture" / "layout-diff.md"
-    path.write_text(read_diff(work).replace("spec:916", "spec:999"))
+    path.write_text(read_diff(work).replace("spec:920", "spec:1000"))
     return True
 
 

@@ -12,10 +12,10 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 - Spec:21: "Approval is a backend policy decision, not a prompt instruction."
 - Spec:21: "All sensitive actions default to review: send message/email, create/change calendar events that invite others, submit application, connect/revoke account, bulk edits, and any financial or irreversible operation."
-- Spec:170: "Read-only operations can be allowed inside the current user's scopes."
-- Spec:774: "A chat callback may be used only if the user identity is already bound, the action preview is immutable, the approval is bound to the payload hash, nonce and expiry, and the provider callback can be verified."
-- Spec:774: "Never treat free-form text such as “yes” as approval for an ambiguous or changed action."
-- Spec:774: "No approval should grant a broader persistent permission than the exact action requested."
+- Spec:172: "Read-only operations can be allowed inside the current user's scopes."
+- Spec:778: "A chat callback may be used only if the user identity is already bound, the action preview is immutable, the approval is bound to the payload hash, nonce and expiry, and the provider callback can be verified."
+- Spec:778: "Never treat free-form text such as “yes” as approval for an ambiguous or changed action."
+- Spec:778: "No approval should grant a broader persistent permission than the exact action requested."
 
 ## Build sequence
 

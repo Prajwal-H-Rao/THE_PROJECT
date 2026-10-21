@@ -8,7 +8,7 @@ import tree_checks
 ABSENT = "none"
 
 # The four spec items that the plan defers.
-DEFERRED_LINES = [438, 677, 831, 951]
+DEFERRED_LINES = [441, 680, 835, 955]
 
 # The overlay directory that the plan keeps.
 OVERLAY_DIRECTORY = "infra/k8s/overlays"

@@ -10,16 +10,16 @@ This module interleaves with `12-jobs-agent` inside P8. See rule 4 in `order-and
 
 ## Constraints (spec, binding)
 
-- Spec:555: "Every company/source starts as `needs_verification`; the agent must verify the official employer identity, canonical career page and permitted source before polling it."
-- Spec:555: the seed list is "not an objective ranking, promise of hiring, or assertion that a company is currently recruiting."
-- Spec:574: "Never use proxy rotation, identity evasion, CAPTCHA solving, anti-bot bypass, hidden/unlisted job exposure, credential stuffing, or unrestricted crawl of arbitrary URLs."
-- Spec:578: "By default poll verified public sources **once per 24 hours**."
-- Spec:581: "If no current check is possible, display “last seen” and the date, not “open now.”"
-- Spec:626: "For a source with no verified permitted URL, leave the URL nullable in the company record and do not guess the domain/endpoint."
-- Spec:630: "Batch actions must not silently enable new sources or authorize applications."
-- Spec:1540: "The source registry is the only authority for whether and how an employer can be polled."
+- Spec:558: "Every company/source starts as `needs_verification`; the agent must verify the official employer identity, canonical career page and permitted source before polling it."
+- Spec:558: the seed list is "not an objective ranking, promise of hiring, or assertion that a company is currently recruiting."
+- Spec:577: "Never use proxy rotation, identity evasion, CAPTCHA solving, anti-bot bypass, hidden/unlisted job exposure, credential stuffing, or unrestricted crawl of arbitrary URLs."
+- Spec:581: "By default poll verified public sources **once per 24 hours**."
+- Spec:584: "If no current check is possible, display “last seen” and the date, not “open now.”"
+- Spec:629: "For a source with no verified permitted URL, leave the URL nullable in the company record and do not guess the domain/endpoint."
+- Spec:633: "Batch actions must not silently enable new sources or authorize applications."
+- Spec:1544: "The source registry is the only authority for whether and how an employer can be polled."
 
-## Registry lifecycle (spec:559)
+## Registry lifecycle (spec:562)
 
 `seeded → identity_verified → career_url_verified → source_permission_reviewed → connector_configured → polling → healthy / no_openings / source_changed / rate_limited / manual_only / paused`
 
@@ -39,9 +39,9 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 |---|---|---|---|
 | 1 | Write the CSV importer against the 11-column header | `services/employer-registry-service/import/` | Fails on a missing or renamed column |
 | 2 | Enforce exactly 250 `IN` plus 250 `GLOBAL` and unique `normalized_name` | importer | 499 or 501 rows fails |
-| 3 | Own the seed artifact. Copy the repo CSV to `data/employer-seed-v1.csv`, the path spec:955 path. Keep it versioned data, not configuration. | `data/employer-seed-v1.csv` | The file has the 11-column header, 500 rows, and no populated `career_url` |
+| 3 | Own the seed artifact. Copy the repo CSV to `data/employer-seed-v1.csv`, the path spec:959 path. Keep it versioned data, not configuration. | `data/employer-seed-v1.csv` | The file has the 11-column header, 500 rows, and no populated `career_url` |
 | 4 | Record alias relationships in a separate reviewed table | alias schema | No alias is silently discarded |
-| 5 | Implement the full spec:559 lifecycle: six pipeline states plus six health states, with legal transitions only | registry service | An illegal transition fails |
+| 5 | Implement the full spec:562 lifecycle: six pipeline states plus six health states, with legal transitions only | registry service | An illegal transition fails |
 | 6 | Add the `verified_permitted` gate: no poll before `source_permission_reviewed` | worker | Unverified source is never polled |
 | 7 | Implement source discovery and the `ats_provider` resolver for Greenhouse, Lever, Ashby, SmartRecruiters | `connectors/` | Each hint resolves or returns `unknown` |
 | 8 | Implement the Greenhouse Job Board adapter (C07) | connector | Adapter contract passes |
@@ -50,7 +50,7 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 | 11 | Implement the SmartRecruiters posting adapter, tier-tolerant (C10) | connector | Missing tier returns `unsupported`, not an error |
 | 12 | Deliver curriculum lab 7: one permitted ATS source with a labelled ranking set, using the connector from task 8 | `labs/lab07/` | The ranking report renders from the labelled set |
 | 13 | Build the permitted-public-page extractor with structured data first, and gate enablement on a completed review record | connector | An enabled source row carries a `source_evidence_url` and a review timestamp |
-| 14 | Extend `employer_targets` and `employer_job_sources` from spec:587-623 on the P1 base schema `02-data-and-audit`. Add the service-owned opening, match and run tables. | migrations | Matches the spec SQL. Adds the five spec:561 fields the SQL omits: alternate names, remote preference, experience band, compensation preference and visa needs |
+| 14 | Extend `employer_targets` and `employer_job_sources` from spec:590-625 on the P1 base schema `02-data-and-audit`. Add the service-owned opening, match and run tables. | migrations | Matches the spec SQL. Adds the five spec:564 fields the SQL omits: alternate names, remote preference, experience band, compensation preference and visa needs |
 | 15 | Implement backoff, timeout, circuit breaker and per-source rate limits | worker | Breaker opens and recovers |
 | 16 | Implement the scheduled poll: 24h default, jitter, concurrency cap, ETag and Last-Modified | worker | No source exceeds its limit |
 | 17 | Build the run record: timing, HTTP status class, records seen/new/updated/closed, dedupe, error class, correlation ID | registry schema | No full HTML stored, no secrets stored |
@@ -62,7 +62,7 @@ All 500 rows start with `registry_status = needs_verification`. All 500 `career_
 | 23 | Build the Jobs to Companies page: search, filters, counts from persisted records, pause/resume, history | web UI | Counts come from queries, not constants |
 | 24 | Deliver curriculum lab 12: seed import with the 250/250 assertion and 10 manual pilots | `labs/lab12/` | The import assertion passes and 10 pilots are marked verified |
 | 25 | Build saved filters and alerts: daily digest, urgent match, company priority and mute. Filter on role family, experience, city mode, work authorisation, salary band and keyword. | `jobs-service/filters/` | Each control round-trips and the digest job reads the saved set |
-## Acceptance criteria (spec:634-639)
+## Acceptance criteria (spec:637-641)
 
 - Exactly 500 distinct seed employer names: 250 `IN`, 250 `GLOBAL`, no duplicate `normalized_name`.
 - All 500 start as targets only. Poll no source until you have verified identity, URL and access mode, and marked the row `verified_permitted`.

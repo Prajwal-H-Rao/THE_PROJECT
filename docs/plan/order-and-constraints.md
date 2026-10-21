@@ -15,7 +15,7 @@ A phase may start only when its modules' inputs exist. Nine ordering rules apply
    - `12` tasks 8 to 21, job discovery and drafting.
    - `13` tasks 18 to 25, opening tracking and filters.
 5. In P2, `08-policy-approval` runs tasks 1-3 first. Then `07-identity-authz` runs in order. Then `08-policy-approval` runs from task 4.
-6. In P5, `03-agent-runtime` runs tasks 1-16 first. Then `04-scope-lock` runs in order. Then `03-agent-runtime` runs from task 17. `04-scope-lock` consumes the orchestrator and the verifier that `03-agent-runtime` builds.
+6. In P5, `21-mcp-surface` runs first. Then `03-agent-runtime` runs tasks 1-16. Then `04-scope-lock` runs in order. Then `03-agent-runtime` runs from task 17. `04-scope-lock` consumes the orchestrator and the verifier that `03-agent-runtime` builds, and the MCP client that `21-mcp-surface` builds.
 7. Task-table cells hold one instruction of 20 words or fewer. The ten release invariants in `18-release-gate.md` stay at full length. They are normative criteria, not build instructions.
 8. In P10, `16-reliability-testing` runs the parser pod drill only after `17-deployment-hardening` builds the `kind` cluster at tasks 11-21.
 9. In P4, `15-design-system` runs task 17 first. The component crawl and task 14's screenshot tests need the Playwright harness.
@@ -32,10 +32,10 @@ A phase may start only when its modules' inputs exist. Nine ordering rules apply
 
 ## Deferred: optional cloud deployment
 
-The spec marks the cloud lab optional twice. Spec:438: "cloud EKS is gated by budget and hardening readiness."
-Spec:691: "Optional cloud lab: deploy to AWS EKS only after cluster access, IAM, networking, costs and rollback plan are reviewed."
+The spec marks the cloud lab optional twice. Spec:441: "cloud EKS is gated by budget and hardening readiness."
+Spec:694: "Optional cloud lab: deploy to AWS EKS only after cluster access, IAM, networking, costs and rollback plan are reviewed."
 
-This plan defers it. Kubernetes stays in the stack through `kind`/`k3d` in module 17. No task in this plan provisions AWS. The deferral leaves four spec items with no owning task. Spec:951 names an `infra/terraform/aws/` tree. Spec:831 names AWS ECS or Fargate tasks, task IAM roles, private subnets and no long-lived keys. Spec:438 names the EKS cluster itself. Spec:677 sets a curriculum definition of done for cloud work. It requires all of the following:
+This plan defers it. Kubernetes stays in the stack through `kind`/`k3d` in module 17. No task in this plan provisions AWS. The deferral leaves four spec items with no owning task. Spec:955 names an `infra/terraform/aws/` tree. Spec:835 names AWS ECS or Fargate tasks, task IAM roles, private subnets and no long-lived keys. Spec:441 names the EKS cluster itself. Spec:680 sets a curriculum definition of done for cloud work. It requires all of the following:
 
 - No long-lived cloud keys in pods.
 - Least-privilege IAM.
@@ -51,7 +51,7 @@ Re-check a ledger row before the dependent module's first task. `claims-ledger.m
 
 ## Evaluation metrics
 
-Some of these are measurable from P1. The agent-specific ones need the evaluation set, which starts in P5. The spec names ten (spec:715). Do not invent a target before the evaluation set exists.
+Some of these are measurable from P1. The agent-specific ones need the evaluation set, which starts in P5. The spec names ten (spec:719). Do not invent a target before the evaluation set exists.
 
 | Metric | Source | Owner phase |
 |---|---|---|

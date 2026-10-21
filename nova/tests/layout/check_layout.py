@@ -7,6 +7,7 @@ import claims_checks
 import copy_checks
 import diff_checks
 import diff_doc
+import plan_checks
 import plan_index
 import record_claims
 import record_paths
@@ -52,6 +53,7 @@ def build_checks(index, rows, sections, text, plan, texts, owned, repo_root, ful
         ("Y copy claims", lambda: record_claims.check_copy_claims(copy, rows, len(index.catalogue), plan_requirement)),
         ("Z owned paths", lambda: tree_checks.check_owned_paths(owned)),
         ("AA ci workflow", lambda: ci_checks.check_ci_workflow(repo_root)),
+        ("AB plan citations", lambda: plan_checks.check_plan_citations(plan_dir, spec_index.SPEC_PATH)),
     ]
 
 

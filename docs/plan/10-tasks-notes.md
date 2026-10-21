@@ -8,11 +8,11 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 
 ## Constraints (spec, binding)
 
-- Spec:854: "Scheduled reminder jobs need timezone-aware recurrence and deduplication windows."
-- Spec:854: queue tasks carry "unique IDs, attempt count, deadline, idempotency key, cancellation state and dead-letter outcome."
-- Spec:139: "Do not record a `succeeded` state until authoritative result evidence exists."
-- Spec:736: notes-memory-service "supports per-item export/delete and vector deletion consistency."
-- Spec:187: notes family is "search, create, update, export and delete explicitly user-owned notes and remembered facts."
+- Spec:858: "Scheduled reminder jobs need timezone-aware recurrence and deduplication windows."
+- Spec:858: queue tasks carry "unique IDs, attempt count, deadline, idempotency key, cancellation state and dead-letter outcome."
+- Spec:141: "Do not record a `succeeded` state until authoritative result evidence exists."
+- Spec:740: notes-memory-service "supports per-item export/delete and vector deletion consistency."
+- Spec:189: notes family is "search, create, update, export and delete explicitly user-owned notes and remembered facts."
 
 ## Build sequence
 
@@ -21,7 +21,7 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 | 1 | Create the task table: title, due, priority, status, owner, recurrence rule | migrations | Unique constraint on owner and id |
 | 2 | Implement the task CRUD service with ownership checks | task service | Cross-user read fails |
 | 3 | Implement recurrence with a deterministic rule parser | task service | RRULE cases pass |
-| 4 | Register the task tool family: create, list, complete, reschedule, search | tool registry | Out-of-scope ops denied |
+| 4 | Register the task tool family: create, list, complete, reschedule, search | MCP tool catalogue | Out-of-scope ops denied |
 | 5 | Build the reminder scheduler as an outbox-driven job | `services/notification-service/` | Job survives restart |
 | 6 | Add idempotent delivery keyed on reminder ID | notification service | Two workers, one delivery |
 | 7 | Implement the escalation policy for missed reminders | notification service | Escalation fires once |
@@ -31,8 +31,8 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 | 11 | Implement note create, update and version history | note service | History restores a prior version |
 | 12 | Wire local embeddings from `workers/inference-worker/` as an optional index | `services/ml-service/` | Vector row deleted with the note |
 | 13 | Implement search: full-text first, vector as a rerank | note service | Search returns note IDs |
-| 14 | Register the note tool family: create, search, read, link, summarise | tool registry | Overwrite requires confirmation |
-| 15 | Build the Tasks and Notes page: list, board and calendar views, snooze and overdue states, tagged notes with linked references | `apps/web/tasks/` | Every view renders from real data, an overdue task shows its overdue state, and no view shows sample data (spec:407) |
+| 14 | Register the note tool family: create, search, read, link, summarise | MCP tool catalogue | Overwrite requires confirmation |
+| 15 | Build the Tasks and Notes page: list, board and calendar views, snooze and overdue states, tagged notes with linked references | `apps/web/tasks/` | Every view renders from real data, an overdue task shows its overdue state, and no view shows sample data (spec:409) |
 | 16 | Add timezone-safe due-time handling | task service | DST boundary case passes |
 | 17 | Add task and reminder metrics: queue backlog, delivery latency | observability | Alert fires on backlog |
 | 18 | Add per-item export and per-item delete for notes and remembered facts | note service | One note exports and deletes without touching others |

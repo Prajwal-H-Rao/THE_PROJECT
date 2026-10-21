@@ -12,10 +12,10 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 - Spec:20: "PostgreSQL is the main relational store. Services own tables/schemas and access them through their own repository layer."
 - Spec:20: "Do not share a single unconstrained ORM client across service boundaries."
-- Spec:117: "Attachments or large content (email body, PDF resumes) can be stored in S3/MinIO with a pointer field."
-- Spec:139: "Do not record a `succeeded` state until authoritative result evidence exists."
-- Spec:903: "Do not put access tokens, passwords, full resumes, full bank statement rows, unnecessary email bodies or model hidden reasoning in audit records."
-- Spec:903: "Use append-only DB permissions; optionally hash-chain events."
+- Spec:119: "Attachments or large content (email body, PDF resumes) can be stored in S3/MinIO with a pointer field."
+- Spec:141: "Do not record a `succeeded` state until authoritative result evidence exists."
+- Spec:907: "Do not put access tokens, passwords, full resumes, full bank statement rows, unnecessary email bodies or model hidden reasoning in audit records."
+- Spec:907: "Use append-only DB permissions; optionally hash-chain events."
 
 ## Build sequence
 
@@ -28,15 +28,15 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 5 | Implement hash chaining over audit rows | audit service | Editing a row breaks the chain check |
 | 6 | Create `emails`, `events`, `tasks`, `notes`, `finances`, `trips` | domain schemas | Ownership column is indexed |
 | 7 | Create `resume_profile`, `job_listing`, `job_match`, `application_draft`, `application_submission` | jobs schema | Profile version is immutable |
-| 8 | Create `employer_targets`, `employer_job_sources`, `job_opening`, `job_source_run` | registry schema | Matches the spec SQL at line 587 |
+| 8 | Create `employer_targets`, `employer_job_sources`, `job_opening`, `job_source_run` | registry schema | Matches the spec SQL at line 590 |
 | 9 | Implement the event envelope with `event_id`, `schema_version`, `correlation_id`, `causation_id` | `packages/contracts/events/` | Backward-compat test passes |
 | 10 | Add object-storage pointers and a retention policy table | finance, notes schemas | Deletion propagates to the object |
 | 11 | Install pgvector on the notes schema now and add the vector column, so no privileged migration is needed later. `10-tasks-notes` activates it in P6 | notes schema | A row holding a vector value inserts and deletes on the notes schema |
-| 12 | Record the privacy, AI, employment and messaging review for the actual jurisdiction, then set every retention period from it | `docs/privacy-review.md` | Every retention row cites the review, and no period is set without it (spec:237, spec:229) |
-| 13 | Write the export and deletion workflow. Deletion propagates to vectors, object files, queued tasks, channel mappings and caches, per spec:856 | audit + all schemas | Export contains every user row plus the audit records that user may read (spec:742). Deletion removes rows in all five target stores, and the vector leg runs from P6 when `10-tasks-notes` activates it. |
+| 12 | Record the privacy, AI, employment and messaging review for the actual jurisdiction, then set every retention period from it | `docs/privacy-review.md` | Every retention row cites the review, and no period is set without it (spec:239, spec:231) |
+| 13 | Write the export and deletion workflow. Deletion propagates to vectors, object files, queued tasks, channel mappings and caches, per spec:860 | audit + all schemas | Export contains every user row plus the audit records that user may read (spec:746). Deletion removes rows in all five target stores, and the vector leg runs from P6 when `10-tasks-notes` activates it. |
 | 14 | Add a backup and restore script with a drill | `infra/` scripts | Restore into an empty DB passes |
 | 15 | Add indexes on IDs, timestamps and ownership columns | migrations | `EXPLAIN` uses the index |
-| 16 | Build audit search: filter by actor, action, resource, policy result and time, served by the audit service (spec:742) | audit service | An unknown filter is rejected, and a caller reads only rows their role allows |
+| 16 | Build audit search: filter by actor, action, resource, policy result and time, served by the audit service (spec:746) | audit service | An unknown filter is rejected, and a caller reads only rows their role allows |
 
 ## Build order
 

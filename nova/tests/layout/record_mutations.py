@@ -39,7 +39,7 @@ def missing_citation(work):
     """Drop the layout citation from one row of the layout diff."""
     return replace_diff(
         work,
-        "The layout path sits at spec:916.",
+        "The layout path sits at spec:920.",
         "The layout path sits elsewhere.")
 
 
@@ -63,8 +63,8 @@ def wrong_deferred_item(work):
     """Drop one deferred spec item from the deferred cloud section."""
     return replace_diff(
         work,
-        "spec:951, spec:831, spec:438 and spec:677",
-        "spec:951, spec:831 and spec:438")
+        "spec:955, spec:835, spec:441 and spec:680",
+        "spec:955, spec:835 and spec:441")
 
 
 def wrong_scope_count(work):
@@ -98,7 +98,7 @@ def wrong_allow_list(work):
 
 def bad_spec_citation(work):
     """Point a spec citation at a line that the spec does not hold."""
-    return replace_diff(work, "spec:717", "spec:9999")
+    return replace_diff(work, "spec:721", "spec:9999")
 
 
 def bad_plan_citation(work):

@@ -1,6 +1,6 @@
-# Module 03 — Agent runtime and tool registry
+# Module 03 — Agent runtime and MCP client
 
-Phase P5. Spec headings: Request lifecycle, Agent Runtime & Tool Registry, Agent workflow and execution policy, Agentic and tool-calling protocol.
+Phase P5. Spec headings: Request lifecycle, Agent Runtime, MCP Surface & Tool Catalogue, Agent workflow and execution policy, Agentic and tool-calling protocol.
 
 ## Goal
 
@@ -10,10 +10,10 @@ The agent is a workflow coordinator. It proposes. It never decides. A typed plan
 
 Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
-- Spec:147: "The model is never permitted to choose arbitrary URLs, SQL, shell commands or filesystem paths as executable instructions."
-- Spec:165: "The `requires_approval` field above is illustrative output only; the policy service recomputes this requirement and can override it."
-- Spec:172: "A model response alone must never transition a workflow to `succeeded`."
-- Spec:173: "Non-idempotent actions are not automatically retried unless the provider supports idempotency or the system first verifies the operation did not happen."
+- Spec:149: "The model is never permitted to choose arbitrary URLs, SQL, shell commands or filesystem paths as executable instructions."
+- Spec:167: "The `requires_approval` field above is illustrative output only; the policy service recomputes this requirement and can override it."
+- Spec:174: "A model response alone must never transition a workflow to `succeeded`."
+- Spec:175: "Non-idempotent actions are not automatically retried unless the provider supports idempotency or the system first verifies the operation did not happen."
 - Bounds: 6 steps per plan, 5 orchestration turns, 30 seconds per model call, one repair attempt for malformed output.
 - States: `planned`, `awaiting_approval`, `approved`, `executing`, `succeeded`, `failed`, `cancelled`, `needs_manual_action`.
 
@@ -21,10 +21,10 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Define the tool registry schema: `tool_id`, version, Pydantic in/out, owning service, task family, scopes, risk tier, idempotency, verifier | `services/agent-orchestrator/registry/` | Unknown field fails validation |
-| 2 | Register 8 read-only tools: list inbox, read event, list tasks, search notes, list transactions, list openings, get profile, get audit | registry + schemas | Registry rejects an unregistered tool |
-| 3 | Register 6 write tools: draft email, create event, create task, create note, import statement, draft application. Enumerate the full operation set for each of the 7 families per spec:193 | registry + schemas | Each write tool carries a risk tier, and every family has an enumerated operation set |
-| 4 | Register 3 consequential tools: send email, submit application, connect account | registry + schemas | Each forces an approval |
+| 1 | Define the MCP tool definition: `tool_id`, version, strict input and output, owning service, task family, scopes, risk tier, idempotency, verifier | `packages/contracts/mcp/` | Unknown field fails validation |
+| 2 | Register 8 read-only tools: list inbox, read event, list tasks, search notes, list transactions, list openings, get profile, get audit | MCP tool catalogue | The catalogue rejects an unregistered tool |
+| 3 | Register 6 write tools: draft email, create event, create task, create note, import statement, draft application. Enumerate the full operation set for each of the 7 families per spec:195 | MCP tool catalogue | Each write tool carries a risk tier, and every family has an enumerated operation set |
+| 4 | Register 3 consequential tools: send email, submit application, connect account | MCP tool catalogue | Each forces an approval |
 | 5 | Build the deterministic router from natural language to a task-family enum | `orchestrator/router/` | Out-of-scope text returns a fixed refusal |
 | 6 | Build the model gateway: provider allow-list, request shaping, redaction, timeout, quota | `services/model-gateway/` | Timeout, quota and `num_ctx` truncation-marker tests pass |
 | 7 | Add Ollama as the default provider with a pinned digest | gateway config | Gateway rejects an unlisted model |
@@ -43,13 +43,14 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 Work these steps in order. A step names tasks from the table above.
 
-1. Define the tool registry and register the read-only tools.
+1. Define the MCP tool definition and register the read-only tools.
 2. Build the deterministic router and the refusal path.
 3. Reuse the P3 fake model and run the router-to-refusal path end to end, with no LLM.
 
 ## Acceptance tests
 
 - `test_unregistered_tool_rejected` — a plan naming an unknown tool fails before policy.
+- `test_tool_call_goes_through_the_mcp_client` — the orchestrator reaches a tool only through the MCP client. `21-mcp-surface` owns the client.
 - `test_out_of_scope_gets_fixed_refusal` — the router never forwards out-of-scope text to the planning model.
 - `test_interrupt_blocks_side_effect` — no domain write happens before the interrupt returns.
 - `test_model_cannot_mark_succeeded` — a model claim of success does not change state.

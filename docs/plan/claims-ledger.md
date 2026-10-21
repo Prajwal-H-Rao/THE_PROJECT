@@ -43,7 +43,7 @@ NOVA's planner models fit whole inside 4 GB VRAM. AirLLM buys capacity NOVA does
 
 ## Note on model choice
 
-No ledger row decides which model is the default. The spec says so at spec:510: build a 250-case evaluation set first, then choose. Community reports about small-model tool calling are not evidence. `05-model-strategy` records that rule.
+No ledger row decides which model is the default. The spec says so at spec:513: build a 250-case evaluation set first, then choose. Community reports about small-model tool calling are not evidence. `05-model-strategy` records that rule.
 
 ## Open claims
 
@@ -51,8 +51,8 @@ These spec statements need verification at implementation time. They have no off
 
 | Spec statement | Verify when | Fallback |
 |---|---|---|
-| Design tokens are recommendations, not claims that the Figma file was edited (spec:417) | Before the P4 tasks start | Measure contrast in the built UI |
-| Do not claim a matching false-positive target before an evaluation set exists (spec:715) | Before the P8 tasks start | Report ranking quality as unmeasured |
-| Recheck the exact publisher and revision for `Qwen/Qwen3-4B-Instruct-2507` (spec:459) | If the alternative planner is tested | Use the Qwen3.5 family only |
-| Plaid or India Account Aggregator for finance import (spec:222) | Before the P7 tasks start | CSV and PDF upload only |
-| Meta business verification and WABA setup prerequisites (spec:767) | Before P9 WhatsApp | Ship Telegram only |
+| Design tokens are recommendations, not claims that the Figma file was edited (spec:419) | Before the P4 tasks start | Measure contrast in the built UI |
+| Do not claim a matching false-positive target before an evaluation set exists (spec:719) | Before the P8 tasks start | Report ranking quality as unmeasured |
+| Recheck the exact publisher and revision for `Qwen/Qwen3-4B-Instruct-2507` (spec:462) | If the alternative planner is tested | Use the Qwen3.5 family only |
+| Plaid or India Account Aggregator for finance import (spec:224) | Before the P7 tasks start | CSV and PDF upload only |
+| Meta business verification and WABA setup prerequisites (spec:771) | Before P9 WhatsApp | Ship Telegram only |

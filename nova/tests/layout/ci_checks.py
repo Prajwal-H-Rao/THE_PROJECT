@@ -96,7 +96,7 @@ def check_ci_workflow(repo_root):
         if command not in code:
             problems.append("the CI workflow holds no command " + command.strip())
     for path in TEMPLATE_PATHS:
-        if path not in text:
+        if path not in code:
             problems.append("the CI workflow does not test " + path)
     if PYTHON_VERSION not in text:
         problems.append("the CI workflow does not use Python " + PYTHON_VERSION)

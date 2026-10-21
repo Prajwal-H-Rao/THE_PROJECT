@@ -17,10 +17,10 @@ This repo has three purposes.
 - `opencode.json` — project config. Holds the permission rules.
 - `.opencode/skills/` — project-scope skills. One stub: `graphify`.
 - `changes/` — changelog entries. One file per change.
-- `NOVA_Full_Updated_Spec.md` — NOVA spec. Source of truth for all NOVA content. 1542 lines, 74 fence-aware headings.
+- `NOVA_Full_Updated_Spec.md` — NOVA spec. Source of truth for all NOVA content. 1546 lines, 74 fence-aware headings. It names the MCP surface and the tool catalogue.
 - `NOVA_Employer_Targets_500.csv` — seed employer registry. 500 rows: 250 `IN`, 250 `GLOBAL`.
-- `docs/plan/` — NOVA build plan. 24 files: index, order-and-constraints, claims ledger, coverage map, 20 module files. 372 tasks, 11 phases. No dates and no hour estimates. The plan holds feature order and constraints only.
-- `nova/` — NOVA monorepo tree. 61 directories below the root, 47 leaf directories, 43 `.gitkeep` placeholders. `nova/docs/layout-diff.md` records the 10 catalogue-to-layout differences. `nova/services/_template/` holds the Python and the TypeScript service skeleton. `nova/tests/layout/` holds the checker for the tree and the record. It holds 21 modules.
+- `docs/plan/` — NOVA build plan. 25 files: index, order-and-constraints, claims ledger, coverage map, 21 module files. 386 tasks, 11 phases. No dates and no hour estimates. The plan holds feature order and constraints only.
+- `nova/` — NOVA monorepo tree. 61 directories below the root, 47 leaf directories, 43 `.gitkeep` placeholders. `nova/docs/layout-diff.md` records the 10 catalogue-to-layout differences. `nova/services/_template/` holds the Python and the TypeScript service skeleton. `nova/tests/layout/` holds the checker for the tree, the record and the plan. It holds 22 modules.
 - `.github/workflows/ci.yml` — the single CI workflow. It runs the layout checks, the lint and the typecheck. It proves that the typecheck fails on a type error.
 - `pyproject.toml` — tool config. It holds the ruff and the mypy settings. The mypy gate runs with `check_untyped_defs` on.
 - `.gitignore` — repo root ignore file. Keeps the byte-code cache and the build output out of git.
@@ -92,4 +92,4 @@ Read any downloaded `SKILL.md` before you trust it. It is third-party agent inst
 - Tree: 61 directories below `nova/`, 47 leaf directories, 43 `.gitkeep` placeholders.
 - Catalogue: 23 entries. Deployable layout paths: 22. Exact name matches: 15.
 - Layout diff: 10 rows. 3 catalogue-only, 2 layout-only, 5 renamed.
-- Checker: 27 checks, 64 mutations, 4 acceptance scenarios.
+- Checker: 28 checks, 64 mutations, 4 acceptance scenarios.

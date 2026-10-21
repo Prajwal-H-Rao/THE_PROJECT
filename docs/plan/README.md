@@ -14,7 +14,8 @@ Build plan for `NOVA_Full_Updated_Spec.md`. The spec is the source of truth. Thi
 
 - The spec wins on every conflict. Report the conflict. Do not silently follow this plan.
 - A task counts as complete only when its test passes. A model response is never proof.
-- The Artifact column names a category or a shared path, not a unique file. `migrations`, `CI config`, `observability`, `tool registry`, `worker` and `adapter` appear in several modules. A later module extends the shared artifact. It does not rebuild it, unless its own row says so.
+- The Artifact column names a category or a shared path, not a unique file. `migrations`, `CI config`, `observability`, `MCP tool catalogue`, `worker` and `adapter` appear in several modules. A later module extends the shared artifact. It does not rebuild it, unless its own row says so.
+- Every external action reaches a tool through an MCP server. `21-mcp-surface` owns the surface, the authorization and the tool bindings. A module that adds a tool registers it in the MCP tool catalogue. No module adds a second path to a tool.
 - The service polls only a source marked `verified_permitted`. An `unverifiable` claim forces `manual_only`.
 - Files stay under 200 lines. Split a module into `-a` and `-b` when it grows.
 - Every quoted string attributed to the spec carries a `spec:LINE` reference. Paraphrase carries no quote marks.
@@ -31,14 +32,14 @@ Phase order follows dependency. The design system lands at P4. The domain pages 
 | P2 Identity and policy | `07-identity-authz.md`, `08-policy-approval.md` | 33 | Replayed, expired and cross-user approvals are denied. RBAC and TLS hold. |
 | P3 Document sandbox and models | `06-document-ml-sandbox.md`, `05-model-strategy.md` | 36 | Gate B. The parser returns evidence-bound fields or explicit unknown. Malicious and oversized fixtures fail safely. |
 | P4 Design system | `15-design-system.md` | 20 | Action previews, denial states and failure states are keyboard-accessible. Tokens drive both themes. |
-| P5 Agent runtime and scope lock | `03-agent-runtime.md`, `04-scope-lock.md` | 37 | Gate C. The model cannot make an unauthorised write. The model cannot fabricate success. |
+| P5 Agent runtime and scope lock | `21-mcp-surface.md`, `03-agent-runtime.md`, `04-scope-lock.md` | 51 | Gate C. The model cannot make an unauthorised write. The model cannot fabricate success. |
 | P6 Inbox, calendar, tasks, notes | `09-inbox-calendar.md`, `10-tasks-notes.md` | 37 | Gate D. Provider IDs and persisted state verify results. Reminder workers survive restart without duplicates. |
 | P7 Finance and trips | `11-finance-trips.md` | 18 | Uncertain extraction is marked for review. Trip estimates are labelled as estimates. |
 | P8 Jobs agent and registry | `12-jobs-agent.md`, `13-employer-registry.md` | 46 | Gate E. Job discovery and drafting with safe human handoff. Exactly 250 IN plus 250 GLOBAL seeds. Source verification gates hold. Fresh opening provenance. Claim references stay truthful. No site-rule bypass. |
 | P9 Channels, automations, pages | `14-channels.md`, `20-pages-and-automations.md` | 41 | Gate F. Telegram and WhatsApp where setup prerequisites permit. Unsigned and replayed webhooks are rejected and deduplicated. Automations run once per trigger. Every privileged chat action requires a bound approval. |
 | P10 Hardening, security and testing | `17-deployment-hardening.md`, `16-reliability-testing.md` | 46 | No known direct model-to-tool path remains. Success and failure states tie to authoritative evidence. Model and parser workloads cannot reach the DB, secrets, the Docker socket, host paths or arbitrary egress. |
 | P11 Release gate | `18-release-gate.md` | 20 | Gate G. All ten release invariants pass by test or operator-reviewed record. |
-| **Total** | 20 files | **372** | |
+| **Total** | 21 files | **386** | |
 
 The gate column states the exit criteria for the phase. Module 18 verifies and signs gates A to G at P11, from the evidence these phases produced. No earlier phase signs a gate.
 

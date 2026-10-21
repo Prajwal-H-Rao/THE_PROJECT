@@ -9,12 +9,12 @@ Docker Compose is the MVP runtime. Kubernetes is the local target. Model and par
 ## Constraints (spec, binding)
 
 - Spec:23: "Docker is the mandatory service packaging layer. Kubernetes is a first-class orchestration technology: use kind/k3d for local cluster practice and policy validation; deploy to AWS EKS only if cloud budget and operational readiness permit."
-- Spec:810: the parser sandbox runs "as non-root, no shell subprocess where avoidable, no DB credentials, no cloud credentials, no writable host mounts, minimal read-only root filesystem plus bounded ephemeral temp space... and no unrestricted egress."
-- Spec:496: "never mount `/var/run/docker.sock` into the model container."
-- Spec:829: "set non-root `USER`, drop Linux capabilities, enable default or narrower seccomp... set `read_only: true` when compatible, create bounded `tmpfs`, set memory/CPU/PID limits, use no privileged mode, mount no Docker socket, disable host network."
-- Spec:838: Restricted Pod Security sets "`runAsNonRoot: true`, a fixed non-zero UID, `allowPrivilegeEscalation: false`, `capabilities.drop: [\"ALL\"]`, `seccompProfile.type: RuntimeDefault`."
-- Spec:841: "The parser and model workers should have no route to Postgres, Redis administration, object-storage control planes, the internet or arbitrary peers."
-- Spec:847 sets the Kubernetes acceptance gate. It needs manifest validation plus a cluster test. The cluster test covers:
+- Spec:814: the parser sandbox runs "as non-root, no shell subprocess where avoidable, no DB credentials, no cloud credentials, no writable host mounts, minimal read-only root filesystem plus bounded ephemeral temp space... and no unrestricted egress."
+- Spec:499: "never mount `/var/run/docker.sock` into the model container."
+- Spec:833: "set non-root `USER`, drop Linux capabilities, enable default or narrower seccomp... set `read_only: true` when compatible, create bounded `tmpfs`, set memory/CPU/PID limits, use no privileged mode, mount no Docker socket, disable host network."
+- Spec:842: Restricted Pod Security sets "`runAsNonRoot: true`, a fixed non-zero UID, `allowPrivilegeEscalation: false`, `capabilities.drop: [\"ALL\"]`, `seccompProfile.type: RuntimeDefault`."
+- Spec:845: "The parser and model workers should have no route to Postgres, Redis administration, object-storage control planes, the internet or arbitrary peers."
+- Spec:851 sets the Kubernetes acceptance gate. It needs manifest validation plus a cluster test. The cluster test covers:
   - Default-deny networking
   - Least-privilege service accounts
   - Restricted Pod Security
@@ -38,16 +38,16 @@ Docker Compose is the MVP runtime. Kubernetes is the local target. Model and par
 | 10 | Prove no Docker socket or host path is mounted | Compose test | Mount check passes |
 | 11 | Build the Kubernetes manifests: Namespaces, NetworkPolicy, ResourceQuota, LimitRange | `infra/k8s/base/` | Manifest validation passes |
 | 12 | Apply Pod Security Admission with `restricted` and the documented exceptions | `infra/k8s/` | A privileged pod is rejected |
-| 13 | Add Kustomize overlays for `kind` and for the optional EKS target, over the base manifests | `infra/k8s/overlays/` | The kind overlay applies cleanly and differs from base only in overlay fields (spec:676, spec:709) |
+| 13 | Add Kustomize overlays for `kind` and for the optional EKS target, over the base manifests | `infra/k8s/overlays/` | The kind overlay applies cleanly and differs from base only in overlay fields (spec:679, spec:713) |
 | 14 | Build the local `kind` cluster target with pinned node image | `infra/k8s/overlays/kind/` | `make kind-up` works from a clean checkout |
 | 15 | Add seccomp, capability dropping and `allowPrivilegeEscalation: false` | manifests | Scan passes |
 | 16 | Use external `SecretRef` files with least privilege and documented rotation | manifests | No secret in an env var |
 | 17 | Add non-root FSGroup, dedicated ServiceAccounts and token automount control | manifests | Default SA cannot read secrets |
 | 18 | Run a private registry with per-environment pull credentials and image signing | `infra/registry/` | Unsigned image is rejected |
 | 19 | Add multi-arch builds for amd64 and arm64 | CI | Both images build |
-| 20 | Add namespace isolation, bounded resources, service accounts and default-deny network policy to the kind cluster, per spec:833-845 | manifests | Every namespace enforces Restricted Pod Security and default-deny egress |
+| 20 | Add namespace isolation, bounded resources, service accounts and default-deny network policy to the kind cluster, per spec:837-848 | manifests | Every namespace enforces Restricted Pod Security and default-deny egress |
 | 21 | Add rolling deploys, preStop hooks and a version endpoint per service | manifests + services | Zero-downtime roll passes |
-| 22 | Re-run the P5 scope-lock red-team suite against the deployed kind services. Prove no code path or Kubernetes permission changes a workload spec. | `labs/lab09-proofs/` | The suite passes against the cluster, and a workload-spec edit attempt is denied (spec:709, spec:847) |
+| 22 | Re-run the P5 scope-lock red-team suite against the deployed kind services. Prove no code path or Kubernetes permission changes a workload spec. | `labs/lab09-proofs/` | The suite passes against the cluster, and a workload-spec edit attempt is denied (spec:713, spec:851) |
 | 23 | Set up Prometheus scrape annotations, OpenTelemetry sidecars and dashboards | `infra/observability/` | Metrics scrape succeeds |
 | 24 | Run Trivy, Grype and pip-audit in CI; fail on critical CVEs | CI config | A planted CVE fails the build |
 | 25 | Deliver curriculum lab 8: hardened Dockerfile passing the isolation checks | `labs/lab08/` | Non-root and no-egress tests pass |

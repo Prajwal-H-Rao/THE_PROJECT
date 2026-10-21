@@ -10,11 +10,11 @@ The service quarantines each upload. It parses the file in a sandbox. Every fiel
 
 Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
-- Spec:805: "uploaded resumes/statements, attachments, email bodies, job descriptions, webpages and chat may contain hostile instructions."
+- Spec:809: "uploaded resumes/statements, attachments, email bodies, job descriptions, webpages and chat may contain hostile instructions."
 - The parser runs non-root. It holds no DB credentials. It holds no cloud credentials. It mounts no writable host path. A read-only root filesystem wraps it. The sandbox bounds its temp space. The sandbox restricts its egress.
-- Spec:810: "It reads only a single authorized input object and writes only to a scoped result destination."
-- Spec:820: "Do not accept a model-supplied citation as real: citation IDs must resolve to fetched source records and source spans."
-- Spec:822: "Use deterministic arithmetic for finance totals, scoring hard filters, due-time scheduling, currency/date conversion, permission decisions and job-application state transitions."
+- Spec:814: "It reads only a single authorized input object and writes only to a scoped result destination."
+- Spec:824: "Do not accept a model-supplied citation as real: citation IDs must resolve to fetched source records and source spans."
+- Spec:826: "Use deterministic arithmetic for finance totals, scoring hard filters, due-time scheduling, currency/date conversion, permission decisions and job-application state transitions."
 - Model and parser workloads never receive DB secrets, a shell, or general egress.
 
 ## Extraction envelope
@@ -42,7 +42,7 @@ High-impact facts need evidence or user confirmation when uncertain. High-impact
 | 7 | CSV and XLSX with pandas, column provenance | parser | Encoding and locale variants pass |
 | 8 | TXT and bank statement paths | parser | Statement rows keep row and column refs |
 | 9 | OCR as an isolated fallback only when native text is insufficient | worker | Low confidence is surfaced, not hidden |
-| 10 | Provision the RQ worker runtime on Redis. Keep it separate from the Flask web workers. Add task timeouts and a dead-letter path (spec:433). | `workers/document-worker/` | A parser job runs in the worker process, and the Flask process holds no parser library |
+| 10 | Provision the RQ worker runtime on Redis. Keep it separate from the Flask web workers. Add task timeouts and a dead-letter path (spec:436). | `workers/document-worker/` | A parser job runs in the worker process, and the Flask process holds no parser library |
 | 11 | Route parsing through a queue worker, not the request worker | worker | Request worker holds no parser library |
 | 12 | Sandbox the worker: non-root, read-only root, tmpfs, dropped capabilities, seccomp, resource limits | `Dockerfile`, Compose | Escape fixture fails |
 | 13 | Prove the worker cannot reach Postgres or the internet | Compose test | Connection attempts fail |
@@ -50,10 +50,10 @@ High-impact facts need evidence or user confirmation when uncertain. High-impact
 | 15 | Store the parsed result object and return the pointer | storage | Result is content-addressed |
 | 16 | Wire `workers/inference-worker/` and its `services/ml-service/` API for classification and embeddings under the same sandbox rules | `workers/inference-worker/` | Same isolation tests pass |
 | 17 | Reject citation IDs that do not resolve to a stored span | validator | Fabricated citation fails |
-| 18 | Scan uploads for malware where tooling is available, before parse | ingest + worker | An infected fixture is quarantined, not parsed (spec:518) |
+| 18 | Scan uploads for malware where tooling is available, before parse | ingest + worker | An infected fixture is quarantined, not parsed (spec:521) |
 | 19 | Deliver the parser half of curriculum lab 2: upload to Flask parser to evidence-linked profile. `12-jobs-agent` adds the review view in P8. | `labs/lab02/` | Malformed and large inputs are rejected, and every field carries its span |
 | 20 | Deliver curriculum lab 3: parser behind an authenticated internal endpoint, two identities, one allowed call and one denied | `labs/lab03/` | The denied call returns 403 and the parser cannot reach Postgres |
-| 21 | Run the NLP extraction step over parsed text: skills and experience, each carrying the source span it came from | `services/ml-service/resume/` | Every extracted skill resolves to a stored span, and an unsupported field stays unknown (spec:224, spec:520) |
+| 21 | Run the NLP extraction step over parsed text: skills and experience, each carrying the source span it came from | `services/ml-service/resume/` | Every extracted skill resolves to a stored span, and an unsupported field stays unknown (spec:226, spec:523) |
 ## Build order
 
 Work these steps in order. A step names tasks from the table above.

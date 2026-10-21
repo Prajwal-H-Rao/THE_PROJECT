@@ -10,17 +10,17 @@ Each user holds one verified identity. Every service call authenticates the work
 
 Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
-- Spec:233: "Users sign in via OAuth2/OpenID (Google or GitHub)."
-- Spec:234: "Require TOTP (Google Authenticator) for user login. Also support email+OTP for password resets."
-- Spec:781: "Never trust raw `X-User-Id`, `user_id` in a JSON body, or a model-generated actor ID."
-- Spec:780: "Reject `none` algorithms, unrecognized keys/issuers/audiences, expired tokens, mismatched service IDs and unsigned requests."
-- Spec:783: "no secrets in source, images, prompt contexts, audit payloads or error traces."
-- Spec:236: "Do not log raw LLM prompts or personal content."
+- Spec:235: "Users sign in via OAuth2/OpenID (Google or GitHub)."
+- Spec:236: "Require TOTP (Google Authenticator) for user login. Also support email+OTP for password resets."
+- Spec:785: "Never trust raw `X-User-Id`, `user_id` in a JSON body, or a model-generated actor ID."
+- Spec:784: "Reject `none` algorithms, unrecognized keys/issuers/audiences, expired tokens, mismatched service IDs and unsigned requests."
+- Spec:787: "no secrets in source, images, prompt contexts, audit payloads or error traces."
+- Spec:238: "Do not log raw LLM prompts or personal content."
 - A user token is not a service identity.
 
 ## Authorization matrix
 
-The spec's 10-row matrix at line 788 is normative. Reproduce it as policy tests, one per row. Do not paraphrase it.
+The spec's 10-row matrix at line 792 is normative. Reproduce it as policy tests, one per row. Do not paraphrase it.
 
 | Row | Operation | Approval required |
 |---|---|---|
@@ -55,8 +55,8 @@ The spec's 10-row matrix at line 788 is normative. Reproduce it as policy tests,
 | 14 | Add rate limiting and account lockout | gateway | Lockout triggers and recovers |
 | 15 | Encode the 10 matrix rows as policy tests, against the rule schema `08-policy-approval` builds in tasks 1-3, before module 07 | policy service | All 10 pass |
 | 16 | Verify no token or secret appears in logs or traces | log scan test | Scan is clean |
-| 17 | Implement RBAC roles `admin` and `user`, checked by the decision endpoint `08-policy-approval` builds in task 3 | identity + policy | A `user` role is denied on an admin-classified tool call (spec:235) |
-| 18 | Terminate TLS outside localhost. Set HttpOnly and SameSite cookies. Add CSRF protection, a CORS allow-list and a content security policy. | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:785) |
+| 17 | Implement RBAC roles `admin` and `user`, checked by the decision endpoint `08-policy-approval` builds in task 3 | identity + policy | A `user` role is denied on an admin-classified tool call (spec:237) |
+| 18 | Terminate TLS outside localhost. Set HttpOnly and SameSite cookies. Add CSRF protection, a CORS allow-list and a content security policy. | gateway + Compose | A request outside localhost is served over HTTPS, and a cookie-auth write without a CSRF token returns 403 (spec:789) |
 
 ## Build order
 

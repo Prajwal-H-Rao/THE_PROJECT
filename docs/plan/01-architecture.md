@@ -4,7 +4,7 @@ Phase P1. Spec headings: architecture rules, logical architecture, service commu
 
 ## Goal
 
-The build creates a monorepo with 23 services from the Microservice Catalogue at spec:723-745. The repo layout at spec:913-968 does not match it. The layout holds 18 directories under `services/`, 3 under `workers/` and `apps/web`, so 22 entries in total. Twenty of those map to a catalogue entry. Three catalogue entries have no directory: `employer-registry-service`, `job-source-worker` and `integration-registry`. Two directories have no catalogue entry: `ml-service` and `document-worker`. `inference-worker` matches on both sides: `06-document-ml-sandbox` and `10-tasks-notes` build `workers/inference-worker/`, and `services/ml-service/` is its HTTP API. Five of the twenty shared entries use a different name: `api-gateway`, `telegram-adapter`, `whatsapp-adapter`, `audit-service` and `apps/web`. The catalogue wins on count and on responsibility. The layout wins on directory shape. Record every difference when you create the tree.
+The build creates a monorepo with 23 services from the Microservice Catalogue at spec:727-748. The repo layout at spec:917-971 does not match it. The layout holds 18 directories under `services/`, 3 under `workers/` and `apps/web`, so 22 entries in total. Twenty of those map to a catalogue entry. Three catalogue entries have no directory: `employer-registry-service`, `job-source-worker` and `integration-registry`. Two directories have no catalogue entry: `ml-service` and `document-worker`. `inference-worker` matches on both sides: `06-document-ml-sandbox` and `10-tasks-notes` build `workers/inference-worker/`, and `services/ml-service/` is its HTTP API. Five of the twenty shared entries use a different name: `api-gateway`, `telegram-adapter`, `whatsapp-adapter`, `audit-service` and `apps/web`. The catalogue wins on count and on responsibility. The layout wins on directory shape. Record every difference when you create the tree.
 
 ## Constraints (spec, binding)
 
@@ -22,7 +22,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Create the monorepo tree from the spec layout at spec:913, then record the diff against the catalogue | `nova/` tree, `nova/docs/layout-diff.md`, `nova/tests/layout/` checks | The diff has exactly 10 rows: 3 catalogue-only, 2 layout-only and 5 renamed entries |
+| 1 | Create the monorepo tree from the spec layout at spec:917, then record the diff against the catalogue | `nova/` tree, `nova/docs/layout-diff.md`, `nova/tests/layout/` checks | The diff has exactly 10 rows: 3 catalogue-only, 2 layout-only and 5 renamed entries |
 | 2 | Add lint, typecheck and a single CI workflow | `.github/workflows/ci.yml`, `pyproject.toml`, `nova/tests/layout/ci_checks.py`, `nova/tests/layout/ci_mutations.py` | CI fails on a type error |
 | 3 | Write the service skeleton template | `services/_template/` | Template builds and serves `/health/live` |
 | 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs | `services/api-gateway/` | Gateway rejects an unauthenticated request |

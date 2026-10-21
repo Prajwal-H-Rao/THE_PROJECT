@@ -23,11 +23,6 @@ export function sendHealth(response: ServerResponse, body: HealthBody): void {
   response.end(payload);
 }
 
-/** Return True when the path is a health path. */
-export function isHealthPath(path: string): boolean {
-  return path === "/health/live" || path === "/health/ready";
-}
-
 /** Answer a health request. Return True when the request was a health request. */
 export function handleHealth(request: IncomingMessage, response: ServerResponse): boolean {
   const path = request.url ?? "/";

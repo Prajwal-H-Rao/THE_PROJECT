@@ -12,76 +12,76 @@ The first module column names the primary owner.
 | 8 | Architecture Overview | `01-architecture` |
 | 12 | Architectural rules | `01-architecture` |
 | 25 | Logical architecture | `01-architecture` |
-| 66 | Request lifecycle | `03-agent-runtime` |
-| 76 | Service communication | `01-architecture`, `07-identity-authz` |
-| 84 | Data Model (Schema Examples) | `02-data-and-audit` |
-| 141 | System Components | `01-architecture` |
-| 143 | Agent Runtime & Tool Registry | `03-agent-runtime` |
-| 167 | Agent workflow and execution policy | `03-agent-runtime`, `08-policy-approval` |
-| 175 | Scope Lock, Anti-Jailbreak and Allowed-Task Enforcement | `04-scope-lock` |
-| 181 | Allowed task families | `04-scope-lock`, `09-inbox-calendar`, `10-tasks-notes`, `11-finance-trips`, `12-jobs-agent` |
-| 195 | Enforcement layers (all required) | `04-scope-lock` |
-| 208 | Operations that must never be exposed as agent tools | `04-scope-lock` |
-| 212 | Required red-team acceptance suite | `04-scope-lock`, `18-release-gate` |
-| 216 | Integrations and External APIs | `09-inbox-calendar`, `11-finance-trips`, `12-jobs-agent` |
-| 231 | Security & Access Control | `07-identity-authz` (RBAC roles, HTTPS), `20-pages-and-automations` (admin plane) |
-| 241 | UI/UX Design Specification | `15-design-system` |
-| 245 | Design tokens (source of truth) | `15-design-system` |
-| 279 | CSS tokens | `15-design-system` |
-| 314 | Typography | `15-design-system` |
-| 334 | Spacing, dimensions and layout | `15-design-system` |
-| 362 | Responsive breakpoints | `15-design-system` |
-| 366 | Component variants, states and anatomy | `15-design-system` |
-| 390 | UI states for agent work | `15-design-system`, `08-policy-approval` |
-| 399 | Page-specific composition | Shared shell in `15-design-system`. Today, Assistant, Automations, Integrations, Activity and Settings in `20-pages-and-automations`. Domain pages in `09-inbox-calendar`, `10-tasks-notes`, `11-finance-trips`, `12-jobs-agent` and `13-employer-registry`. |
-| 419 | Technology Choices (Comparison) | `19-tech-and-curriculum` |
-| 442 | Local Model Strategy: Agentic Tool Calling on Commodity Hardware | `05-model-strategy` |
-| 444 | Design objective and recommended starting profile | `05-model-strategy` |
-| 450 | Candidate shortlist | `05-model-strategy` |
-| 467 | Small-hardware inference repositories | `05-model-strategy` |
-| 478 | Recommended development commands | `05-model-strategy` |
-| 498 | Agentic and tool-calling protocol | `05-model-strategy`, `03-agent-runtime` |
-| 508 | Model evaluation gate | `05-model-strategy` |
-| 512 | Resume & Job-Search / Application Agent | `12-jobs-agent` |
-| 516 | Flow | `12-jobs-agent` |
-| 530 | Data and service responsibilities | `12-jobs-agent`, `13-employer-registry` |
-| 543 | Acceptance criteria (jobs) | `12-jobs-agent` |
-| 553 | 500-Employer Target Registry and Job-Opening Tracker | `13-employer-registry` |
-| 557 | Registry lifecycle | `13-employer-registry` |
-| 567 | Permitted source priority and connector policy | `13-employer-registry` |
-| 576 | Polling and matching policy | `13-employer-registry` |
-| 584 | Data model (illustrative SQL) | `13-employer-registry`, `02-data-and-audit` |
-| 628 | Dashboard and service behavior | `13-employer-registry`, `15-design-system` |
-| 632 | Acceptance criteria (registry) | `13-employer-registry` |
-| 641 | Implementation & Learning Curriculum | `19-tech-and-curriculum` |
-| 680 | Curriculum order and practical labs | `19-tech-and-curriculum` |
-| 695 | Roadmap & Milestones | `README.md`, `18-release-gate` |
-| 717 | Microservice Catalogue, Contracts and Ownership | `01-architecture`, all domain modules |
-| 747 | Example API and event conventions | `02-data-and-audit` |
-| 754 | WhatsApp and Telegram Interaction | `14-channels` |
-| 758 | Telegram | `14-channels` |
-| 765 | WhatsApp Business Platform / Cloud API | `14-channels` |
-| 772 | Chat-based approvals | `14-channels`, `08-policy-approval` |
-| 776 | Service Authentication and Authorization Standard | `07-identity-authz` |
-| 788 | Authorization matrix (minimum expected defaults) | `07-identity-authz` |
-| 803 | Sandboxed ML and Document Processing | `06-document-ml-sandbox` |
-| 807 | Trust boundaries | `06-document-ml-sandbox` |
-| 816 | Defenses against fabricated output and prompt injection | `06-document-ml-sandbox`, `04-scope-lock` |
-| 827 | Minimum container controls | `17-deployment-hardening` |
-| 833 | Kubernetes controls | `17-deployment-hardening` |
-| 850 | Reliability, Failure Handling and Recovery | `16-reliability-testing` |
-| 859 | Testing, Observability and Audit Contract | `16-reliability-testing` |
-| 861 | Required test layers | `16-reliability-testing` |
-| 872 | Audit event schema | `02-data-and-audit` |
-| 905 | Observability | `16-reliability-testing` |
-| 909 | Repository and Local Deployment Layout | `01-architecture` |
-| 972 | Source and Design Notes | `19-tech-and-curriculum` |
-| 976 | References | `claims-ledger.md` |
-| 1010 | Non-Negotiable Security Invariants (Release Gate) | `18-release-gate` |
-| 1026 | Appendix B — Seed Employer List (500) | `13-employer-registry` |
-| 1030 | India-focused target employers (IN-001 to IN-250) | `13-employer-registry` |
-| 1283 | International and global target employers | `13-employer-registry` |
-| 1536 | Seed-list maintenance rules | `13-employer-registry` |
+| 67 | Request lifecycle | `03-agent-runtime` |
+| 77 | Service communication | `01-architecture`, `07-identity-authz` |
+| 86 | Data Model (Schema Examples) | `02-data-and-audit` |
+| 143 | System Components | `01-architecture` |
+| 145 | Agent Runtime, MCP Surface & Tool Catalogue | `03-agent-runtime`, `21-mcp-surface` |
+| 169 | Agent workflow and execution policy | `03-agent-runtime`, `08-policy-approval` |
+| 177 | Scope Lock, Anti-Jailbreak and Allowed-Task Enforcement | `04-scope-lock` |
+| 183 | Allowed task families | `04-scope-lock`, `09-inbox-calendar`, `10-tasks-notes`, `11-finance-trips`, `12-jobs-agent` |
+| 197 | Enforcement layers (all required) | `04-scope-lock` |
+| 210 | Operations that must never be exposed as agent tools | `04-scope-lock` |
+| 214 | Required red-team acceptance suite | `04-scope-lock`, `18-release-gate` |
+| 218 | Integrations and External APIs | `09-inbox-calendar`, `11-finance-trips`, `12-jobs-agent` |
+| 233 | Security & Access Control | `07-identity-authz` (RBAC roles, HTTPS), `20-pages-and-automations` (admin plane) |
+| 243 | UI/UX Design Specification | `15-design-system` |
+| 247 | Design tokens (source of truth) | `15-design-system` |
+| 281 | CSS tokens | `15-design-system` |
+| 316 | Typography | `15-design-system` |
+| 336 | Spacing, dimensions and layout | `15-design-system` |
+| 364 | Responsive breakpoints | `15-design-system` |
+| 368 | Component variants, states and anatomy | `15-design-system` |
+| 392 | UI states for agent work | `15-design-system`, `08-policy-approval` |
+| 401 | Page-specific composition | Shared shell in `15-design-system`. Today, Assistant, Automations, Integrations, Activity and Settings in `20-pages-and-automations`. Domain pages in `09-inbox-calendar`, `10-tasks-notes`, `11-finance-trips`, `12-jobs-agent` and `13-employer-registry`. |
+| 421 | Technology Choices (Comparison) | `19-tech-and-curriculum` |
+| 445 | Local Model Strategy: Agentic Tool Calling on Commodity Hardware | `05-model-strategy` |
+| 447 | Design objective and recommended starting profile | `05-model-strategy` |
+| 453 | Candidate shortlist | `05-model-strategy` |
+| 470 | Small-hardware inference repositories | `05-model-strategy` |
+| 481 | Recommended development commands | `05-model-strategy` |
+| 501 | Agentic and tool-calling protocol | `05-model-strategy`, `03-agent-runtime`, `21-mcp-surface` |
+| 511 | Model evaluation gate | `05-model-strategy` |
+| 515 | Resume & Job-Search / Application Agent | `12-jobs-agent` |
+| 519 | Flow | `12-jobs-agent` |
+| 533 | Data and service responsibilities | `12-jobs-agent`, `13-employer-registry` |
+| 546 | Acceptance criteria (jobs) | `12-jobs-agent` |
+| 556 | 500-Employer Target Registry and Job-Opening Tracker | `13-employer-registry` |
+| 560 | Registry lifecycle | `13-employer-registry` |
+| 570 | Permitted source priority and connector policy | `13-employer-registry` |
+| 579 | Polling and matching policy | `13-employer-registry` |
+| 587 | Data model (illustrative SQL) | `13-employer-registry`, `02-data-and-audit` |
+| 631 | Dashboard and service behavior | `13-employer-registry`, `15-design-system` |
+| 635 | Acceptance criteria (registry) | `13-employer-registry` |
+| 644 | Implementation & Learning Curriculum | `19-tech-and-curriculum` |
+| 683 | Curriculum order and practical labs | `19-tech-and-curriculum` |
+| 699 | Roadmap & Milestones | `README.md`, `18-release-gate` |
+| 721 | Microservice Catalogue, Contracts and Ownership | `01-architecture`, all domain modules |
+| 751 | Example API and event conventions | `02-data-and-audit` |
+| 758 | WhatsApp and Telegram Interaction | `14-channels` |
+| 762 | Telegram | `14-channels` |
+| 769 | WhatsApp Business Platform / Cloud API | `14-channels` |
+| 776 | Chat-based approvals | `14-channels`, `08-policy-approval` |
+| 780 | Service Authentication and Authorization Standard | `07-identity-authz` |
+| 792 | Authorization matrix (minimum expected defaults) | `07-identity-authz` |
+| 807 | Sandboxed ML and Document Processing | `06-document-ml-sandbox` |
+| 811 | Trust boundaries | `06-document-ml-sandbox` |
+| 820 | Defenses against fabricated output and prompt injection | `06-document-ml-sandbox`, `04-scope-lock` |
+| 831 | Minimum container controls | `17-deployment-hardening` |
+| 837 | Kubernetes controls | `17-deployment-hardening` |
+| 854 | Reliability, Failure Handling and Recovery | `16-reliability-testing` |
+| 863 | Testing, Observability and Audit Contract | `16-reliability-testing` |
+| 865 | Required test layers | `16-reliability-testing` |
+| 876 | Audit event schema | `02-data-and-audit` |
+| 909 | Observability | `16-reliability-testing` |
+| 913 | Repository and Local Deployment Layout | `01-architecture` |
+| 976 | Source and Design Notes | `19-tech-and-curriculum` |
+| 980 | References | `claims-ledger.md` |
+| 1014 | Non-Negotiable Security Invariants (Release Gate) | `18-release-gate` |
+| 1030 | Appendix B — Seed Employer List (500) | `13-employer-registry` |
+| 1034 | India-focused target employers (IN-001 to IN-250) | `13-employer-registry` |
+| 1287 | International and global target employers | `13-employer-registry` |
+| 1540 | Seed-list maintenance rules | `13-employer-registry` |
 
 ## Data sections
 

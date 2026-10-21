@@ -37,7 +37,8 @@ flowchart TB
   AGENT --> POLICY[Policy & Approval Service]
   AGENT --> MODEL[Model Gateway]
   MODEL --> SANDBOX[Isolated Python Inference Workers]
-  AGENT --> DOMAINS[Domain Services]
+  AGENT --> MCP[MCP Surface]
+  MCP --> DOMAINS[Domain Services]
   DOMAINS --> EMAIL[Inbox / Email Integration]
   DOMAINS --> CAL[Calendar Service]
   DOMAINS --> TASKS[Tasks / Reminders Service]
@@ -61,15 +62,15 @@ flowchart TB
   AGENT --> REDIS[(Redis: cache, locks, queues)]
 ```
 
-This diagram is a logical map; external integrations should be called only by their owning adapters. Model/inference workers receive bounded jobs and return candidate outputs; policy and domain services remain authoritative for permissions and outcomes.
+This diagram is a logical map; external integrations should be called only by their owning adapters. Every external action reaches its owning service through that service's MCP server. Model/inference workers receive bounded jobs and return candidate outputs; policy and domain services remain authoritative for permissions and outcomes.
 
 ### Request lifecycle
 
 1. Authenticate the user and derive a stable `user_id`, tenant/profile scope, channel identity and correlation ID.
 2. Normalize the request and label imported email, file, job-description, web and chat content as **untrusted data**.
-3. Agent orchestrator creates a typed plan using Pydantic schemas; validate tool name, arguments, ownership and schema version.
+3. Agent orchestrator creates a typed plan using Pydantic schemas; it reaches every tool through the MCP client, which validates tool name, arguments, ownership and schema version.
 4. Policy service evaluates actor, scope, data sensitivity, target, blast radius and risk. It creates an approval record where needed.
-5. After approval, a domain service verifies the approval token against the exact operation hash, target and expiry; the service executes using its own scoped integration credential.
+5. After approval, the owning service's MCP server verifies the approval token against the exact operation hash, target and expiry; the server executes using its own scoped integration credential.
 6. Independent code verifies authoritative state/API response and records evidence. The model is not allowed to set `success` status.
 7. Append audit events and notify the user in the UI/chat channel. On failure, expose the failed stage and safe retry options rather than claiming success.
 
@@ -80,6 +81,7 @@ This diagram is a logical map; external integrations should be called only by th
 - Authenticate every service-to-service call with workload identity: prefer mutual TLS where available and/or short-lived signed service tokens with strict issuer, audience, expiry, subject and scope validation. A user token is not a service identity. Services do not trust caller-supplied `user_id` without checking it against verified claims and resource ownership.
 - Apply network segmentation and egress policy so each service can contact only its required dependencies. Keep model workers on a separate network with no direct DB route and default-deny outbound network access.
 - In the MVP, implement service JWTs or mTLS-compatible identities in middleware with clear rotation; for AWS, use task-specific IAM roles for AWS APIs rather than static AWS keys. Containers must still be isolated and configured with least privilege.
+- External actions reach their owning service through that service's MCP server. The MCP server validates the tool arguments, checks the caller's service identity and scope, and records the decision in the audit trail.
 
 ## Data Model (Schema Examples)
 
@@ -140,11 +142,11 @@ Every event should identify the actor/service, operation, model version where re
 
 ## System Components
 
-### Agent Runtime & Tool Registry
+### Agent Runtime, MCP Surface & Tool Catalogue
 
 NOVA's agent layer is a **workflow coordinator, not an unrestricted autonomous process**. A recommended Python orchestration service uses Pydantic v2 for strict structured inputs/outputs and LangGraph for long-running workflows that need checkpoints, retries and approval interrupts. Use LangChain only for useful provider/tool adapters; keep core authorization and execution code framework-independent. The model gateway wraps local Ollama models and optional external model APIs so request logging, provider allow-lists, redaction, quotas and timeouts are applied consistently.
 
-**Workflow:** request → context retrieval → typed plan → schema validation → deterministic policy check → explicit approval if needed → authorized tool adapter → independent verification → audit result. Tool definitions include a fixed name, Pydantic/JSON Schema argument type, output type, allowed roles/scopes, read/write classification, risk tier, idempotency strategy and timeout. The model is never permitted to choose arbitrary URLs, SQL, shell commands or filesystem paths as executable instructions.
+**Workflow:** request → context retrieval → typed plan → schema validation → deterministic policy check → explicit approval if needed → authorized MCP tool call → independent verification → audit result. Each tool is defined once in the MCP tool catalogue with a fixed name, Pydantic/JSON Schema argument type, output type, allowed roles/scopes, read/write classification, risk tier, idempotency strategy and timeout. The model is never permitted to choose arbitrary URLs, SQL, shell commands or filesystem paths as executable instructions.
 
 Example tool envelope:
 
@@ -180,7 +182,7 @@ This is a defense-in-depth design recommendation, not a mathematical guarantee a
 
 #### Allowed task families
 
-The server-maintained task registry is versioned, reviewed and deployed as application configuration. Only these families are enabled by default:
+The server-maintained task registry is versioned, reviewed and deployed as application configuration. Only these families are enabled by default, and each family maps to the tools that the MCP surface exposes:
 
 1. Inbox and email: read/search/summarize the connected user's messages; draft responses; send only through an approved, payload-bound action.
 2. Calendar, tasks and reminders: list/create/update/cancel the user's own records according to per-operation policy and approval requirements.
@@ -199,7 +201,7 @@ A task-family allow-list is not a universal free-form capability. Each family ha
 3. **Constrained planning:** the model may select only enumerated tool IDs and schema-defined arguments. It cannot return executable code, shell commands, SQL, arbitrary URLs, arbitrary browser actions, dynamic tool definitions or policy edits. Unknown values fail closed.
 4. **Deterministic authorization:** every proposed action is checked against verified user identity, object ownership, integration grants, operation scopes, rate/size quotas, current policy version and current task allow-list. Tool selection by the model is only a proposal.
 5. **Capability-scoped execution:** after authorization, mint a short-lived, audience-restricted action grant for the one service, operation, user/resource, target and payload hash. The executing service ignores model-supplied permissions and independently validates the grant. No blanket “agent is trusted” identity exists.
-6. **Prompt-injection isolation:** email bodies, resumes, PDFs, job descriptions, search results, notes imported from outside, Telegram/WhatsApp messages and tool outputs are treated as untrusted content. They may be summarized or quoted but cannot change the system policy, tool registry or workflow state by including commands.
+6. **Prompt-injection isolation:** email bodies, resumes, PDFs, job descriptions, search results, notes imported from outside, Telegram/WhatsApp messages and tool outputs are treated as untrusted content. They may be summarized or quoted but cannot change the system policy, tool catalogue or workflow state by including commands.
 7. **Independent output and side-effect verification:** schema-valid output is not necessarily truthful. Use trusted provider APIs/database state, source references and receipts; otherwise status remains `unknown`, `unverified` or `needs_manual_action`.
 8. **Auditable denials:** log a reason code and non-sensitive evidence for scope violations, jailbreak attempts, unregistered tools and authorization failures. Avoid logging full personal message bodies or secrets just to capture the attempt.
 9. **No agent self-extension:** the agent cannot edit its own system/developer instructions, policies, API schemas, allow-lists, authorization tables, infrastructure, deployables or model configuration. Model/version/configuration updates go through a separate reviewed deployment pipeline.
@@ -232,7 +234,7 @@ For every model and agent workflow, test direct jailbreak (“ignore all previou
 
 - **Authentication:** Users sign in via OAuth2/OpenID (Google or GitHub). We implement an OAuth2 flow on the backend, store refresh tokens encrypted. For local hosting, use secure cookies or JWT sessions (set `HttpOnly`, `Secure`).
 - **Two-Factor:** Require TOTP (Google Authenticator) for user login. Also support email+OTP for password resets.
-- **Authorization:** RBAC roles (admin vs user). Policy layer checks each tool call against user’s permissions. For example, only a user with “finance” permission can run expense-import tools.
+- **Authorization:** RBAC roles (admin, user and viewer). The policy layer checks each MCP tool call against the caller's role and permissions. A viewer may read but not write. For example, only a user with “finance” permission can run expense-import tools.
 - **Data Encryption:** Store sensitive fields (OAuth tokens, API keys) encrypted in the database. Use HTTPS for all communications. Do not log raw LLM prompts or personal content (log only metadata or hashes).
 - **Audit Trail:** As noted, every actionable event is logged. This provides an auditable design practice; it does not by itself establish legal compliance. Review applicable privacy, AI, employment and messaging rules for the actual jurisdiction and use case. Raw LLM chain-of-thought is not logged (avoids chain-of-thought “narrative” abuse). Instead, we log the tool calls and responses.
 - **Observability:** Structured logging (JSON logs) for system events. Prometheus metrics for request latency and error rates. Use an APM/tracing (OpenTelemetry) to trace requests from UI to DB and LLM calls.
@@ -430,6 +432,7 @@ Use Tailwind-compatible breakpoints: `sm=640px`, `md=768px`, `lg=1024px`, `xl=12
 | **Python API** | **Flask** | Required for document and ML HTTP services. Use app factory/blueprints, Pydantic v2 for schemas, strict upload limits, and a production WSGI server (not `flask run`). Keep CPU/GPU inference out of request workers where it is long-running; enqueue jobs. |
 | **Validation & settings** | **Pydantic v2 / pydantic-settings** | Explicit API/event contracts, model output validation, configuration validation. Schema validity does not prove source truth; add business checks and evidence. |
 | **Agent workflow** | **LangGraph (Python) where useful; LangChain selectively** | State graphs, retries, checkpointing and human approval pauses are useful for long workflows. Start with a small deterministic state machine if that meets the scope; avoid abstraction for simple CRUD. |
+| **Tool surface** | **MCP (Model Context Protocol) servers, one per owning service, with a shared tool catalogue** | Every external action then uses one transport. The tool definition carries the task family, the scopes, the risk tier and the verifier, so the policy service decides each call and the audit records it. A shared server would hold every provider credential, so each server stays inside the service that owns the tools. |
 | **Python workers** | **Celery + Redis/RabbitMQ** or **RQ + Redis** | Pick one. Celery suits more complex routing/retries/throughput; RQ is simpler for a small self-hosted system. Use durable idempotency/locks, task timeouts and dead-letter handling. Keep workers separate from Flask web workers. |
 | **Model gateway** | **Ollama locally; optional provider adapter/LiteLLM** | Normalizes calls, model allow-list, timeouts, quotas and redaction; provider choice is configuration. Gateway does not remove the need for sandboxing or output verification. |
 | **Document parsing** | **PyMuPDF/pdfplumber, python-docx, pandas; OCR only if needed** | Text/native extraction first; scanned documents use isolated OCR. Parsers are untrusted-input attack surface; use size/page limits and isolated workers. |
@@ -497,7 +500,7 @@ For the first release, configure a **4K context** and at most one concurrent loc
 
 ### Agentic and tool-calling protocol
 
-1. **Use bounded tool definitions.** Define each tool once in the registry with `tool_id`, version, Pydantic input/output classes, JSON Schema, owning service, allowed task family, required scopes, resource ownership rule, risk tier, idempotency requirements and independent verifier. No arbitrary-URL or generic-browser tool is exposed.
+1. **Use bounded tool definitions.** Define each tool once in the MCP tool catalogue with `tool_id`, version, strict Pydantic input/output classes, JSON Schema, owning service and its MCP server, allowed task family, required scopes, resource ownership rule, risk tier, idempotency requirements and independent verifier. The orchestrator reaches a tool only through the MCP client. No arbitrary-URL or generic-browser tool is exposed. A bounded fetch tool may reach an allow-list of permitted sources only, and a headless browser worker may render allow-listed pages only, without a credential.
 2. **Model emits a proposal, not a call with authority.** Native tool/function calling is a serialization convenience: the model emits an expected tool name and arguments; NOVA's orchestrator parses it as untrusted data. Ollama documents this request/response loop, Qwen documents its tool-call format, and vLLM notes schema-constrained output provides parseability—not a guarantee that the chosen function is correct. See [Ollama tool calling](https://github.com/ollama/ollama/blob/main/docs/capabilities/tool-calling.mdx), [Qwen3 function calling](https://github.com/QwenLM/Qwen3/blob/main/docs/source/framework/function_call.md), and [vLLM tool calling](https://docs.vllm.ai/en/latest/features/tool_calling/).
 3. **Constrain shape; validate meaning.** Use strict JSON Schema where supported (`additionalProperties: false`, explicit required fields), then Pydantic strict validation and independent domain validators. Reject unknown fields, tools, URLs, IDs outside the user's scope, stale jobs, unsupported enums and missing evidence. On malformed output, allow at most one repair attempt; otherwise stop safely.
 4. **Route before planning.** A deterministic router maps requests to one of the fixed NOVA task families. For ambiguous/in-scope requests, ask a question. For unsupported/out-of-scope requests, use a fixed refusal without sending the text to a general-purpose model with broad tool context. This is in addition to the anti-jailbreak controls elsewhere in this document.
@@ -691,6 +694,7 @@ Learn each technology alongside a real NOVA deliverable. The aim is not to colle
 10. **Production readiness:** add tracing, metrics, backup restore, load limits, queue retry/failure tests, container/image scanning, dependency update strategy and documented incident recovery. Optional cloud lab: deploy to AWS EKS only after cluster access, IAM, networking, costs and rollback plan are reviewed.
 11. **Small-model agent benchmark:** evaluate `qwen3.5:0.8b`, `qwen3.5:2b`, `qwen3.5:4b-q4_K_M` and at least one alternative. Measure memory, latency, schema/tool selection accuracy and out-of-scope false calls on identical fixtures. Choose the smallest candidate that meets the documented quality floor; do not assume that a benchmark score guarantees safe behavior.
 12. **500-employer directory:** import Appendix B, normalize/dedupe names, assert 250 `IN` and 250 `GLOBAL`, and mark every source `needs_verification`. Verify 10 pilot companies manually and configure only permitted official APIs/feeds. Implement source health, caching, backoff, dedupe and manual-only states before expanding source polling.
+13. **MCP surface and tool authorization:** build one MCP server that owns a tool, call it from a stub client with a service identity, and prove that a missing scope, a wrong audience and a viewer write are all denied and audited. Add the bounded fetch tool and prove that a URL outside the allow-list is refused.
 
 ## Roadmap & Milestones (October–December 2026)
 
@@ -808,7 +812,7 @@ Every request between services must authenticate the **calling workload** and au
 
 1. **Untrusted input zone:** uploads and external content enter through size/type checks and quarantine. Content is labeled by source and treated as data, not instructions.
 2. **Parser sandbox:** runs as non-root, no shell subprocess where avoidable, no DB credentials, no cloud credentials, no writable host mounts, minimal read-only root filesystem plus bounded ephemeral temp space, CPU/memory/process/page/time limits, restricted syscalls (seccomp), AppArmor/SELinux where available and no unrestricted egress. It reads only a single authorized input object and writes only to a scoped result destination.
-3. **Model/inference sandbox:** receives the minimum redacted bounded context and returns a Pydantic-validated candidate result. No tool registry, OAuth token, secret, database connection, arbitrary HTTP client or shell. For local models, run inference in a separate process/container with separate UID, limited device/filesystem access, restricted network and explicit resource quotas. Model weights are trusted build artifacts with pinned provenance; user-supplied models are not loaded by default.
+3. **Model/inference sandbox:** receives the minimum redacted bounded context and returns a Pydantic-validated candidate result. No MCP client, OAuth token, secret, database connection, arbitrary HTTP client or shell. For local models, run inference in a separate process/container with separate UID, limited device/filesystem access, restricted network and explicit resource quotas. Model weights are trusted build artifacts with pinned provenance; user-supplied models are not loaded by default.
 4. **Validation/policy zone:** trusted code validates Pydantic schema, semantic constraints, ownership, source references, allowed tool/argument combinations and policy. Validation rejects unknown enum/tool names, malformed URLs, impossible date/range values, unsupported fields and ungrounded high-impact claims.
 5. **Execution zone:** narrowly scoped domain service uses its own credential to call official provider/API and returns a signed/typed result envelope with request ID and receipt. It independently checks approval, user and resource ownership.
 6. **Evidence/audit zone:** verifier checks provider response and persisted state, stores minimal evidence and produces verified status. Model prose cannot create an evidence record.

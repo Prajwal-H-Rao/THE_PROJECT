@@ -26,5 +26,6 @@ ruff check .
 mypy app tests
 ```
 
-The CI workflow runs the same three commands. The module that owns the service keeps the
-commands in step with the repository.
+The CI workflow runs the lint over the whole repository and the typecheck over the checker
+modules. The typecheck of this template runs in the module that owns the service. The
+template copy of the tool config is the one that ships with a copied service.

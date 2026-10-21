@@ -8,7 +8,7 @@ Fix each technology choice from the spec comparison table. Write the design note
 
 Eleven of the twelve labs need artifacts that later phases own. Those labs run in the phase that owns the artifact. The table below names that phase for each lab. Module 19 delivers only lab 1, which P1 can satisfy.
 
-## Technology choices (spec:421-438)
+## Technology choices (spec:423-440)
 
 The spec decides these. This plan records the decision and the reason. Any deviation needs a written note in `docs/design-notes/`.
 
@@ -16,7 +16,7 @@ The spec decides these. This plan records the decision and the reason. Any devia
 |---|---|---|
 | LLM/model provider | Qwen3.5 2B/4B quantized through Ollama or llama.cpp; optional approved cloud provider (423). Owner: `05-model-strategy` | Choosing a model by hype, or trusting a local model without measuring it |
 | Backend TypeScript | NestJS on Fastify (424) | Express, plain Fastify |
-| Backend Python | Flask app factory with blueprints (430) | FastAPI, Django. Spec:1007 supersedes "FastAPI-based" |
+| Backend Python | Flask app factory with blueprints (430) | FastAPI, Django. Spec:1011 supersedes "FastAPI-based" |
 | Validation | Pydantic v2 and pydantic-settings (431) | Joi, Zod in Python |
 | Database | PostgreSQL with Prisma (425) | MySQL, SQLite beyond local dev |
 | Queue | BullMQ on Redis (426) | RabbitMQ |
@@ -31,9 +31,9 @@ The spec decides these. This plan records the decision and the reason. Any devia
 | Orchestration | Kubernetes on kind or k3d locally; AWS EKS optional (438) | Compose only |
 | Monitoring | Prometheus and Grafana (429) | CloudWatch-only |
 
-No MCP protocol appears in the spec. The tool contract is the fixed registry at spec:500. Do not add MCP.
+The product owner chose the MCP surface over the tool registry. `21-mcp-surface` owns the surface, the authorization and the tool bindings. The registry fields moved onto the MCP tool definition. The spec now names the MCP surface, and the change from the earlier registry wording is recorded in `docs/design-notes/`. The browser tool stays bounded, so the no-generic-browser rule holds.
 
-## Curriculum labs and their owning phase (spec:682-693)
+## Curriculum labs and their owning phase (spec:685-695)
 
 | # | Lab | Owning module | Phase |
 |---|---|---|---|
@@ -56,17 +56,17 @@ Every lab still runs inside the NOVA repository. The owning module carries its t
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Confirm each technology row against spec:421-438 | this file | No deviation without a design note |
+| 1 | Confirm each technology row against spec:423-440 | this file | No deviation without a design note |
 | 2 | Record version pins and licences for every dependency | `THIRD_PARTY.md` | Every entry names a licence |
 | 3 | Lab 1: contracts with OpenAPI and Pydantic fixtures | `labs/lab01/` | All six schemas validate a fixture |
-| 4 | Write source and design notes: every choice and every rejection with a reason | `docs/design-notes/` | Each rejected option has a reason |
+| 4 | Write source and design notes: every choice and every rejection with a reason. Include the MCP surface deviation | `docs/design-notes/` | Each rejected option has a reason |
 | 5 | Create the lab registry with all 12 labs. Each row has an owning module, a phase and a `planned` or `implemented` status. Add the CI workflow for the `implemented` rows. | `labs/registry.yaml` + `.github/workflows/labs.yml` | The registry has 12 rows, the workflow runs lab 1, and it fails when an `implemented` row has no runner |
 
 ## Build order
 
 Work these steps in order. A step names tasks from the table above.
 
-1. Confirm the technology table against spec:421-438 and record version pins.
+1. Confirm the technology table against spec:423-440 and record version pins.
 2. Write the source and design notes.
 3. Deliver lab 1, then register the other 11 labs with the module file, phase and status that owns each.
 
@@ -74,8 +74,9 @@ Work these steps in order. A step names tasks from the table above.
 
 - `test_registered_labs_run_in_ci` — the workflow runs the labs marked `implemented`, and fails when an `implemented` row has no runner.
 - `test_every_dependency_names_a_licence` — a dependency without a licence fails the check.
-- `test_no_fastapi_service` — no Python service imports FastAPI, which spec:1007 supersedes.
-- `test_tool_contract_is_registry_not_mcp` — the repo declares the registry at spec:500 as the tool source, and declares no MCP server. `03-agent-runtime` enforces the same rule against the live registry in P5.
+- `test_no_fastapi_service` — no Python service imports FastAPI, which spec:1011 supersedes.
+- `test_mcp_surface_is_scoped_and_authorized` — every MCP tool names a task family, a scope and a risk tier, and the surface sits inside the scope lock. `21-mcp-surface` enforces the same rule against the live catalogue in P5.
+- `test_mcp_deviation_has_a_design_note` — the design note for the MCP surface names spec:503 and spec:504 and the reason.
 - `test_each_rejection_has_a_reason` — every row in the not-chosen column appears in `docs/design-notes/` with a reason.
 - `test_every_lab_has_an_owner` — each of the 12 labs names a module file, a phase and a status.
 

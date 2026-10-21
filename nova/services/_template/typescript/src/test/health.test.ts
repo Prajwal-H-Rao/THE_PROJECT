@@ -1,59 +1,59 @@
-/** Prove that the template serves the health endpoints. */
+/** Prove that the template serves the health endpoints over HTTP. */
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { IncomingMessage, ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
+import type { Server } from "node:http";
 
-import { handleHealth, isHealthPath, liveBody, readyBody } from "../health.js";
+import { createService } from "../app.js";
+import { liveBody, readyBody } from "../health.js";
 
-/** What a fake response records. */
-interface Recorded {
-  code: number | null;
-  body: string;
+/** Start the service on an ephemeral port. It returns the server and the port. */
+async function startService(): Promise<{ server: Server; port: number }> {
+  const server = createService();
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address() as AddressInfo;
+  return { server, port: address.port };
 }
 
-/** Return a fake request for one path. */
-function request(path: string): IncomingMessage {
-  return { url: path } as IncomingMessage;
+/** Stop the service. */
+function stopService(server: Server): Promise<void> {
+  return new Promise<void>((resolve) => server.close(() => resolve()));
 }
 
-/** Return a fake response and the record of what it sent. */
-function response(): { record: Recorded; value: ServerResponse } {
-  const record: Recorded = { code: null, body: "" };
-  const value = {
-    writeHead(code: number): ServerResponse {
-      record.code = code;
-      return value;
-    },
-    end(body: string): void {
-      record.body = body;
-    },
-  } as unknown as ServerResponse;
-  return { record, value };
-}
-
-test("the live endpoint reports that the process runs", () => {
-  const target = response();
-  const handled = handleHealth(request("/health/live"), target.value);
-  assert.equal(handled, true);
-  assert.equal(target.record.code, 200);
-  assert.deepEqual(JSON.parse(target.record.body), { status: "live" });
+test("the service serves the live endpoint over HTTP", async () => {
+  const { server, port } = await startService();
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/health/live`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { status: "live" });
+  } finally {
+    await stopService(server);
+  }
 });
 
-test("the ready endpoint reports that the service accepts traffic", () => {
-  const target = response();
-  const handled = handleHealth(request("/health/ready"), target.value);
-  assert.equal(handled, true);
-  assert.equal(target.record.code, 200);
-  assert.deepEqual(JSON.parse(target.record.body), { status: "ready" });
+test("the service serves the ready endpoint over HTTP", async () => {
+  const { server, port } = await startService();
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/health/ready`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { status: "ready" });
+  } finally {
+    await stopService(server);
+  }
+});
+
+test("the service refuses any other path", async () => {
+  const { server, port } = await startService();
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/metrics`);
+    assert.equal(response.status, 404);
+    assert.deepEqual(await response.json(), { error: "not_found" });
+  } finally {
+    await stopService(server);
+  }
 });
 
 test("the health endpoints leak no secret", () => {
   assert.deepEqual(Object.keys(liveBody()), ["status"]);
   assert.deepEqual(Object.keys(readyBody()), ["status"]);
-});
-
-test("the health paths are the only ones that the service answers", () => {
-  assert.equal(isHealthPath("/health/live"), true);
-  assert.equal(isHealthPath("/health/ready"), true);
-  assert.equal(isHealthPath("/metrics"), false);
 });
