@@ -29,9 +29,22 @@ Prove more of the record. The checker must reject a record that drifts from the 
 - `nova/docs/layout-diff.md`: states the ignored directories, the ignored directory suffixes, the ignored files and the ignored file suffixes. Names the new checker modules in the checker module list. States the service map rule of module 01 task 16. States that the ignored names match at any depth, so a source directory with such a name is skipped. States that the owning module adds a new build output name to `nova/tests/layout/ignored_paths.py`.
 - `docs/plan/README.md`: the rule that binds the plan now names `nova/tests/layout/ignored_paths.py` as the file that holds the ignore list.
 
+## Later fixes
+
+- The ignore list is scoped. The always ignored names match at any depth. The output names match only directly under a package root. A source directory with an output name below the package root is counted and checked. The user chose this rule.
+- `ignored_paths.py` holds the always ignored names, the output names, the directory suffixes, the files and the file suffixes as separate lists. The ignore file holds the same patterns as exact lines.
+- The record states the always ignored names and the output names in two sentences.
+
+- Check Y anchored the service requirement. The plan pattern and the record pattern now match the whole phrase. A plan that says `appears exactly once or twice` fails the check. A record that claims the same fails the check.
+- Check X keeps the ordinal of each path group. The ordinal must match the position of the group.
+- Check T matches a path name as a whole token. A path that is a prefix of a longer path in the plan no longer passes.
+- Check Q reads every allow-list that the section states. A second, contradictory allow-list fails the check.
+- The rule sentence in the record and in `docs/plan/README.md` names the repo-root `.gitignore` as well. The ignore list lives in three places.
+
 ## Design decisions
 
 - The record states the ignored paths in four sentences. One sentence holds each list. Check W parses all four and compares each list with the code. A second list in the same section fails the check.
+- Check Q reads every allow-list in the same way as check W.
 - Check X compares the path groups, not loose words. Each group must name the expected paths and no other path. A record that states a sixth group fails.
 - Check Y reads every count that the section states. A second, wrong count fails the check.
 - Check X compares path groups, not loose words. The record names each group by its ordinal. The check reads the group sentences, compares the group count with the count that the record states, and holds the name that each group must carry.
@@ -42,8 +55,8 @@ Prove more of the record. The checker must reject a record that drifts from the 
 
 ## Verification
 
-- `python3 nova/tests/layout/check_layout.py` passes all 26 checks.
-- `python3 nova/tests/layout/test_layout_checks.py` rejects all 48 mutations. Each check rejects its own mutation. Both acceptance scenarios pass. The git leak test passes.
+- `python3 nova/tests/layout/check_layout.py` passes all 27 checks.
+- `python3 nova/tests/layout/test_layout_checks.py` rejects all 63 mutations. Each check rejects its own mutation. Both acceptance scenarios pass. The git leak test passes.
 - The tree counts stay at 54 directories, 44 leaf directories and 43 placeholders.
 - The catalogue stays at 23 entries, 22 deployable units and 15 exact matches.
 - The layout diff stays at 10 rows.
