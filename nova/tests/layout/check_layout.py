@@ -2,6 +2,7 @@
 
 import sys
 
+import ci_checks
 import claims_checks
 import copy_checks
 import diff_checks
@@ -50,6 +51,7 @@ def build_checks(index, rows, sections, text, plan, texts, owned, repo_root, ful
         ("X extra paths", lambda: record_paths.check_extra_paths(index, extra)),
         ("Y copy claims", lambda: record_claims.check_copy_claims(copy, rows, len(index.catalogue), plan_requirement)),
         ("Z owned paths", lambda: tree_checks.check_owned_paths(owned)),
+        ("AA ci workflow", lambda: ci_checks.check_ci_workflow(repo_root)),
     ]
 
 

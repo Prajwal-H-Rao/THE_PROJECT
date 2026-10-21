@@ -1,0 +1,59 @@
+# The single CI workflow. It runs the layout checks, the lint and the typecheck.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Install the tools
+        run: python -m pip install --disable-pip-version-check ruff==0.17.1 mypy==2.4.0
+
+      - name: Run the layout checks
+        run: |
+          python nova/tests/layout/check_layout.py
+          python nova/tests/layout/test_layout_checks.py
+
+      - name: Lint the Python code
+        run: ruff check .
+
+      - name: Typecheck the Python code
+        run: mypy nova/tests/layout
+
+      - name: Prove that the typecheck fails on a type error
+        run: |
+          proof=nova/tests/layout/type_error_proof.py
+          printf 'def proof():\n    total: int = "twelve"\n    return total\n' > "$proof"
+          set +e
+          output=$(mypy nova/tests/layout 2>&1)
+          status=$?
+          set -e
+          rm -f "$proof"
+          if [ "$status" -ne 1 ]; then
+            echo "the typecheck exit code was $status, not 1"
+            echo "$output"
+            exit 1
+          fi
+          case "$output" in
+            *type_error_proof.py*) ;;
+            *)
+              echo "the typecheck did not name the type error"
+              echo "$output"
+              exit 1
+              ;;
+          esac

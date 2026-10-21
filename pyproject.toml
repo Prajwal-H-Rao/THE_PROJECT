@@ -1,0 +1,14 @@
+# The tool settings for the repo. The CI workflow runs these tools.
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+include = ["nova/**/*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["nova/tests/layout"]
+ignore_missing_imports = true
+check_untyped_defs = true

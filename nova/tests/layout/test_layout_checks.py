@@ -6,75 +6,13 @@ import sys
 import tempfile
 from pathlib import Path
 
+import cases
 import check_layout
-import mutations
-import path_mutations
-import plan_mutations
-import record_mutations
 import repo_checks
 import spec_index
 
 COPY_IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc")
 WORK_PARENT = "/tmp/opencode"
-
-# Each mutation names the check that must reject it.
-MUTATIONS = [
-    ("A", "missing layout directory", mutations.missing_directory),
-    ("B", "stray top-level directory", mutations.stray_directory),
-    ("C", "nine row diff", record_mutations.short_diff),
-    ("D", "wrong row kind", record_mutations.wrong_split),
-    ("E", "wrong catalogue-only name", record_mutations.wrong_catalogue_name),
-    ("F", "telegram and whatsapp swap", record_mutations.swap_channels),
-    ("G", "missing spec citation", record_mutations.missing_citation),
-    ("H", "empty leaf directory", mutations.empty_leaf),
-    ("I", "copied spec file", mutations.copied_spec_file),
-    ("I", "wrong omitted file count", record_mutations.wrong_omitted_count),
-    ("J", "bad module task reference", record_mutations.bad_task_reference),
-    ("K", "wrong deferred spec item", record_mutations.wrong_deferred_item),
-    ("L", "mismatched task 16 copy", mutations.mismatched_copy),
-    ("L", "mangled task 16 copy", mutations.mangled_copy),
-    ("L", "task 16 copy with a false citation", mutations.false_citation_copy),
-    ("M", "wrong scope count", record_mutations.wrong_scope_count),
-    ("M", "wrong leaf count", record_mutations.wrong_leaf_count),
-    ("N", "missing named module file", record_mutations.missing_module_file),
-    ("O", "unnamed module file", mutations.unnamed_module_file),
-    ("P", "file in the deferred directory", mutations.file_in_deferred_directory),
-    ("P", "bare placeholder file", mutations.bare_placeholder),
-    ("Q", "wrong allow-list statement", record_mutations.wrong_allow_list),
-    ("R", "bad spec citation", record_mutations.bad_spec_citation),
-    ("S", "bad plan citation", record_mutations.bad_plan_citation),
-    ("S", "plan citation without a line", record_mutations.plan_citation_without_line),
-    ("S", "plan citation with other words", record_mutations.plan_citation_with_other_words),
-    ("T", "wrong task binding", record_mutations.wrong_task_binding),
-    ("U", "missing ignore file", mutations.missing_gitignore),
-    ("U", "missing artifact pattern", mutations.missing_artifact_pattern),
-    ("V", "renamed section", record_mutations.renamed_section),
-    ("W", "wrong ignored directory list", path_mutations.wrong_ignored_list),
-    ("W", "wrong ignored file list", path_mutations.wrong_ignored_files),
-    ("W", "wrong ignored directory suffix list", path_mutations.wrong_ignored_directory_suffixes),
-    ("W", "wrong ignored file suffix list", path_mutations.wrong_ignored_file_suffixes),
-    ("X", "missing extra path", path_mutations.missing_extra_path),
-    ("X", "wrong extra path", path_mutations.wrong_extra_path),
-    ("X", "missing path group", path_mutations.missing_path_group),
-    ("X", "unnamed checker group", path_mutations.unnamed_checker_group),
-    ("X", "wrong group count", path_mutations.wrong_group_count),
-    ("X", "extra path in a group", path_mutations.extra_group_name),
-    ("X", "sixth path group", path_mutations.sixth_path_group),
-    ("Y", "wrong copy row count", record_mutations.wrong_copy_rows),
-    ("Y", "wrong service count", record_mutations.wrong_service_count),
-    ("Y", "second copy row count", record_mutations.second_copy_rows),
-    ("Y", "second service count", record_mutations.second_service_count),
-    ("Y", "plan service count", plan_mutations.plan_service_count),
-    ("Y", "plan requirement", plan_mutations.plan_requirement),
-    ("Z", "owned path that the checker skips", plan_mutations.owned_build_path),
-]
-
-# The scenarios name the changes that the checks must accept.
-SCENARIOS = [
-    ("build output under nova/", mutations.build_output),
-    ("later module output under nova/", mutations.later_module_output),
-]
-
 
 def work_root():
     """Return the parent directory that holds the work directories."""
@@ -87,6 +25,8 @@ def build_work(root):
     """Copy the tree, the plan and the repo root files into a work directory."""
     shutil.copytree(spec_index.TREE_ROOT, root / "nova", ignore=COPY_IGNORE)
     shutil.copy2(spec_index.REPO_ROOT / ".gitignore", root / ".gitignore")
+    shutil.copy2(spec_index.REPO_ROOT / "pyproject.toml", root / "pyproject.toml")
+    shutil.copytree(spec_index.REPO_ROOT / ".github", root / ".github")
     # The plan is a copy. A mutation must not change the real plan.
     shutil.copytree(spec_index.REPO_ROOT / "docs", root / "docs")
     # The work directory is a git repo. The git check must run in every mutation.
@@ -153,7 +93,7 @@ def main():
         problems.append(leak)
     else:
         print("PASS the git check finds a leak that the text check cannot see")
-    for label, name, mutate in MUTATIONS:
+    for label, name, mutate in cases.MUTATIONS:
         labels = run_mutation(label, name, mutate)
         if labels is None:
             problems.append("the mutation " + name + " did not change the tree")
@@ -161,7 +101,7 @@ def main():
             problems.append("the mutation " + name + " did not fail check " + label)
         else:
             print("PASS " + label + " rejects " + name)
-    for name, mutate in SCENARIOS:
+    for name, mutate in cases.SCENARIOS:
         changed, labels = run_change(mutate)
         if not changed:
             problems.append("the scenario " + name + " did not change the tree")
