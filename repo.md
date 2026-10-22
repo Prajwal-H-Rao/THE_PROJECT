@@ -25,7 +25,7 @@ This repo has three purposes.
 - `.github/workflows/ci.yml` — the single CI workflow. It runs the layout checks, the lint, the typecheck, the two template test suites, the api-gateway build and test, and the database isolation test. It proves that the typecheck fails on a type error.
 - `pyproject.toml` — tool config. It holds the ruff and the mypy settings. The mypy gate runs with `check_untyped_defs` on.
 - `.gitignore` — repo root ignore file. Keeps the byte-code cache, the build output and the generated Next.js type file out of git.
-- `README.md` — repo readme. Present at the root, not covered elsewhere.
+- `README.md` — repo readme. It holds the project summary, the prerequisites, the install and run guide, the per-service setup status, and the rule to update it when a service lands.
 
 Machine-global files live outside this repo:
 
