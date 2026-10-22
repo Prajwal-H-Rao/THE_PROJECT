@@ -11,10 +11,12 @@
     "build": "next build",
     "build:test": "tsc -p tsconfig.test.json",
     "start": "next start -H ${NOVA_HOST:-127.0.0.1} -p ${NOVA_PORT:-8000}",
-    "pretest": "for f in session middleware body; do test -f dist/test/$f.test.js || { echo 'the test build is missing. Run npm run build:test'; exit 1; }; done",
+    "pretest": "for f in session middleware body service-auth; do test -f dist/test/$f.test.js || { echo 'the test build is missing. Run npm run build:test'; exit 1; }; done",
     "test": "node --test \"dist/test/*.test.js\""
   },
   "dependencies": {
+    "@nova/contracts": "file:../../packages/contracts",
+    "bullmq": "6.4.0",
     "next": "16.4.2",
     "react": "19.3.1",
     "react-dom": "19.3.1"

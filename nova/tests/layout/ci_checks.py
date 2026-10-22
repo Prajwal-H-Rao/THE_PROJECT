@@ -46,14 +46,21 @@ TEMPLATE_PATHS = (
     "nova/services/_template/typescript",
 )
 
-# The service paths that the workflow must test.
+# The service paths that the workflow must test. Contracts builds before the gateway.
 SERVICE_PATHS = (
     "nova/services/api-gateway",
+    "nova/packages/contracts",
 )
 
-# The compose paths that the workflow must name for the database stack.
+# The paths and step markers the workflow must name. They keep every gate self-proving.
 DATABASE_PATHS = (
     "nova/infra/compose/compose.yaml",
+    "nova/infra/compose/compose.platform.yaml",
+    "object-init",
+    "node queues/enqueue.mjs", "node queues/verify.mjs", "restart redis",
+    "outcome=payload_intact",
+    "probe-allow", "probe-deny",
+    "mode=allow outcome=connected", "mode=deny outcome=blocked",
 )
 
 # The scope of the typecheck in the workflow and in the config.

@@ -1,0 +1,77 @@
+# The platform run pieces of the NOVA Compose stack. The substrate in compose.yaml holds
+# the always-on services and the network definitions. This file holds the pieces that a
+# run mode guards: the object identities init, the two network probes and the queue
+# runner. Merge both files for the full view:
+# docker compose -f compose.yaml -f compose.platform.yaml
+# The env guards below stay in step with the substrate. YAML anchors cannot cross a file.
+
+# The shared shape of the two probe entries. Each entry overrides the command and the network.
+# A missing probe value fails the stack with the named reason.
+x-probe-base: &probe-base
+  build:
+    context: ../../infra/compose/probe
+  environment:
+    NOVA_PROBE_DB_HOST: ${NOVA_PROBE_DB_HOST:?the local secret file holds no probe target}
+    NOVA_PROBE_DB_PORT: ${NOVA_PROBE_DB_PORT:?the local secret file holds no probe port}
+  profiles: [guard]
+
+services:
+  object-init:
+    image: python:3.12-alpine@sha256:b658b05ce9c4eb97ec6fc19424818a1f31993659c2b505a532f470e83807815d
+    # WHY: the store ships no init hook. This sidecar creates the two synthetic identities
+    # and their per-store policies through the signed admin API. The identities come from
+    # the local secret file. The container never invents a value.
+    command: ["python3", "/opt/object-init.py"]
+    volumes:
+      - ../../infra/compose/object-init/object-init.py:/opt/object-init.py:ro
+      # WHY: the admin calls ride the shared signing helper. The tests hold its source.
+      - ../../tests/security/sigv4_request.py:/opt/sigv4_request.py:ro
+    environment:
+      NOVA_OBJECT_ROOT_USER: ${NOVA_OBJECT_ROOT_USER:?the local secret file holds no object root user}
+      NOVA_OBJECT_ROOT_PASSWORD: ${NOVA_OBJECT_ROOT_PASSWORD:?the local secret file holds no object root password}
+      NOVA_OBJECT_USER_ALPHA: ${NOVA_OBJECT_USER_ALPHA:?the local secret file holds no alpha identity name}
+      NOVA_OBJECT_PASSWORD_ALPHA: ${NOVA_OBJECT_PASSWORD_ALPHA:?the local secret file holds no alpha identity password}
+      NOVA_OBJECT_USER_BETA: ${NOVA_OBJECT_USER_BETA:?the local secret file holds no beta identity name}
+      NOVA_OBJECT_PASSWORD_BETA: ${NOVA_OBJECT_PASSWORD_BETA:?the local secret file holds no beta identity password}
+      NOVA_OBJECT_HOST: rustfs
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    networks:
+      - nova-app
+    restart: "no"
+    profiles: [test]
+
+  probe-allow:
+    <<: *probe-base
+    # WHY: the positive control joins the app network. It must reach Postgres. A failed
+    # connect fails the CI step through the exit code and the record line.
+    command: ["--mode", "allow"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-app
+
+  probe-deny:
+    <<: *probe-base
+    # WHY: the negative control joins the untrusted network alone. A connect against
+    # Postgres must fail there. The record line names the target and the failure kind.
+    command: ["--mode", "deny"]
+    networks:
+      - nova-untrusted
+
+  queue-runner:
+    build:
+      context: ../../services/api-gateway
+      dockerfile: queues/Dockerfile
+    environment:
+      NOVA_REDIS_HOST: redis
+      NOVA_REDIS_PORT: "6379"
+      NOVA_REDIS_PASSWORD: ${NOVA_REDIS_PASSWORD:?the local secret file holds no redis password}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - nova-app
+    profiles: [test]

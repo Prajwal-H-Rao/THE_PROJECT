@@ -41,7 +41,10 @@ FILE_SUFFIXES = (".py", ".toml", ".yml", ".yaml", ".json", ".md", ".sh", ".lock"
 EXTENSIONLESS_NAMES = ("Makefile", "LICENSE", "CODEOWNERS", "Dockerfile")
 
 # The design notes that the repo holds outside the tree. A module task updates the list.
-DESIGN_NOTES = ("docs/design-notes/nova-api-gateway.md",)
+DESIGN_NOTES = (
+    "docs/design-notes/nova-api-gateway.md",
+    "docs/design-notes/nova-object-store.md",
+)
 
 
 def expected_groups(index):

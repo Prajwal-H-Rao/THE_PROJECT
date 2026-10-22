@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rootDir": ".",
+    "outDir": "dist",
+    "declaration": true,
+    "noEmit": false,
+    "strict": true,
+    "types": ["node"]
+  },
+  "include": ["service-token.ts", "service-token.test.ts"]
+}

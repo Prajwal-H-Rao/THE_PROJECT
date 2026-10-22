@@ -12,7 +12,8 @@ run the system.
 ## Status
 
 - Implemented: repo checks, service templates, database roles and schemas, the local
-  Compose stack, and the api-gateway.
+  compose stack with Redis, RustFS and network guards, the shared service contracts,
+  and the api-gateway.
 - Not started: identity, policy, document parsing, agent runtime, model gateway, and
   the domain services. Their trees hold placeholders only.
 
@@ -59,34 +60,41 @@ mypy nova
 ```
 
 CI runs the layout checks, the Python lint and typecheck, the template test suites,
-the api-gateway build and test, and the database isolation test.
+the contracts build and test, the api-gateway build and test, the compose isolation
+suites, the queue restart test, and the network guard test.
 
 ## Set up the data stack
 
-The stack lives in `nova/infra/compose/`. It runs Postgres 17 with one role per
-service. The database publishes no port. It stays on the internal network.
+The stack lives in `nova/infra/compose/` over two files. `compose.yaml` holds the
+always-on services. `compose.platform.yaml` holds the init sidecar, the queue runner
+and the probes. The stack runs Postgres 17 with one role per service, Redis for the
+queue, and RustFS as the object store. No service publishes a port. They stay on the
+internal networks.
 
 ```bash
 cd nova/infra/compose
 cp .env.example .env
 # Open .env and set every password.
-docker compose up -d postgres
+docker compose -f compose.yaml -f compose.platform.yaml up -d postgres
 ```
 
 The init scripts in `nova/db/init/` create the roles and the schemas on first start.
 The stack refuses to start with a missing password.
 
-Run the database isolation test:
+Run the isolation suites:
 
 ```bash
-docker compose --profile test up tests
-docker compose --profile test down
+docker compose -f compose.yaml -f compose.platform.yaml --profile test run --rm --build object-init
+docker compose -f compose.yaml -f compose.platform.yaml --profile test run --rm --build tests
 ```
+
+`object-init` creates the two object identities. `tests` runs the database and the
+object prefix isolation tests.
 
 Stop the stack:
 
 ```bash
-docker compose down
+docker compose -f compose.yaml -f compose.platform.yaml down
 ```
 
 The data volume survives `down`. Add `--volumes` to remove it.
@@ -112,9 +120,11 @@ NOVA_SESSION_SECRET=<32+ bytes> npm start
 
 The server binds `127.0.0.1:8000`. The health route is `/health/live` and it is public.
 `NOVA_SESSION_SECRET` must hold at least 32 bytes. A missing secret makes every request
-answer 500. Other settings: `NOVA_ALLOWED_ORIGINS`, `NOVA_RATE_LIMIT_MAX`,
+answer 500. `/api/internal/` routes take service JWTs instead of sessions. The gate
+fails closed: `NOVA_SERVICE_JWT_SECRET` empty keeps those routes closed, and a present
+secret must hold 32 bytes. Other settings: `NOVA_ALLOWED_ORIGINS`, `NOVA_RATE_LIMIT_MAX`,
 `NOVA_RATE_LIMIT_WINDOW_MS`, `NOVA_MAX_BODY_BYTES`, `NOVA_TRUST_PROXY`, `NOVA_HOST`,
-`NOVA_PORT`.
+`NOVA_PORT`, `NOVA_SERVICE_TOKEN_ISSUER`, `NOVA_SERVICE_TOKEN_AUDIENCE`.
 
 New services start from a template:
 

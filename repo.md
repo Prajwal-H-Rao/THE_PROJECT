@@ -20,9 +20,9 @@ This repo has three purposes.
 - `NOVA_Full_Updated_Spec.md` — NOVA spec. Source of truth for all NOVA content. 1546 lines, 74 fence-aware headings. It names the MCP surface and the tool catalogue.
 - `NOVA_Employer_Targets_500.csv` — seed employer registry. 500 rows: 250 `IN`, 250 `GLOBAL`.
 - `docs/plan/` — NOVA build plan. 25 files: index, order-and-constraints, claims ledger, coverage map, 21 module files. 390 tasks, 11 phases. No dates and no hour estimates. The plan holds feature order and constraints only.
-- `docs/design-notes/` — the design notes. Each note records a technology deviation and its reason. The api-gateway note records the Next.js choice.
-- `nova/` — NOVA monorepo tree. 73 directories below the root, 52 leaf directories, 40 `.gitkeep` placeholders. `nova/docs/layout-diff.md` records the 10 catalogue-to-layout differences. `nova/services/_template/` holds the Python and the TypeScript service skeleton. `nova/services/api-gateway/` holds the api-gateway-bff. It is a Next.js 16 app with route handlers and a proxy. `nova/infra/compose/` holds the local stack. Its secret file is ignored by git. A shared `x-role-passwords` anchor holds the 16 role password entries. The `postgres` service and the `tests` service both merge the anchor. It keeps the two lists in step. `nova/db/init/` holds the database roles and schemas. `nova/tests/layout/` holds the checker for the tree, the record and the plan. It holds 22 modules.
-- `.github/workflows/ci.yml` — the single CI workflow. It runs the layout checks, the lint, the typecheck, the two template test suites, the api-gateway build and test, and the database isolation test. It proves that the typecheck fails on a type error.
+- `docs/design-notes/` — the design notes. Each note records a technology deviation and its reason. The api-gateway note records the Next.js choice. The object-store note records the RustFS choice for module 01 task 7.
+- `nova/` — NOVA monorepo tree. 78 directories below the root, 55 leaf directories, 39 `.gitkeep` placeholders. `nova/docs/layout-diff.md` records the 10 catalogue-to-layout differences. `nova/services/_template/` holds the Python and the TypeScript service skeleton. `nova/services/api-gateway/` holds the api-gateway-bff. It is a Next.js 16 app with route handlers and a proxy. Its `queues/` directory holds the BullMQ queue runner. `nova/packages/contracts/` holds the shared service identity contracts. `nova/infra/compose/` holds the local stack over two files: the substrate `compose.yaml` and the run pieces `compose.platform.yaml`. Its secret file is ignored by git. A shared `x-role-passwords` anchor holds the 16 role password entries. The `postgres` service and the `tests` service both merge the anchor. It keeps the two lists in step. `nova/db/init/` holds the database roles and schemas. `nova/tests/security/` holds the database and object isolation tests. `nova/tests/layout/` holds the checker for the tree, the record and the plan. It holds 22 modules.
+- `.github/workflows/ci.yml` — the single CI workflow. It runs the layout checks, the lint, the typecheck, the two template test suites, the contracts build and test, the api-gateway build and test, the compose isolation suites, the queue restart test, and the network guard test. It proves that the typecheck fails on a type error.
 - `pyproject.toml` — tool config. It holds the ruff and the mypy settings. The mypy gate runs with `check_untyped_defs` on.
 - `.gitignore` — repo root ignore file. Keeps the byte-code cache, the build output and the generated Next.js type file out of git.
 - `README.md` — repo readme. It holds the project summary, the prerequisites, the install and run guide, the per-service setup status, and the rule to update it when a service lands.
@@ -90,8 +90,8 @@ Read any downloaded `SKILL.md` before you trust it. It is third-party agent inst
 
 ## Verified tree counts (2026-10-22)
 
-- Tree: 73 directories below `nova/`, 52 leaf directories, 40 `.gitkeep` placeholders.
+- Tree: 78 directories below `nova/`, 55 leaf directories, 39 `.gitkeep` placeholders.
 - Catalogue: 23 entries. Deployable layout paths: 22. Exact name matches: 15.
 - Layout diff: 10 rows. 3 catalogue-only, 2 layout-only, 5 renamed.
-- Checker: 28 checks, 68 mutations, 4 acceptance scenarios.
+- Checker: 28 checks, 72 mutations, 4 acceptance scenarios.
 - `nova/services/packages/` was an unrecorded duplicate of the spec-named `nova/packages/`. Removed on 2026-10-22. The tree matches the spec layout again.

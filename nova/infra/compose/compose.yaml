@@ -1,9 +1,10 @@
-# The local Compose stack of NOVA. It holds the Postgres cluster and the database tests.
-# The stack is local-only. It uses synthetic data and the local secret file of the directory.
-# The database publishes no port. The spec exposes only the web and the API edge.
-#
-# The stack reads its passwords from `.env` next to this file. Copy `.env.example` to `.env`
-# first. The compose file refuses to start when a value is missing.
+# The local Compose stack of NOVA: the substrate. It holds the Postgres cluster,
+# the queue broker, the object store and the isolation tests. The stack is local-only.
+# It uses synthetic data and the local secret file of the directory.
+# The spec exposes only the web and the API edge. Every port here stays inside the stack.
+# The run pieces that the tests profile guards live in compose.platform.yaml. Merge both
+# files: docker compose -f compose.yaml -f compose.platform.yaml. The isolation suite of
+# CI does exactly that. The three networks name the three trust layers at spec:693.
 
 name: nova
 
@@ -27,6 +28,19 @@ x-role-passwords: &role-passwords
   NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE: ${NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE:?the local secret file holds no password for tasks_reminders_service}
   NOVA_PG_PASSWORD_TRIPS_SERVICE: ${NOVA_PG_PASSWORD_TRIPS_SERVICE:?the local secret file holds no password for trips_service}
 
+# The broker and the object store share this block. Each consumer merges it. The object host
+# is the service name of the store. compose.platform.yaml spells the same guards inline;
+# YAML anchors cannot cross a file. Keep the two blocks in step.
+x-store-env: &store-env
+  NOVA_REDIS_PASSWORD: ${NOVA_REDIS_PASSWORD:?the local secret file holds no redis password}
+  NOVA_OBJECT_ROOT_USER: ${NOVA_OBJECT_ROOT_USER:?the local secret file holds no object root user}
+  NOVA_OBJECT_ROOT_PASSWORD: ${NOVA_OBJECT_ROOT_PASSWORD:?the local secret file holds no object root password}
+  NOVA_OBJECT_USER_ALPHA: ${NOVA_OBJECT_USER_ALPHA:?the local secret file holds no alpha identity name}
+  NOVA_OBJECT_PASSWORD_ALPHA: ${NOVA_OBJECT_PASSWORD_ALPHA:?the local secret file holds no alpha identity password}
+  NOVA_OBJECT_USER_BETA: ${NOVA_OBJECT_USER_BETA:?the local secret file holds no beta identity name}
+  NOVA_OBJECT_PASSWORD_BETA: ${NOVA_OBJECT_PASSWORD_BETA:?the local secret file holds no beta identity password}
+  NOVA_OBJECT_HOST: rustfs
+
 services:
   postgres:
     image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
@@ -46,12 +60,46 @@ services:
       timeout: 3s
       retries: 30
     networks:
-      - nova-internal
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 1G
+      - nova-app
+    deploy: {resources: {limits: {cpus: "2.0", memory: 1G}}}
+
+  redis:
+    image: redis:8.2-alpine@sha256:d1389b3f3f981460b9b0918c4d7390c6e9decb8c69b9f09a02e1b6fd7554ade7
+    # WHY: the archive keeps every accepted job on disk. The restart test reads that record.
+    command: ["redis-server", "--requirepass", "${NOVA_REDIS_PASSWORD:?the local secret file holds no redis password}", "--appendonly", "yes"]
+    environment:
+      NOVA_REDIS_PASSWORD: ${NOVA_REDIS_PASSWORD:?the local secret file holds no redis password}
+    volumes:
+      - nova-redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$NOVA_REDIS_PASSWORD\" ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - nova-app
+    deploy: {resources: {limits: {cpus: "1.0", memory: 512M}}}
+
+  rustfs:
+    image: rustfs/rustfs:1.0.3@sha256:9ca9559533b537d10482fe923288b676ad08f92a7069d9a17327fbae3cab688b
+    # Record of the source switch: docs/design-notes/nova-object-store.md. MinIO left the
+    # public registries. RustFS is the Apache-2.0 S3 store this stack runs instead.
+    command: ["/data"]
+    environment:
+      RUSTFS_ACCESS_KEY: ${NOVA_OBJECT_ROOT_USER:?the local secret file holds no object root user}
+      RUSTFS_SECRET_KEY: ${NOVA_OBJECT_ROOT_PASSWORD:?the local secret file holds no object root password}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ENABLE: "false"
+    volumes:
+      - nova-rustfs-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - nova-app
+    deploy: {resources: {limits: {cpus: "1.0", memory: 512M}}}
 
   tests:
     build:
@@ -62,16 +110,20 @@ services:
       - ../../../NOVA_Full_Updated_Spec.md:/app/NOVA_Full_Updated_Spec.md:ro
       - ../../db/init:/app/nova/db/init:ro
       - ../../tests/security/test_database_isolation.py:/app/nova/tests/security/test_database_isolation.py:ro
+      - ../../tests/security/test_object_prefix_isolation.py:/app/nova/tests/security/test_object_prefix_isolation.py:ro
+      - ../../tests/security/sigv4_request.py:/app/nova/tests/security/sigv4_request.py:ro
     depends_on:
       postgres:
         condition: service_healthy
     environment:
       <<: *role-passwords
+      <<: *store-env
+      NOVA_OBJECT_PORT: "9000"
       NOVA_PG_HOST: postgres
       NOVA_PG_PORT: "5432"
       NOVA_PG_DATABASE: nova
     networks:
-      - nova-internal
+      - nova-app
     deploy:
       resources:
         limits:
@@ -81,9 +133,20 @@ services:
       - test
 
 networks:
-  nova-internal:
+  # WHY three networks. The name of each names its trust layer at spec:693. The bridge
+  # engine drops cross-network traffic, so the untrusted network proves module 01 rule 9.
+  # The internal flag denies egress on every network. The edge network stays empty here.
+  nova-app:
+    driver: bridge
+    internal: true
+  nova-untrusted:
+    driver: bridge
+    internal: true
+  nova-edge:
     driver: bridge
     internal: true
 
 volumes:
   nova-postgres-data:
+  nova-redis-data:
+  nova-rustfs-data:

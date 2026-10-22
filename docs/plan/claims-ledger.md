@@ -36,6 +36,7 @@ Only `verified` permits automated polling. A `stale` or `unverifiable` claim for
 | C15 | AirLLM streams one layer at a time so a 70B model fits 4 GB VRAM. Cost is seconds per token. It is a Python library, not an OpenAI-compatible server | https://github.com/lyogavin/airllm | evaluated-rejected | 2026-10-12 | 2026-11-25 | `05-model-strategy` (P3) |
 | C16 | llama.cpp already exposes layer offload through `--n-gpu-layers`, so the AirLLM idea reaches NOVA without AirLLM | https://github.com/ggml-org/llama.cpp | evaluated-rejected | 2026-10-12 | 2026-11-25 | `05-model-strategy` (P3) |
 | C17 | pgvector v0.8.7 supports Postgres 13 and later. Docker tags run pg13 to pg18 | https://github.com/pgvector/pgvector | verified | 2026-10-12 | 2026-10-12 | `02-data-and-audit` (P1) |
+| C18 | RustFS 1.0.3 is Apache-2.0 and serves S3 on port 9000. Its admin API answers on `/minio/admin/v3` with `/rustfs/admin/v3` as fallback. Its policies hold no conditions | https://github.com/rustfs/rustfs | verified | 2026-10-22 | 2026-12-22 | `01-architecture` task 7 (P1) |
 
 ## Why AirLLM was rejected
 

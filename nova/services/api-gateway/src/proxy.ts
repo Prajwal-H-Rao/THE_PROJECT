@@ -8,11 +8,21 @@ import { checkCookieWrite } from "@/lib/csrf";
 import { logRequest } from "@/lib/logging";
 import { RateLimiter } from "@/lib/rate-limit";
 import { errorResponse } from "@/lib/responses";
+import {
+  SERVICE_ID_HEADER,
+  SERVICE_SCOPE_HEADER,
+  SERVICE_TOKEN_HEADER,
+  verifyServiceCall,
+} from "@/lib/service-auth";
+import type { ServiceClaims } from "@nova/contracts";
 import { verifySession } from "@/lib/session";
 import type { SessionContext } from "@/lib/session";
 import { settings } from "@/lib/settings";
 import { resolveTrace, traceparentOf } from "@/lib/trace";
 import type { TraceContext } from "@/lib/trace";
+
+/** The internal route prefix. Its own token rule runs before the session chain. */
+const INTERNAL_PREFIX = "/api/internal/";
 
 /** The header that carries the verified user id to the route handler. */
 export const USER_HEADER = "x-nova-user-id";
@@ -28,7 +38,7 @@ export const TRACE_HEADER = "x-nova-trace-id";
 
 let limiter: RateLimiter | null = null;
 
-/** Return the limiter of the process. It lives until module 01 task 6 lands Redis. */
+/** Return the limiter of the process. Module 07 task 14 moves the limit onto the shared store. */
 function rateLimiter(): RateLimiter {
   if (limiter === null) {
     const current = settings();
@@ -49,6 +59,15 @@ export function proxy(request: NextRequest): Response {
         return reject(429, "rate_limited", context, request, { "retry-after": String(wait) });
       }
     }
+    // WHY: a service caller holds no user session. The internal branch answers service
+    // tokens first and keeps the session chain for human traffic.
+    if (request.nextUrl.pathname.startsWith(INTERNAL_PREFIX)) {
+      const service = verifyServiceCall(request, current, Math.floor(Date.now() / 1000));
+      if (!service.ok) {
+        return reject(401, service.reason, context, request);
+      }
+      return passService(request, service.claims, context);
+    }
     const session = verifySession(request, current.sessionSecret, Math.floor(Date.now() / 1000));
     if (!session.ok) {
       return reject(401, session.reason, context, request);
@@ -68,6 +87,25 @@ export function proxy(request: NextRequest): Response {
     // WHY: the answer holds a fixed code. The message of the error never reaches the client.
     return reject(503, "service_unavailable", context, request);
   }
+}
+
+/** Pass a service request to the route handler with the verified service context. */
+function passService(request: NextRequest, claims: ServiceClaims, context: TraceContext): Response {
+  const headers = new Headers(request.headers);
+  // WHY: the proxy owns every context header. A caller must never set one.
+  headers.delete(USER_HEADER);
+  headers.delete(TENANT_HEADER);
+  headers.delete(CHANNEL_HEADER);
+  headers.delete(TRACE_HEADER);
+  headers.delete(SERVICE_ID_HEADER);
+  headers.delete(SERVICE_SCOPE_HEADER);
+  // WHY: the raw token must not leak into the handler context.
+  headers.delete("authorization");
+  headers.delete(SERVICE_TOKEN_HEADER);
+  headers.set(SERVICE_ID_HEADER, claims.sub);
+  headers.set(SERVICE_SCOPE_HEADER, claims.scope);
+  headers.set(TRACE_HEADER, context.traceId);
+  return withTrace(NextResponse.next({ request: { headers } }), context);
 }
 
 /** Answer a request that the chain refuses. */

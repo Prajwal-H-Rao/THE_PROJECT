@@ -15,6 +15,12 @@ export const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 /** The default number of trusted proxy hops. It holds none. */
 export const DEFAULT_TRUST_PROXY_HOPS = 0;
 
+/** The default issuer of the service tokens that the gateway accepts. */
+export const DEFAULT_SERVICE_ISSUER = "nova";
+
+/** The default audience of the service tokens that the gateway accepts. */
+export const DEFAULT_SERVICE_AUDIENCE = "nova-internal";
+
 /** The settings of one gateway process. */
 export interface Settings {
   readonly sessionSecret: string;
@@ -23,6 +29,9 @@ export interface Settings {
   readonly rateLimitWindowMs: number;
   readonly maxBodyBytes: number;
   readonly trustProxyHops: number;
+  readonly serviceJwtSecret: string;
+  readonly serviceTokenIssuer: string;
+  readonly serviceTokenAudience: string;
 }
 
 /** The error that a bad environment raises. Its message holds no secret. */
@@ -38,13 +47,19 @@ export function settings(env: NodeJS.ProcessEnv = process.env): Settings {
   return cached;
 }
 
-/** Return the settings that the environment holds. It throws when the secret is missing. */
+/** Return the settings that the environment holds. It throws when a secret is bad. */
 export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
   const secret = env.NOVA_SESSION_SECRET ?? "";
   if (Buffer.byteLength(secret, "utf8") < MIN_SECRET_BYTES) {
     // WHY: an empty or short secret lets anyone mint a session.
     throw new SettingsError(
       "NOVA_SESSION_SECRET must hold at least " + String(MIN_SECRET_BYTES) + " bytes");
+  }
+  const serviceSecret = env.NOVA_SERVICE_JWT_SECRET ?? "";
+  if (serviceSecret !== "" && Buffer.byteLength(serviceSecret, "utf8") < MIN_SECRET_BYTES) {
+    // WHY: a short service key lets any caller mint a service token. The route then fails.
+    throw new SettingsError(
+      "NOVA_SERVICE_JWT_SECRET must hold at least " + String(MIN_SECRET_BYTES) + " bytes");
   }
   return {
     sessionSecret: secret,
@@ -55,6 +70,10 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
     maxBodyBytes: positiveInteger(
       Number(env.NOVA_MAX_BODY_BYTES ?? DEFAULT_MAX_BODY_BYTES), DEFAULT_MAX_BODY_BYTES),
     trustProxyHops: trustHops(env.NOVA_TRUST_PROXY),
+    // WHY: an empty service key keeps the internal routes closed. The gate fails shut.
+    serviceJwtSecret: serviceSecret,
+    serviceTokenIssuer: textValue(env.NOVA_SERVICE_TOKEN_ISSUER, DEFAULT_SERVICE_ISSUER),
+    serviceTokenAudience: textValue(env.NOVA_SERVICE_TOKEN_AUDIENCE, DEFAULT_SERVICE_AUDIENCE),
   };
 }
 
@@ -78,4 +97,12 @@ export function trustHops(value: string | undefined): number {
 /** Return the number when it is a positive integer, else the fallback. */
 export function positiveInteger(value: number, fallback: number): number {
   return Number.isInteger(value) && value > 0 ? value : fallback;
+}
+
+/** Return the text when it is a non-empty value, else the fallback. */
+export function textValue(value: string | undefined, fallback: string): string {
+  if (value === undefined || value.trim() === "") {
+    return fallback;
+  }
+  return value;
 }

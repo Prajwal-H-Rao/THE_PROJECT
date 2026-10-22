@@ -75,6 +75,12 @@ jobs:
               ;;
           esac
 
+      - name: Build the shared contracts before the gateway step reads them
+        run: |
+          cd nova/packages/contracts
+          npm ci
+          npm test
+
       - name: Build and test the api-gateway
         run: |
           cd nova/services/api-gateway
@@ -83,14 +89,73 @@ jobs:
           npm run build:test
           npm test
 
-      - name: Test the per-service database isolation
+      - name: Test the database and object isolation suites
         run: |
           cp nova/infra/compose/.env.example nova/infra/compose/.env
           chmod 600 nova/infra/compose/.env
-          compose="docker compose -f nova/infra/compose/compose.yaml --profile test"
+          compose="docker compose -f nova/infra/compose/compose.yaml -f nova/infra/compose/compose.platform.yaml --profile test"
           $compose down -v --remove-orphans
           status=0
+          $compose run --rm --build object-init || status=$?
           $compose run --rm --build tests || status=$?
+          $compose down -v --remove-orphans
+          rm -f nova/infra/compose/.env
+          exit $status
+
+      - name: Test that the queue job survives the broker restart
+        run: |
+          cp nova/infra/compose/.env.example nova/infra/compose/.env
+          chmod 600 nova/infra/compose/.env
+          compose="docker compose -f nova/infra/compose/compose.yaml -f nova/infra/compose/compose.platform.yaml --profile test"
+          $compose down -v --remove-orphans
+          status=0
+          record=$($compose run --rm --build queue-runner node queues/enqueue.mjs 2>/dev/null | grep '^ENQUEUE ') || status=$?
+          job=$(printf '%s\n' "$record" | grep -o 'job=[^ ]*' | head -1 | cut -d= -f2)
+          payload=$(printf '%s\n' "$record" | grep -o 'payload=[^ ]*' | cut -d= -f2)
+          if [ -z "$job" ] || [ -z "$payload" ]; then
+            echo "the enqueue record is incomplete: $record"
+            exit 1
+          fi
+          $compose restart redis || status=$?
+          proof=$($compose run --rm queue-runner node queues/verify.mjs "$job" "$payload" 2>/dev/null | grep '^VERIFY ') || status=$?
+          case "$proof" in
+            *outcome=payload_intact*) ;;
+            *)
+              echo "the job did not survive the broker restart: $proof"
+              exit 1
+              ;;
+          esac
+          $compose down -v --remove-orphans
+          rm -f nova/infra/compose/.env
+          exit $status
+
+      - name: Test the default-deny network rule
+        run: |
+          cp nova/infra/compose/.env.example nova/infra/compose/.env
+          chmod 600 nova/infra/compose/.env
+          compose="docker compose -f nova/infra/compose/compose.yaml -f nova/infra/compose/compose.platform.yaml --profile guard"
+          $compose down -v --remove-orphans
+          status=0
+          # WHY: the allow run first. It holds the healthy dependency of Postgres, so the
+          # deny run that follows sees a listening target and proves the rule, not dead time.
+          allow=$($compose run --rm --build probe-allow 2>/dev/null | grep '^PROBE ') || status=$?
+          case "$allow" in
+            *"target=postgres port=5432 mode=allow outcome=connected"*) ;;
+            *)
+              echo "the allow probe did not connect: $allow"
+              exit 1
+              ;;
+          esac
+          deny=$($compose run --rm --build probe-deny 2>/dev/null | grep '^PROBE ') || status=$?
+          case "$deny" in
+            *"target=postgres port=5432 mode=deny outcome=blocked kind="*) ;;
+            *)
+              echo "the deny probe record is wrong: $deny"
+              exit 1
+              ;;
+          esac
+          echo "$allow"
+          echo "$deny"
           $compose down -v --remove-orphans
           rm -f nova/infra/compose/.env
           exit $status

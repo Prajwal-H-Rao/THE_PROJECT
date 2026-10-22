@@ -29,10 +29,10 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 3 | Write the service skeleton template | `services/_template/` | Template builds and serves `/health/live` |
 | 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs. It sets the session token format | `services/api-gateway/` | Gateway rejects an unauthenticated request |
 | 5 | Add Postgres with one schema and one role per service that owns data | `infra/compose/`, `db/init/`, `tests/security/` | Service A cannot read service B's schema |
-| 6 | Add Redis and one BullMQ queue | `services/api-gateway/queues/` | Job survives a container restart |
-| 7 | Add MinIO with per-service prefixes | `infra/compose/` | Worker in prefix A cannot list prefix B |
-| 8 | Implement workload identity: signed service JWTs with issuer, audience, expiry and scope | `packages/contracts/`, gateway middleware | Missing and invalid tokens are rejected |
-| 9 | Add default-deny network rules in Compose and prove them on a placeholder untrusted container | `infra/compose/` | The placeholder untrusted container cannot reach Postgres |
+| 6 | Add Redis and one BullMQ queue with opaque payloads. Task 13 lands the typed envelope. Order rule 3 applies. | `services/api-gateway/queues/` | Job survives a container restart |
+| 7 | Add RustFS with a per-identity store name. Spec:786 holds least privilege; the matrix waits for P3 (order rule 3) | `infra/compose/` | Worker in prefix A cannot list prefix B |
+| 8 | Implement workload identity: signed service JWTs with issuer, audience, expiry and scope. The private-port proof waits (order rule 3) | `packages/contracts/`, gateway middleware | Missing and invalid tokens are rejected |
+| 9 | Add default-deny network rules in Compose. The untrusted probe proves per-network DNS and subnet isolation | `infra/compose/` | The placeholder untrusted container cannot reach Postgres |
 | 10 | Define `/health/live` and `/health/ready` on every service created so far | each existing service | Health returns no secret material |
 | 11 | Wire OpenTelemetry correlation IDs across gateway, services and workers | `infra/observability/` | One trace spans UI to DB |
 | 12 | Publish versioned OpenAPI for two services | `packages/contracts/` | Contract test fails on a breaking change |

@@ -32,12 +32,58 @@ def replace_in_work(work, relative, old, new):
     return True
 
 
+def remove_step(work, step_name):
+    """Remove one workflow step block, from its name line to the next name line."""
+    text = read_file(work, WORKFLOW)
+    marker = "      - name: " + step_name + "\n"
+    start = text.find(marker)
+    if start < 0:
+        return False
+    following = text.find("\n      - name: ", start + 1)
+    # WHY: a last step has no following name line. Its block runs to the file end.
+    end = len(text) if following < 0 else following + 1
+    write_file(work, WORKFLOW, text[:start] + text[end:])
+    return True
+
+
 def remove_typecheck_step(work):
     """Remove the typecheck step from the CI workflow."""
-    return replace_in_work(
-        work, WORKFLOW,
-        "      - name: Typecheck the Python code\n        run: mypy nova\n",
-        "")
+    return remove_step(work, "Typecheck the Python code")
+
+
+def remove_gateway_step(work):
+    """Remove the gateway step from the CI workflow."""
+    return remove_step(work, "Build and test the api-gateway")
+
+
+def remove_database_step(work):
+    """Remove the compose isolation step from the CI workflow."""
+    return remove_step(work, "Test the database and object isolation suites")
+
+
+def remove_contracts_step(work):
+    """Remove the contracts step from the CI workflow."""
+    return remove_step(work, "Build the shared contracts before the gateway step reads them")
+
+
+def remove_queue_step(work):
+    """Remove the queue restart step from the CI workflow."""
+    return remove_step(work, "Test that the queue job survives the broker restart")
+
+
+def remove_guard_step(work):
+    """Remove the network guard step from the CI workflow."""
+    return remove_step(work, "Test the default-deny network rule")
+
+
+def remove_platform_file(work):
+    """Drop the compose.platform.yaml file from every compose command."""
+    text = read_file(work, WORKFLOW)
+    if " -f nova/infra/compose/compose.platform.yaml" not in text:
+        return False
+    write_file(work, WORKFLOW,
+               text.replace(" -f nova/infra/compose/compose.platform.yaml", ""))
+    return True
 
 
 def unpin_ruff(work):
@@ -120,35 +166,3 @@ def widen_typecheck_scope(work):
     replace_in_work(work, WORKFLOW, "output=$(mypy nova 2>&1)", "output=$(mypy nova/services 2>&1)")
     return replace_in_work(
         work, CONFIG, 'files = ["nova"]', 'files = ["nova/services"]')
-
-
-def remove_gateway_step(work):
-    """Remove the gateway step from the CI workflow."""
-    return replace_in_work(
-        work, WORKFLOW,
-        "      - name: Build and test the api-gateway\n"
-        "        run: |\n"
-        "          cd nova/services/api-gateway\n"
-        "          npm ci\n"
-        "          npm run build\n"
-        "          npm run build:test\n"
-        "          npm test\n",
-        "")
-
-
-def remove_database_step(work):
-    """Remove the database test step from the CI workflow."""
-    return replace_in_work(
-        work, WORKFLOW,
-        "      - name: Test the per-service database isolation\n"
-        "        run: |\n"
-        "          cp nova/infra/compose/.env.example nova/infra/compose/.env\n"
-        "          chmod 600 nova/infra/compose/.env\n"
-        "          compose=\"docker compose -f nova/infra/compose/compose.yaml --profile test\"\n"
-        "          $compose down -v --remove-orphans\n"
-        "          status=0\n"
-        "          $compose run --rm --build tests || status=$?\n"
-        "          $compose down -v --remove-orphans\n"
-        "          rm -f nova/infra/compose/.env\n"
-        "          exit $status\n",
-        "")

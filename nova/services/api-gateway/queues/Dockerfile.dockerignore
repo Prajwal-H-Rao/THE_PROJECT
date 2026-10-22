@@ -1,0 +1,9 @@
+# The build context of the queue runner holds the gateway sources. The runner needs
+# only the package files and the queue scripts. Everything else stays out.
+node_modules
+.next
+dist
+src
+public
+*.md
+.gitignore
