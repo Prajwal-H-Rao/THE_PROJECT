@@ -1,0 +1,85 @@
+# The local Compose stack of NOVA. It holds the Postgres cluster and the database tests.
+# The stack is local-only. It uses synthetic data and the local secret file of the directory.
+# The database publishes no port. The spec exposes only the web and the API edge.
+#
+# The stack reads its passwords from `.env` next to this file. Copy `.env.example` to `.env`
+# first. The compose file refuses to start when a value is missing.
+
+name: nova
+
+services:
+  postgres:
+    image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+    environment:
+      POSTGRES_DB: nova
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: ${NOVA_PG_SUPERUSER_PASSWORD:?the local secret file holds no superuser password}
+      # WHY: the host rule of initdb trusts the loopback. This forces the password on every host.
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      NOVA_PG_PASSWORD_AGENT_ORCHESTRATOR: ${NOVA_PG_PASSWORD_AGENT_ORCHESTRATOR:?the local secret file holds no password for agent_orchestrator}
+      NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE: ${NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE:?the local secret file holds no password for audit_activity_service}
+      NOVA_PG_PASSWORD_CALENDAR_SERVICE: ${NOVA_PG_PASSWORD_CALENDAR_SERVICE:?the local secret file holds no password for calendar_service}
+      NOVA_PG_PASSWORD_CHANNEL_ADAPTER_WHATSAPP: ${NOVA_PG_PASSWORD_CHANNEL_ADAPTER_WHATSAPP:?the local secret file holds no password for channel_adapter_whatsapp}
+      NOVA_PG_PASSWORD_EMPLOYER_REGISTRY_SERVICE: ${NOVA_PG_PASSWORD_EMPLOYER_REGISTRY_SERVICE:?the local secret file holds no password for employer_registry_service}
+      NOVA_PG_PASSWORD_FINANCE_SERVICE: ${NOVA_PG_PASSWORD_FINANCE_SERVICE:?the local secret file holds no password for finance_service}
+      NOVA_PG_PASSWORD_IDENTITY_SERVICE: ${NOVA_PG_PASSWORD_IDENTITY_SERVICE:?the local secret file holds no password for identity_service}
+      NOVA_PG_PASSWORD_INBOX_SERVICE: ${NOVA_PG_PASSWORD_INBOX_SERVICE:?the local secret file holds no password for inbox_service}
+      NOVA_PG_PASSWORD_INTEGRATION_REGISTRY: ${NOVA_PG_PASSWORD_INTEGRATION_REGISTRY:?the local secret file holds no password for integration_registry}
+      NOVA_PG_PASSWORD_JOBS_SERVICE: ${NOVA_PG_PASSWORD_JOBS_SERVICE:?the local secret file holds no password for jobs_service}
+      NOVA_PG_PASSWORD_MODEL_GATEWAY: ${NOVA_PG_PASSWORD_MODEL_GATEWAY:?the local secret file holds no password for model_gateway}
+      NOVA_PG_PASSWORD_NOTES_MEMORY_SERVICE: ${NOVA_PG_PASSWORD_NOTES_MEMORY_SERVICE:?the local secret file holds no password for notes_memory_service}
+      NOVA_PG_PASSWORD_NOTIFICATION_SERVICE: ${NOVA_PG_PASSWORD_NOTIFICATION_SERVICE:?the local secret file holds no password for notification_service}
+      NOVA_PG_PASSWORD_POLICY_APPROVAL_SERVICE: ${NOVA_PG_PASSWORD_POLICY_APPROVAL_SERVICE:?the local secret file holds no password for policy_approval_service}
+      NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE: ${NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE:?the local secret file holds no password for tasks_reminders_service}
+      NOVA_PG_PASSWORD_TRIPS_SERVICE: ${NOVA_PG_PASSWORD_TRIPS_SERVICE:?the local secret file holds no password for trips_service}
+    volumes:
+      - nova-postgres-data:/var/lib/postgresql/data
+      - ../../db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U nova -d nova"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - nova-internal
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+
+  tests:
+    build:
+      context: ../../tests/security
+    # WHY: the test reads the spec and the init script. The mounts keep the paths of the repo.
+    # The local secret file stays out of the container.
+    volumes:
+      - ../../../NOVA_Full_Updated_Spec.md:/app/NOVA_Full_Updated_Spec.md:ro
+      - ../../db/init:/app/nova/db/init:ro
+      - ../../tests/security/test_database_isolation.py:/app/nova/tests/security/test_database_isolation.py:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NOVA_PG_HOST: postgres
+      NOVA_PG_PORT: "5432"
+      NOVA_PG_DATABASE: nova
+      NOVA_PG_PASSWORD_IDENTITY_SERVICE: ${NOVA_PG_PASSWORD_IDENTITY_SERVICE:?the local secret file holds no password for identity_service}
+      NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE: ${NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE:?the local secret file holds no password for audit_activity_service}
+    networks:
+      - nova-internal
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    profiles:
+      - test
+
+networks:
+  nova-internal:
+    driver: bridge
+    internal: true
+
+volumes:
+  nova-postgres-data:

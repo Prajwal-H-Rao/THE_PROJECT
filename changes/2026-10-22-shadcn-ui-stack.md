@@ -38,9 +38,9 @@ blue unless the work asks for it.
 ## Verification
 
 - `python3 nova/tests/layout/check_layout.py` passes all 28 checks.
-- `python3 nova/tests/layout/test_layout_checks.py` rejects all 67 mutations.
+- `python3 nova/tests/layout/test_layout_checks.py` rejects all 68 mutations.
 - `ruff check .` passes over the whole repository.
-- `mypy nova` passes on the 27 Python modules.
+- `mypy nova` passes on the 28 Python modules.
 
 ## Open items
 

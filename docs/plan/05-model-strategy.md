@@ -6,6 +6,8 @@ Phase P3. Spec headings: local model strategy, candidate shortlist, inference re
 
 Pick the smallest local model that clears a measured quality floor on NOVA's own tools. P3 configures the local runtime. P5 puts the same runtime behind the model gateway. Never trust a model because it is local.
 
+The route picks the model per task family. A lightweight family uses the smallest model that clears the floor. A major family uses the larger model. The orchestration of the agent runtime runs in Python with LangGraph, and it asks the model gateway for the model of the tier. LangChain holds the provider and tool adapters where they remove boilerplate. No step uses one model for everything.
+
 ## Hardware envelope
 
 16 GiB system RAM, i5-class CPU, 4 GiB NVIDIA laptop GPU. Treat as a sizing assumption, not a guarantee. Benchmark on the machine that runs NOVA.
@@ -18,6 +20,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 - Spec:499: "Do not infer that a catalogue's advertised 256K context is feasible on commodity hardware."
 - Spec:425: "Keep model access behind the gateway."
 - Spec:509: "The same tool contracts must work with a deterministic fake model, the chosen local model, and any explicitly enabled remote provider."
+- Spec:17: "Prefer LangGraph when durable multi-step state, retries, pauses for approval, and human-in-the-loop continuation are needed; use LangChain abstractions when they simplify provider/tool integration. Neither framework is a security boundary."
 - Start at 4K context and one concurrent generation.
 
 ## Verified claims
@@ -56,6 +59,7 @@ The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility
 | 13 | Test the `0.8b` for classification only. Fence it from the MCP surface that `21-mcp-surface` binds in P5. Use a dummy listener in P3. | Compose network plus config | A dummy listener on the MCP port is unreachable from the `0.8b` container |
 | 14 | Add a deterministic fake model as the CI default, which `03-agent-runtime` reuses in P5 | `tests/fixtures/` | CI needs no GPU |
 | 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:695) |
+| 16 | Define the model routing policy: every task family names the model tier it uses. A lightweight family uses the smallest model that clears the floor. A major family uses the larger model. The policy is deterministic and the registry holds it. `03-agent-runtime` reads it. | `models/model-registry.yaml` | Every task family names a tier, and a family that writes, handles finance, qualifications or submission never names the classifier-only model |
 ## Release thresholds
 
 - 100 percent of unauthorised or out-of-scope tool proposals blocked by deterministic enforcement. This is policy, not model quality.
@@ -69,7 +73,7 @@ If a candidate misses the tool-choice target, simplify the workflow or use deter
 
 Work these steps in order. A step names tasks from the table above.
 
-1. Write the setup script and `models/model-registry.yaml`.
+1. Write the setup script, `models/model-registry.yaml` and the routing policy (tasks 1, 2 and 16).
 2. Build the 250-case evaluation set.
 3. Run 2b and 4b. Record both. Decide.
 
@@ -83,6 +87,7 @@ Work these steps in order. A step names tasks from the table above.
 - `test_decision_cites_existing_run` — the default model names an eval run ID that resolves.
 - `test_08b_cannot_reach_write_tools` — a dummy listener on the MCP port is unreachable from the `0.8b` container. `21-mcp-surface` repeats the check against the live surface in P5.
 - `test_ci_runs_without_gpu` — the evaluation job passes on a machine with no GPU.
+- `test_every_task_family_names_a_model_tier` — a family without a tier fails, and a family that writes, handles finance, qualifications or submission never names the classifier-only model. `03-agent-runtime` reads the same policy at the router in P5.
 
 ## Risks
 

@@ -134,3 +134,21 @@ def remove_gateway_step(work):
         "          npm run build:test\n"
         "          npm test\n",
         "")
+
+
+def remove_database_step(work):
+    """Remove the database test step from the CI workflow."""
+    return replace_in_work(
+        work, WORKFLOW,
+        "      - name: Test the per-service database isolation\n"
+        "        run: |\n"
+        "          cp nova/infra/compose/.env.example nova/infra/compose/.env\n"
+        "          chmod 600 nova/infra/compose/.env\n"
+        "          compose=\"docker compose -f nova/infra/compose/compose.yaml --profile test\"\n"
+        "          $compose down -v --remove-orphans\n"
+        "          status=0\n"
+        "          $compose run --rm --build tests || status=$?\n"
+        "          $compose down -v --remove-orphans\n"
+        "          rm -f nova/infra/compose/.env\n"
+        "          exit $status\n",
+        "")

@@ -47,6 +47,7 @@ nova/packages/*/test-results/
 .coverage
 type_error_proof.py
 next-env.d.ts
+**/.env
 *.pyc
 *.pyo
 *.tsbuildinfo

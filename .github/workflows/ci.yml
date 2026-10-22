@@ -82,3 +82,15 @@ jobs:
           npm run build
           npm run build:test
           npm test
+
+      - name: Test the per-service database isolation
+        run: |
+          cp nova/infra/compose/.env.example nova/infra/compose/.env
+          chmod 600 nova/infra/compose/.env
+          compose="docker compose -f nova/infra/compose/compose.yaml --profile test"
+          $compose down -v --remove-orphans
+          status=0
+          $compose run --rm --build tests || status=$?
+          $compose down -v --remove-orphans
+          rm -f nova/infra/compose/.env
+          exit $status

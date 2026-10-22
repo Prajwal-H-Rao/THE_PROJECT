@@ -15,6 +15,8 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 - Spec:15: "Python services using Flask own all document parsing and ML/NLP work."
 - Spec:18: "No model direct access: a model sees a constrained context and returns candidate structured output."
 - Spec:20: "A single Postgres cluster is acceptable for local and MVP deployment, with per-service schemas/roles and no cross-service write privileges."
+- Spec:974: "Local Compose should use an internal network for private services, explicit service names, named volumes for data, health checks and resource constraints."
+- Spec:787: "no secrets in source, images, prompt contexts, audit payloads or error traces."
 - Spec:23: "Docker is the mandatory service packaging layer."
 - Only the owning adapter calls an external integration.
 
@@ -26,7 +28,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 2 | Add lint, typecheck and a single CI workflow | `.github/workflows/ci.yml`, `pyproject.toml`, `nova/tests/layout/ci_checks.py`, `nova/tests/layout/ci_mutations.py` | CI fails on a type error |
 | 3 | Write the service skeleton template | `services/_template/` | Template builds and serves `/health/live` |
 | 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs. It sets the session token format | `services/api-gateway/` | Gateway rejects an unauthenticated request |
-| 5 | Add Postgres with one schema and one role per service | `infra/compose/`, `db/init/` | Service A cannot read service B's schema |
+| 5 | Add Postgres with one schema and one role per service that owns data | `infra/compose/`, `db/init/`, `tests/security/` | Service A cannot read service B's schema |
 | 6 | Add Redis and one BullMQ queue | `services/api-gateway/queues/` | Job survives a container restart |
 | 7 | Add MinIO with per-service prefixes | `infra/compose/` | Worker in prefix A cannot list prefix B |
 | 8 | Implement workload identity: signed service JWTs with issuer, audience, expiry and scope | `packages/contracts/`, gateway middleware | Missing and invalid tokens are rejected |
@@ -65,3 +67,4 @@ Work these steps in order. A step names tasks from the table above.
 - The gateway of task 4 sets the session token format and the `nova_csrf` cookie name. `07-identity-authz` task 2 issues the cookies. Its tasks 10, 13, 14 and 18 add the step-up, the CORS, the CSP, the SSRF guard, the lockout and the TLS. Its task 14 extends the limiter of task 4.
 - Task 4 builds the health endpoints of the gateway, because the module acceptance test reads them. Task 10 of this module adds them to the services that exist by then.
 - The gateway of task 4 runs on Next.js. The deviation from the backend framework of spec:426 has a note in `docs/design-notes/nova-api-gateway.md`.
+- Task 5 gives a role and a schema to every service that owns data. The web app, the gateway, the inference worker, the document service, the job source worker, the scheduler worker and the Telegram adapter hold no role. The spec denies a database to the inference worker, the document service and the Telegram adapter. The other four own no store. The row says "per service" and the spec says the data-ownership column decides. The spec wins, and the change entry records it.

@@ -65,6 +65,7 @@ MUTATIONS = [
     ("Z", "owned path that the checker skips", plan_mutations.owned_build_path),
     ("AA", "missing typecheck step", ci_mutations.remove_typecheck_step),
     ("AA", "missing gateway step", ci_mutations.remove_gateway_step),
+    ("AA", "missing database step", ci_mutations.remove_database_step),
     ("AA", "unpinned ruff", ci_mutations.unpin_ruff),
     ("AA", "missing tool config", ci_mutations.drop_tool_config),
     ("AA", "continue on error", ci_mutations.add_continue_on_error),

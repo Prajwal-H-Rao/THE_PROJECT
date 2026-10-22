@@ -14,6 +14,8 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 - Spec:167: "The `requires_approval` field above is illustrative output only; the policy service recomputes this requirement and can override it."
 - Spec:174: "A model response alone must never transition a workflow to `succeeded`."
 - Spec:175: "Non-idempotent actions are not automatically retried unless the provider supports idempotency or the system first verifies the operation did not happen."
+- Spec:17: "Prefer LangGraph when durable multi-step state, retries, pauses for approval, and human-in-the-loop continuation are needed; use LangChain abstractions when they simplify provider/tool integration. Neither framework is a security boundary."
+- Spec:147: "Use LangChain only for useful provider/tool adapters; keep core authorization and execution code framework-independent."
 - Bounds: 6 steps per plan, 5 orchestration turns, 30 seconds per model call, one repair attempt for malformed output.
 - States: `planned`, `awaiting_approval`, `approved`, `executing`, `succeeded`, `failed`, `cancelled`, `needs_manual_action`.
 
@@ -25,8 +27,8 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 2 | Register 8 read-only tools: list inbox, read event, list tasks, search notes, list transactions, list openings, get profile, get audit | MCP tool catalogue | The catalogue rejects an unregistered tool |
 | 3 | Register 6 write tools: draft email, create event, create task, create note, import statement, draft application. Enumerate the full operation set for each of the 7 families per spec:195 | MCP tool catalogue | Each write tool carries a risk tier, and every family has an enumerated operation set |
 | 4 | Register 3 consequential tools: send email, submit application, connect account | MCP tool catalogue | Each forces an approval |
-| 5 | Build the deterministic router from natural language to a task-family enum | `orchestrator/router/` | Out-of-scope text returns a fixed refusal |
-| 6 | Build the model gateway: provider allow-list, request shaping, redaction, timeout, quota | `services/model-gateway/` | Timeout, quota and `num_ctx` truncation-marker tests pass |
+| 5 | Build the deterministic router from natural language to a task-family enum, then to the model tier of that family | `orchestrator/router/` | Out-of-scope text returns a fixed refusal, and the router never names a tier that the registry forbids |
+| 6 | Build the model gateway: provider allow-list, request shaping, redaction, timeout, quota, and the model of the tier | `services/model-gateway/` | Timeout, quota and `num_ctx` truncation-marker tests pass |
 | 7 | Add Ollama as the default provider with a pinned digest | gateway config | Gateway rejects an unlisted model |
 | 8 | Implement the LangGraph state machine with a checkpointer | `orchestrator/workflows/` | Pause and resume restore exact state |
 | 9 | Put `interrupt()` before every consequential step | workflow code | No side effect runs before approval |

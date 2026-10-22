@@ -101,10 +101,10 @@ The spec names three gateway duties that no plan row owns.
 - The test build always emits. `tsconfig.test.json` turns off the incremental build, and the
   pretest script fails when the test build is missing, so the gate cannot pass with zero tests.
 - `python3 nova/tests/layout/check_layout.py` passes all 28 checks.
-- `python3 nova/tests/layout/test_layout_checks.py` rejects all 67 mutations. The four acceptance
+- `python3 nova/tests/layout/test_layout_checks.py` rejects all 68 mutations. The four acceptance
   scenarios pass.
 - `ruff check .` passes over the whole repository.
-- `mypy nova` passes on the 27 Python modules.
+- `mypy nova` passes on the 28 Python modules.
 - The tree counts hold at 71 directories, 51 leaf directories and 42 placeholders.
 
 ## Open items

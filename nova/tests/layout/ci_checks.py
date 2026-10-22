@@ -51,6 +51,11 @@ SERVICE_PATHS = (
     "nova/services/api-gateway",
 )
 
+# The compose paths that the workflow must name for the database stack.
+DATABASE_PATHS = (
+    "nova/infra/compose/compose.yaml",
+)
+
 # The scope of the typecheck in the workflow and in the config.
 MYPY_SCOPE = re.compile(r"mypy (\S+)")
 CONFIG_FILES = re.compile(r"files = \[\"([^\"]+)\"\]")
@@ -103,6 +108,9 @@ def check_ci_workflow(repo_root):
     for path in TEMPLATE_PATHS + SERVICE_PATHS:
         if path not in code:
             problems.append("the CI workflow does not test " + path)
+    for path in DATABASE_PATHS:
+        if path not in code:
+            problems.append("the CI workflow does not name " + path)
     if PYTHON_VERSION not in text:
         problems.append("the CI workflow does not use Python " + PYTHON_VERSION)
     problems += trigger_problems(code)
