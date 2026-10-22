@@ -7,6 +7,26 @@
 
 name: nova
 
+# The role passwords shared by the database init and the database test. The anchor keeps the
+# two lists in step. A missing value fails the stack with the named reason.
+x-role-passwords: &role-passwords
+  NOVA_PG_PASSWORD_AGENT_ORCHESTRATOR: ${NOVA_PG_PASSWORD_AGENT_ORCHESTRATOR:?the local secret file holds no password for agent_orchestrator}
+  NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE: ${NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE:?the local secret file holds no password for audit_activity_service}
+  NOVA_PG_PASSWORD_CALENDAR_SERVICE: ${NOVA_PG_PASSWORD_CALENDAR_SERVICE:?the local secret file holds no password for calendar_service}
+  NOVA_PG_PASSWORD_CHANNEL_ADAPTER_WHATSAPP: ${NOVA_PG_PASSWORD_CHANNEL_ADAPTER_WHATSAPP:?the local secret file holds no password for channel_adapter_whatsapp}
+  NOVA_PG_PASSWORD_EMPLOYER_REGISTRY_SERVICE: ${NOVA_PG_PASSWORD_EMPLOYER_REGISTRY_SERVICE:?the local secret file holds no password for employer_registry_service}
+  NOVA_PG_PASSWORD_FINANCE_SERVICE: ${NOVA_PG_PASSWORD_FINANCE_SERVICE:?the local secret file holds no password for finance_service}
+  NOVA_PG_PASSWORD_IDENTITY_SERVICE: ${NOVA_PG_PASSWORD_IDENTITY_SERVICE:?the local secret file holds no password for identity_service}
+  NOVA_PG_PASSWORD_INBOX_SERVICE: ${NOVA_PG_PASSWORD_INBOX_SERVICE:?the local secret file holds no password for inbox_service}
+  NOVA_PG_PASSWORD_INTEGRATION_REGISTRY: ${NOVA_PG_PASSWORD_INTEGRATION_REGISTRY:?the local secret file holds no password for integration_registry}
+  NOVA_PG_PASSWORD_JOBS_SERVICE: ${NOVA_PG_PASSWORD_JOBS_SERVICE:?the local secret file holds no password for jobs_service}
+  NOVA_PG_PASSWORD_MODEL_GATEWAY: ${NOVA_PG_PASSWORD_MODEL_GATEWAY:?the local secret file holds no password for model_gateway}
+  NOVA_PG_PASSWORD_NOTES_MEMORY_SERVICE: ${NOVA_PG_PASSWORD_NOTES_MEMORY_SERVICE:?the local secret file holds no password for notes_memory_service}
+  NOVA_PG_PASSWORD_NOTIFICATION_SERVICE: ${NOVA_PG_PASSWORD_NOTIFICATION_SERVICE:?the local secret file holds no password for notification_service}
+  NOVA_PG_PASSWORD_POLICY_APPROVAL_SERVICE: ${NOVA_PG_PASSWORD_POLICY_APPROVAL_SERVICE:?the local secret file holds no password for policy_approval_service}
+  NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE: ${NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE:?the local secret file holds no password for tasks_reminders_service}
+  NOVA_PG_PASSWORD_TRIPS_SERVICE: ${NOVA_PG_PASSWORD_TRIPS_SERVICE:?the local secret file holds no password for trips_service}
+
 services:
   postgres:
     image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
@@ -16,22 +36,7 @@ services:
       POSTGRES_PASSWORD: ${NOVA_PG_SUPERUSER_PASSWORD:?the local secret file holds no superuser password}
       # WHY: the host rule of initdb trusts the loopback. This forces the password on every host.
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
-      NOVA_PG_PASSWORD_AGENT_ORCHESTRATOR: ${NOVA_PG_PASSWORD_AGENT_ORCHESTRATOR:?the local secret file holds no password for agent_orchestrator}
-      NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE: ${NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE:?the local secret file holds no password for audit_activity_service}
-      NOVA_PG_PASSWORD_CALENDAR_SERVICE: ${NOVA_PG_PASSWORD_CALENDAR_SERVICE:?the local secret file holds no password for calendar_service}
-      NOVA_PG_PASSWORD_CHANNEL_ADAPTER_WHATSAPP: ${NOVA_PG_PASSWORD_CHANNEL_ADAPTER_WHATSAPP:?the local secret file holds no password for channel_adapter_whatsapp}
-      NOVA_PG_PASSWORD_EMPLOYER_REGISTRY_SERVICE: ${NOVA_PG_PASSWORD_EMPLOYER_REGISTRY_SERVICE:?the local secret file holds no password for employer_registry_service}
-      NOVA_PG_PASSWORD_FINANCE_SERVICE: ${NOVA_PG_PASSWORD_FINANCE_SERVICE:?the local secret file holds no password for finance_service}
-      NOVA_PG_PASSWORD_IDENTITY_SERVICE: ${NOVA_PG_PASSWORD_IDENTITY_SERVICE:?the local secret file holds no password for identity_service}
-      NOVA_PG_PASSWORD_INBOX_SERVICE: ${NOVA_PG_PASSWORD_INBOX_SERVICE:?the local secret file holds no password for inbox_service}
-      NOVA_PG_PASSWORD_INTEGRATION_REGISTRY: ${NOVA_PG_PASSWORD_INTEGRATION_REGISTRY:?the local secret file holds no password for integration_registry}
-      NOVA_PG_PASSWORD_JOBS_SERVICE: ${NOVA_PG_PASSWORD_JOBS_SERVICE:?the local secret file holds no password for jobs_service}
-      NOVA_PG_PASSWORD_MODEL_GATEWAY: ${NOVA_PG_PASSWORD_MODEL_GATEWAY:?the local secret file holds no password for model_gateway}
-      NOVA_PG_PASSWORD_NOTES_MEMORY_SERVICE: ${NOVA_PG_PASSWORD_NOTES_MEMORY_SERVICE:?the local secret file holds no password for notes_memory_service}
-      NOVA_PG_PASSWORD_NOTIFICATION_SERVICE: ${NOVA_PG_PASSWORD_NOTIFICATION_SERVICE:?the local secret file holds no password for notification_service}
-      NOVA_PG_PASSWORD_POLICY_APPROVAL_SERVICE: ${NOVA_PG_PASSWORD_POLICY_APPROVAL_SERVICE:?the local secret file holds no password for policy_approval_service}
-      NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE: ${NOVA_PG_PASSWORD_TASKS_REMINDERS_SERVICE:?the local secret file holds no password for tasks_reminders_service}
-      NOVA_PG_PASSWORD_TRIPS_SERVICE: ${NOVA_PG_PASSWORD_TRIPS_SERVICE:?the local secret file holds no password for trips_service}
+      <<: *role-passwords
     volumes:
       - nova-postgres-data:/var/lib/postgresql/data
       - ../../db/init:/docker-entrypoint-initdb.d:ro
@@ -61,11 +66,10 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      <<: *role-passwords
       NOVA_PG_HOST: postgres
       NOVA_PG_PORT: "5432"
       NOVA_PG_DATABASE: nova
-      NOVA_PG_PASSWORD_IDENTITY_SERVICE: ${NOVA_PG_PASSWORD_IDENTITY_SERVICE:?the local secret file holds no password for identity_service}
-      NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE: ${NOVA_PG_PASSWORD_AUDIT_ACTIVITY_SERVICE:?the local secret file holds no password for audit_activity_service}
     networks:
       - nova-internal
     deploy:
