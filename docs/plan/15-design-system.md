@@ -21,7 +21,7 @@ No component holds hardcoded text. Every user-facing string comes from the messa
 - Spec:390: "Do not treat a Lighthouse score as a substitute for manual review."
 - Spec:419: "The design tokens are design recommendations to verify in the final Figma implementation, not claims that the Figma file was edited."
 - Spec:399: "each module implements each applicable state rather than a blank page or fake sample data" for empty, loading, offline and permission-denied.
-- No component uses purple, a shade of purple or blue, unless a spec token demands it. The palette follows the colour combinations of the Figma resource library. The token values of spec:253-277 are blue and violet, so the token layer keeps them and the rule applies to every colour outside that table.
+- No component uses purple, a shade of purple or blue, unless a spec token demands it. The rule covers the UI design and the theme colours. It reaches no other part of the system: not the data, not the API, not the logs and not the code. The token values of spec:253-277 are blue and violet, so the token layer keeps them and the rule applies to every colour outside that table.
 
 ## Design token set (spec:253-277, 25 rows)
 
