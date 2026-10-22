@@ -1,8 +1,21 @@
 # THE_PROJECT agent rules
 
-These are the project rules. The global `~/.config/opencode/AGENTS.md` holds machine-wide invariants: ASD-STE100 always, repo.md first, approval before implementation, negation-loop scope, stub-honesty. This file adds project detail. Where this file and `AGENT_CONFIG.md` differ on skill loading, this file wins.
+These are the project rules. They include the global invariants from `~/.config/opencode/AGENTS.md` plus project detail. Where this file and `AGENT_CONFIG.md` differ on skill loading, this file wins.
 
-## Skill loading
+## Global invariants (from ~/.config/opencode/AGENTS.md)
+
+- Always use the ASD-STE100 language standard. This is unconditional. Use short active sentences, one idea per sentence, exact terms, and no ceremony. Apply it to every reply, report, plan, repo.md entry, changelog entry, commit message, and code comment.
+- Read repo.md first when the active project has a repo.md. Use it to target files instead of rescanning the repo.
+- Get explicit user approval before implementing functional or architectural changes.
+- The two-negating-subagent loop runs in the primary agent only, and only for implementation changes. Negators are `general` subagents. A `general` subagent cannot launch subagents, so the loop cannot recurse. Plan, document, and config changes do not need negators.
+- A stub skill is never coverage. Never count a stub as review, verification, or security work. Do not load an empty stub. Note the skip.
+- **Never commit.** Do not run `git commit`, `git push`, or any command that creates a commit. The user will commit when they choose. Staging with `git add` is allowed, but the commit decision belongs to the user.
+
+## Project agent rules
+
+These are the project rules. They add detail on top of the global invariants.
+
+### Skill loading
 
 - First step of every turn: load applicable skills before planning or editing. Load a skill only when it has real content.
 - A stub gives no value. Do not load an empty stub. Note the skip.
@@ -10,7 +23,7 @@ These are the project rules. The global `~/.config/opencode/AGENTS.md` holds mac
 - ECC and security skills load on demand. Use ecc-guide when ECC itself matters. Use security-review for auth, secrets, input validation, security, and attack-path work. A stub security skill gives no coverage. Say so plainly.
 - `AGENT_CONFIG.md` is the skill inventory. All 308 listed skills plus 4 rule-referenced skills are stubs on this machine. Their IDs, scopes, and discovery wiring are complete.
 
-## Skill origin: manual vs downloaded
+### Skill origin: manual vs downloaded
 
 Every skill on this machine is a hand-placed stub. None was downloaded with its real content. The names come from three public collections and one hand-made set. Treat the origin as provenance, not as proof the skill has content.
 
