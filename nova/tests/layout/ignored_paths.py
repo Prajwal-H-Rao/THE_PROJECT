@@ -28,7 +28,7 @@ OUTPUT_NAMES = (
 IGNORED_DIRECTORY_SUFFIXES = (".egg-info",)
 
 # The file names that hold build output.
-IGNORED_FILES = (".coverage",)
+IGNORED_FILES = (".coverage", "next-env.d.ts")
 
 # The temporary files that a tool run leaves behind.
 IGNORED_TEMPORARY_FILES = ("type_error_proof.py",)

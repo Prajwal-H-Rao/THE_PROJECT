@@ -46,6 +46,11 @@ TEMPLATE_PATHS = (
     "nova/services/_template/typescript",
 )
 
+# The service paths that the workflow must test.
+SERVICE_PATHS = (
+    "nova/services/api-gateway",
+)
+
 # The scope of the typecheck in the workflow and in the config.
 MYPY_SCOPE = re.compile(r"mypy (\S+)")
 CONFIG_FILES = re.compile(r"files = \[\"([^\"]+)\"\]")
@@ -95,7 +100,7 @@ def check_ci_workflow(repo_root):
     for command in REQUIRED_COMMANDS:
         if command not in code:
             problems.append("the CI workflow holds no command " + command.strip())
-    for path in TEMPLATE_PATHS:
+    for path in TEMPLATE_PATHS + SERVICE_PATHS:
         if path not in code:
             problems.append("the CI workflow does not test " + path)
     if PYTHON_VERSION not in text:

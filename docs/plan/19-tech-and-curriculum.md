@@ -15,7 +15,7 @@ The spec decides these. This plan records the decision and the reason. Any devia
 | Layer | Chosen (spec line) | Not chosen |
 |---|---|---|
 | LLM/model provider | Qwen3.5 2B/4B quantized through Ollama or llama.cpp; optional approved cloud provider (425). Owner: `05-model-strategy` | Choosing a model by hype, or trusting a local model without measuring it |
-| Backend TypeScript | NestJS on Fastify (426) | Express, plain Fastify |
+| Backend TypeScript | NestJS on Fastify (426). The `api-gateway-bff` runs on Next.js 16 route handlers and the proxy (429), as the developer chose. The note is at `docs/design-notes/nova-api-gateway.md` | Express, plain Fastify |
 | Backend Python | Flask app factory with blueprints (432) | FastAPI, Django. Spec:1011 supersedes "FastAPI-based" |
 | Validation | Pydantic v2 and pydantic-settings (433) | Joi, Zod in Python |
 | Database | PostgreSQL with Prisma (427) | MySQL, SQLite beyond local dev |

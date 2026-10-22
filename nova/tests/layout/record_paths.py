@@ -40,6 +40,9 @@ FILE_SUFFIXES = (".py", ".toml", ".yml", ".yaml", ".json", ".md", ".sh", ".lock"
 # The file names that carry no suffix. The record may name them.
 EXTENSIONLESS_NAMES = ("Makefile", "LICENSE", "CODEOWNERS", "Dockerfile")
 
+# The design notes that the repo holds outside the tree. A module task updates the list.
+DESIGN_NOTES = ("docs/design-notes/nova-api-gateway.md",)
+
 
 def expected_groups(index):
     """Return the path names that each path group must state."""
@@ -50,6 +53,7 @@ def expected_groups(index):
         [tree_checks.PLACEHOLDER_NAME],
         repo_files(),
         [tree_checks.TEMPLATE_DIRECTORY],
+        list(DESIGN_NOTES),
     ]
 
 

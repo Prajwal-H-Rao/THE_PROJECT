@@ -21,6 +21,8 @@ Build plan for `NOVA_Full_Updated_Spec.md`. The spec is the source of truth. Thi
 - Every quoted string attributed to the spec carries a `spec:LINE` reference. Paraphrase carries no quote marks.
 - A module task that adds a path under `nova/` or names a new path in its plan row updates `nova/docs/layout-diff.md` and `nova/tests/layout/tree_checks.py`. The record holds the counts, the allow-list and the plan claims. A directory that the spec layout does not name joins the allow-list in both files. A module that adds a file under `nova/` names the path in its plan row. A module task that creates build output under `nova/` adds the output name to `nova/tests/layout/ignored_paths.py` and to the repo-root `.gitignore`, and states it in `nova/docs/layout-diff.md`. A module task that changes the CI workflow, the tool config or the typecheck scope edits `.github/workflows/ci.yml`, `pyproject.toml` and `nova/tests/layout/ci_checks.py`. A module task that adds a repo-root file names it in `nova/docs/layout-diff.md` and in `nova/tests/layout/record_paths.py`. The owning module runs the checks.
 - A module task that creates `data/employer-seed-v1.csv` or `models/model-registry.yaml` removes the file from the omitted section in `nova/docs/layout-diff.md` and updates the count. The owning module runs the checks.
+- The UI components come from the shadcn/ui CLI. The CLI copies the component source into `apps/web/components/ui/`. The repo holds no shadcn runtime dependency. The `--nova-*` tokens replace the shadcn colour variables. The variants come from `class-variance-authority`.
+- No user-facing string is hardcoded in the UI. Every string comes from the message file at `apps/web/messages/en.json`. The keys sit under the page that uses them. The hook is `useTranslations` from next-intl.
 
 ## Phase table
 
@@ -31,7 +33,7 @@ Phase order follows dependency. The design system lands at P4. The domain pages 
 | P1 Repo, contracts, platform | `01-architecture.md`, `02-data-and-audit.md`, `19-tech-and-curriculum.md` | 38 | Gate A. An unauthenticated private service call is rejected. Images run non-root. No secrets in images. |
 | P2 Identity and policy | `07-identity-authz.md`, `08-policy-approval.md` | 33 | Replayed, expired and cross-user approvals are denied. RBAC and TLS hold. |
 | P3 Document sandbox and models | `06-document-ml-sandbox.md`, `05-model-strategy.md` | 36 | Gate B. The parser returns evidence-bound fields or explicit unknown. Malicious and oversized fixtures fail safely. |
-| P4 Design system | `15-design-system.md` | 20 | Action previews, denial states and failure states are keyboard-accessible. Tokens drive both themes. |
+| P4 Design system | `15-design-system.md` | 21 | Action previews, denial states and failure states are keyboard-accessible. Tokens drive both themes. |
 | P5 Agent runtime and scope lock | `21-mcp-surface.md`, `03-agent-runtime.md`, `04-scope-lock.md` | 53 | Gate C. The model cannot make an unauthorised write. The model cannot fabricate success. |
 | P6 Inbox, calendar, tasks, notes | `09-inbox-calendar.md`, `10-tasks-notes.md` | 37 | Gate D. Provider IDs and persisted state verify results. Reminder workers survive restart without duplicates. |
 | P7 Finance and trips | `11-finance-trips.md` | 18 | Uncertain extraction is marked for review. Trip estimates are labelled as estimates. |
@@ -39,7 +41,7 @@ Phase order follows dependency. The design system lands at P4. The domain pages 
 | P9 Channels, automations, pages | `14-channels.md`, `20-pages-and-automations.md` | 41 | Gate F. Telegram and WhatsApp where setup prerequisites permit. Unsigned and replayed webhooks are rejected and deduplicated. Automations run once per trigger. Every privileged chat action requires a bound approval. |
 | P10 Hardening, security and testing | `17-deployment-hardening.md`, `16-reliability-testing.md` | 46 | No known direct model-to-tool path remains. Success and failure states tie to authoritative evidence. Model and parser workloads cannot reach the DB, secrets, the Docker socket, host paths or arbitrary egress. |
 | P11 Release gate | `18-release-gate.md` | 20 | Gate G. All ten release invariants pass by test or operator-reviewed record. |
-| **Total** | 21 files | **388** | |
+| **Total** | 21 files | **389** | |
 
 The gate column states the exit criteria for the phase. Module 18 verifies and signs gates A to G at P11, from the evidence these phases produced. No earlier phase signs a gate.
 

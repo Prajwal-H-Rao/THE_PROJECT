@@ -25,7 +25,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 1 | Create the monorepo tree from the spec layout at spec:917, then record the diff against the catalogue | `nova/` tree, `nova/docs/layout-diff.md`, `nova/tests/layout/` checks | The diff has exactly 10 rows: 3 catalogue-only, 2 layout-only and 5 renamed entries |
 | 2 | Add lint, typecheck and a single CI workflow | `.github/workflows/ci.yml`, `pyproject.toml`, `nova/tests/layout/ci_checks.py`, `nova/tests/layout/ci_mutations.py` | CI fails on a type error |
 | 3 | Write the service skeleton template | `services/_template/` | Template builds and serves `/health/live` |
-| 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs | `services/api-gateway/` | Gateway rejects an unauthenticated request |
+| 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs. It sets the session token format | `services/api-gateway/` | Gateway rejects an unauthenticated request |
 | 5 | Add Postgres with one schema and one role per service | `infra/compose/`, `db/init/` | Service A cannot read service B's schema |
 | 6 | Add Redis and one BullMQ queue | `services/api-gateway/queues/` | Job survives a container restart |
 | 7 | Add MinIO with per-service prefixes | `infra/compose/` | Worker in prefix A cannot list prefix B |
@@ -36,7 +36,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 12 | Publish versioned OpenAPI for two services | `packages/contracts/` | Contract test fails on a breaking change |
 | 13 | Implement the event envelope and outbox pattern | `packages/contracts/` | Consumer records the event ID once |
 | 14 | Build images for the services created so far: multi-stage, pinned digest, non-root, no secrets | each new `Dockerfile` | A container reports a non-zero uid. No secret string from the repo appears in the image layers. `17-deployment-hardening` adds the Trivy scan in P10. |
-| 15 | Scaffold `apps/web` as a Next.js + React + Tailwind app with a build script | `apps/web/` | `npm run build` succeeds from a clean checkout |
+| 15 | Scaffold `apps/web` as a Next.js + React + Tailwind app with shadcn/ui and the translation setup, with a build script | `apps/web/` | `npm run build` succeeds from a clean checkout |
 | 16 | Write `docs/architecture`: service map, trust boundaries, data flow and the layout diff at `docs/architecture/layout-diff.md` | `docs/architecture/` | Each of the 23 catalogue services appears exactly once |
 | 17 | Add the public HTTPS edge: a reverse proxy with a certificate and hostname, or a tunnel for local work | `infra/edge/` | An HTTPS request from outside reaches the gateway, and plain HTTP does not answer |
 
@@ -50,6 +50,7 @@ Work these steps in order. A step names tasks from the table above.
 
 ## Acceptance tests
 
+- `test_gateway_rejects_unauthenticated_request` — a request to `/api/v1/anything` without a session gets 401.
 - `test_gateway_rejects_unauthenticated_private_call` — a direct call to a private service port without a service token returns 401.
 - `test_service_cannot_read_peer_schema` — a query from service A against service B's schema fails.
 - `test_untrusted_container_has_no_db_route` — the placeholder untrusted container fails to connect to Postgres. `06-document-ml-sandbox` repeats the same rule on the real parser in P3.
@@ -61,3 +62,6 @@ Work these steps in order. A step names tasks from the table above.
 - 23 services is heavy for one developer. Start with gateway, identity, policy, audit and one domain. Add the rest in the phase that needs them. Health and image tasks cover only services that exist at that point.
 - Per-service schemas slow cross-domain joins. The spec forbids them. Use events.
 - Workload identity in the MVP is service JWTs, not mTLS. mTLS is out of scope for this plan. Add it only when a service boundary crosses a host, and record that change in `changes/`.
+- The gateway of task 4 sets the session token format and the `nova_csrf` cookie name. `07-identity-authz` task 2 issues the cookies. Its tasks 10, 13, 14 and 18 add the step-up, the CORS, the CSP, the SSRF guard, the lockout and the TLS. Its task 14 extends the limiter of task 4.
+- Task 4 builds the health endpoints of the gateway, because the module acceptance test reads them. Task 10 of this module adds them to the services that exist by then.
+- The gateway of task 4 runs on Next.js. The deviation from the backend framework of spec:426 has a note in `docs/design-notes/nova-api-gateway.md`.

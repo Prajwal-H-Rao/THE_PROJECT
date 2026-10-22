@@ -120,3 +120,17 @@ def widen_typecheck_scope(work):
     replace_in_work(work, WORKFLOW, "output=$(mypy nova 2>&1)", "output=$(mypy nova/services 2>&1)")
     return replace_in_work(
         work, CONFIG, 'files = ["nova"]', 'files = ["nova/services"]')
+
+
+def remove_gateway_step(work):
+    """Remove the gateway step from the CI workflow."""
+    return replace_in_work(
+        work, WORKFLOW,
+        "      - name: Build and test the api-gateway\n"
+        "        run: |\n"
+        "          cd nova/services/api-gateway\n"
+        "          npm ci\n"
+        "          npm run build\n"
+        "          npm run build:test\n"
+        "          npm test\n",
+        "")

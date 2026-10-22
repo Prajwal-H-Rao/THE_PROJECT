@@ -40,7 +40,7 @@ The spec's 10-row matrix at line 792 is normative. Reproduce it as policy tests,
 | # | Task | Artifact | Test |
 |---|---|---|---|
 | 1 | Implement the OIDC authorization-code flow with state and PKCE | identity service | Replay of `state` fails |
-| 2 | Issue session cookies: `HttpOnly`, `Secure`, `SameSite` | gateway | CSRF on cookie writes fails |
+| 2 | Issue the session cookies: `nova_session` with `HttpOnly`, `Secure` and `SameSite`, and `nova_csrf` readable with `Secure` and `SameSite`. The token format is from module 01 task 4 | gateway | CSRF on cookie writes fails |
 | 3 | Implement TOTP enrolment and login | identity service | Wrong code rejected, replay rejected |
 | 4 | Add email plus OTP for password reset | identity service | Token is single-use and time-boxed |
 | 5 | Encrypt OAuth refresh tokens at rest with envelope encryption | identity service | Ciphertext only in DB and logs |

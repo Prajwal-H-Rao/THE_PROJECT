@@ -6,6 +6,10 @@ Phase P4. Spec headings: UI/UX design, design tokens, CSS tokens, typography, sp
 
 One token file drives both themes. Every component carries all of its specified states. Every agent action shows an honest state. Page bodies belong to their domain modules, so this module ships the shell and the shared parts only.
 
+The base components come from shadcn/ui. The CLI copies the component source into `apps/web/components/ui/`, so the repo holds no component library dependency and every variant stays editable. The `--nova-*` tokens replace the shadcn colour variables. The variants come from `class-variance-authority`.
+
+No component holds hardcoded text. Every user-facing string comes from the message file at `apps/web/messages/en.json`, and its keys sit under the page that uses them. The hook is `useTranslations` from next-intl. The web app of module 01 task 15 sets up the provider, the locale routing and the message file.
+
 ## Constraints (spec, binding)
 
 - Spec:245: "Use the same tokens for the web dashboard and approval surfaces shown in chat."
@@ -17,6 +21,7 @@ One token file drives both themes. Every component carries all of its specified 
 - Spec:390: "Do not treat a Lighthouse score as a substitute for manual review."
 - Spec:419: "The design tokens are design recommendations to verify in the final Figma implementation, not claims that the Figma file was edited."
 - Spec:399: "each module implements each applicable state rather than a blank page or fake sample data" for empty, loading, offline and permission-denied.
+- No component uses purple, a shade of purple or blue, unless a spec token demands it. The palette follows the colour combinations of the Figma resource library. The token values of spec:253-277 are blue and violet, so the token layer keeps them and the rule applies to every colour outside that table.
 
 ## Design token set (spec:253-277, 25 rows)
 
@@ -34,15 +39,15 @@ Planning, Approval required, Executing, Verified success, Failed/uncertain, and 
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Copy the spec:284-313 CSS token block verbatim. Append the four chart keys from the spec:274-277 colour table, which the block omits. | `apps/web/styles/tokens.css` | The copied block matches spec:284-313 byte for byte, and the four `--nova-chart-*` keys carry both theme values |
+| 1 | Copy the spec:284-313 CSS token block verbatim. Append the four chart keys from the spec:274-277 colour table, which the block omits. Then set up shadcn/ui on that theme: the Tailwind variables, the CSS variable map and the component registry. Pick the accents outside the token table from the Figma colour combinations library, without purple or blue. | `apps/web/styles/tokens.css`, `apps/web/components/ui/` | The copied block matches spec:284-313 byte for byte, the four `--nova-chart-*` keys carry both theme values, and a shadcn component reads the `--nova-*` tokens |
 | 2 | Build the theme switch with persistence and system preference | web app | Both themes render from the same keys |
 | 3 | Implement the 25-row token table as a typed token file | `tokens.ts` | Typed file has exactly 25 color keys |
 | 4 | Implement the 11 `type.*` tokens from spec:322-332, then the spec:334 rules on spacing, caps and tabular numerals | `typography.css` | All 11 tokens resolve, long-word overflow passes, and a money and a date value render with tabular numerals |
 | 5 | Implement spacing on the 4px base, then copy the layout dimension table from spec:340-360 | `spacing.css` | Spacing tokens are multiples of 4, and the layout values match spec:340-360 |
-| 6 | Build Button with all variants and states: default, hover, active, focus-visible, loading, disabled | `components/Button/` | Focus-visible present on every control |
-| 7 | Build TextField, TextArea, Select, Combobox with invalid, read-only and no-results states | `components/` | `aria-describedby` links the error |
-| 8 | Build Card, Badge, Tabs, Dialog, Drawer, DataTable, Timeline with specified states | `components/` | Dialog traps focus and closes safely |
-| 9 | Build ChatMessage, ApprovalCard, FileDropzone, EmptyState, Skeleton, Toast, DatePicker | `components/` | ApprovalCard shows hash, expiry and consequence |
+| 6 | Build Button with all variants and states: default, hover, active, focus-visible, loading, disabled. Use the shadcn Button and its variant map | `components/Button/` | Focus-visible present on every control |
+| 7 | Build TextField, TextArea, Select, Combobox with invalid, read-only and no-results states. Use the shadcn Input, Textarea, Select and Command primitives | `components/` | `aria-describedby` links the error |
+| 8 | Build Card, Badge, Tabs, Dialog, Drawer, DataTable, Timeline with specified states. Use the shadcn Card, Badge, Tabs, Dialog, Sheet and Table primitives | `components/` | Dialog traps focus and closes safely |
+| 9 | Build ChatMessage, ApprovalCard, FileDropzone, EmptyState, Skeleton, Toast, DatePicker. Use the shadcn Skeleton, Toast and Calendar primitives | `components/` | ApprovalCard shows hash, expiry and consequence |
 | 10 | Build the 10 domain card variants: email, event, task, note, transaction, trip, job, application, approval, document | `components/cards/` | Each of the 10 cards renders default, loading, empty, error and denied states |
 | 11 | Implement all six agent UI states with honest copy | `components/agent-states/` | No `done` renders before verification |
 | 12 | Build the action preview: target, exact fields, permissions, side effects, reversibility, expiry, policy rationale. Each domain page verifies the live match in P6 to P9 | `components/ActionPreview/` | The rendered preview matches the tool-call fixture exactly |
@@ -54,12 +59,13 @@ Planning, Approval required, Executing, Verified success, Failed/uncertain, and 
 | 18 | Run an accessibility pass: contrast, labels, focus order, ARIA, keyboard, hit targets 40-44px | `a11y-report.json` | The report lists zero violations of severity critical, and every entry carries an element selector |
 | 19 | Test with a screen reader: navigation, focus announcements and action previews | `a11y-screen-reader.md` | The record lists each flow tested and its result (spec:390, spec:873) |
 | 20 | Add the empty, loading, offline and permission-denied state for every shared component | components | Each state renders, none shows fake data |
+| 21 | Move every shared string into the message file. No component holds hardcoded text. The keys sit under the page that uses them. | `apps/web/messages/en.json`, `apps/web/components/` | A scan finds no hardcoded string in a component, and every key resolves |
 
 ## Build order
 
 Work these steps in order. A step names tasks from the table above.
 
-1. Copy the CSS tokens and build the theme switch.
+1. Copy the CSS tokens, set up shadcn/ui and the message file (tasks 1 and 21), then build the theme switch.
 2. Build Button and TextField with every state, then the action preview.
 3. Run the accessibility crawl before any domain page starts.
 
@@ -81,3 +87,4 @@ Work these steps in order. A step names tasks from the table above.
 - The spec states the tokens are recommendations, not a measured Figma export. Measure contrast in the built UI and record the result (see `claims-ledger.md` open claims).
 - Page bodies belong to modules 09, 10, 11, 12, 13 and 20. Do not absorb them here or this module will blow past 200 lines.
 - Accessibility is cheapest when built in. Run the crawl after every component batch, not once at the end.
+- The colour rule and the spec token table disagree. The token values of spec:253-277 are blue and violet, and task 1 copies that block byte for byte. The token layer keeps the spec values. Every colour outside the table follows the rule. A change to the spec values needs a spec change first.

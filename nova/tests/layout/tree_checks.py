@@ -6,9 +6,9 @@ import ignored_paths
 EXTRA_DIRECTORY_PREFIXES = ("tests/layout", "labs", "db")
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 61
-EXPECTED_LEAVES = 47
-EXPECTED_PLACEHOLDERS = 43
+EXPECTED_DIRECTORIES = 71
+EXPECTED_LEAVES = 51
+EXPECTED_PLACEHOLDERS = 42
 
 # The header that every placeholder file holds.
 PLACEHOLDER_TEXT = "# Placeholder. Git cannot track an empty directory. The owning module task adds the content."
