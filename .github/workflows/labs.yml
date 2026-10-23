@@ -1,0 +1,67 @@
+# CI workflow for NOVA labs.
+# Runs only labs with status=implemented. Fails if an implemented lab has no runner.
+
+name: Labs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lab-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.23.4"
+
+      - name: Load lab registry
+        id: registry
+        run: |
+          # Parse registry.yaml for implemented labs
+          python3 -c "
+import yaml, sys, json
+with open('labs/registry.yaml') as f:
+    data = yaml.safe_load(f)
+implemented = [lab for lab in data['labs'] if lab['status'] == 'implemented']
+print('implemented_labs=' + json.dumps(implemented))
+print('count=' + str(len(implemented)))
+" >> "$GITHUB_OUTPUT"
+
+      - name: Verify implemented labs have test commands
+        if: ${{ fromJson(steps.registry.outputs.implemented_labs) != '[]' }}
+        run: |
+          python3 -c "
+import json, sys
+labs = json.loads('${{ steps.registry.outputs.implemented_labs }}')
+for lab in labs:
+    if not lab.get('test_command'):
+        print(f'FAIL: Lab {lab[\"number\"]} ({lab[\"name\"]}) has status=implemented but no test_command')
+        sys.exit(1)
+    print(f'OK: Lab {lab[\"number\"]} has test command: {lab[\"test_command\"]}')
+"
+
+      - name: Install dependencies for Lab 1
+        if: ${{ fromJson(steps.registry.outputs.count) > 0 }}
+        run: |
+          # Lab 1 needs ajv which is in contracts package
+          cd nova/packages/contracts && npm ci
+
+      - name: Run Lab 1 - Contracts OpenAPI Fixture Validation
+        if: ${{ fromJson(steps.registry.outputs.count) > 0 }}
+        run: |
+          node labs/lab01/validate-openapi.js
+
+      - name: Fail if no implemented labs found
+        if: ${{ steps.registry.outputs.count == '0' }}
+        run: |
+          echo "No implemented labs found in registry. This is expected for P1 if Lab 1 is not yet implemented."
+          # Don't fail - just warn

@@ -1,0 +1,94 @@
+# NOVA Lab Registry
+# Each lab has: number, name, owning_module, phase, status (planned|implemented), test_command
+
+labs:
+  - number: 1
+    name: "Contracts before models"
+    owning_module: "19-tech-and-curriculum"
+    phase: "P1"
+    status: "implemented"
+    test_command: "node labs/lab01/validate-openapi.js"
+
+  - number: 2
+    name: "One vertical slice: upload, Flask parser, evidence-linked profile, React review view"
+    owning_module: "06-document-ml-sandbox"
+    phase: "P3"
+    status: "planned"
+    test_command: ""
+
+  - number: 3
+    name: "Service identity and policy with the parser behind an authenticated endpoint"
+    owning_module: "06-document-ml-sandbox"
+    phase: "P3"
+    status: "planned"
+    test_command: ""
+
+  - number: 4
+    name: "Agent workflow plan → validate → await_approval → execute → verify → audit"
+    owning_module: "03-agent-runtime"
+    phase: "P5"
+    status: "planned"
+    test_command: ""
+
+  - number: 5
+    name: "Messaging channels: Telegram first, then WhatsApp"
+    owning_module: "14-channels"
+    phase: "P9"
+    status: "planned"
+    test_command: ""
+
+  - number: 6
+    name: "One domain integration: Gmail read-only, then draft and send"
+    owning_module: "09-inbox-calendar"
+    phase: "P6"
+    status: "planned"
+    test_command: ""
+
+  - number: 7
+    name: "Job search in permitted mode on a labelled set"
+    owning_module: "13-employer-registry"
+    phase: "P8"
+    status: "planned"
+    test_command: ""
+
+  - number: 8
+    name: "Docker hardening with isolation proofs"
+    owning_module: "17-deployment-hardening"
+    phase: "P10"
+    status: "planned"
+    test_command: ""
+
+  - number: 9
+    name: "Kubernetes policy lab on kind or k3d"
+    owning_module: "17-deployment-hardening"
+    phase: "P10"
+    status: "planned"
+    test_command: ""
+
+  - number: 10
+    name: "Production readiness: tracing, restore, scanning"
+    owning_module: "16-reliability-testing"
+    phase: "P10"
+    status: "planned"
+    test_command: ""
+
+  - number: 11
+    name: "Small-model agent benchmark on identical fixtures"
+    owning_module: "05-model-strategy"
+    phase: "P3"
+    status: "planned"
+    test_command: ""
+
+  - number: 12
+    name: "500-employer directory import and pilot verification"
+    owning_module: "13-employer-registry"
+    phase: "P8"
+    status: "planned"
+    test_command: ""
+
+  - number: 13
+    name: "MCP surface and tool authorization"
+    owning_module: "21-mcp-surface"
+    phase: "P5"
+    status: "planned"
+    test_command: ""

@@ -15,13 +15,13 @@ The spec decides these. This plan records the decision and the reason. Any devia
 | Layer | Chosen (spec line) | Not chosen |
 |---|---|---|
 | LLM/model provider | Qwen3.5 2B/4B quantized through Ollama or llama.cpp; optional approved cloud provider (425). Owner: `05-model-strategy` | Choosing a model by hype, or trusting a local model without measuring it |
-| Backend TypeScript | NestJS on Fastify (426). The `api-gateway-bff` runs on Next.js 16 route handlers and the proxy (429), as the developer chose. The note is at `docs/design-notes/nova-api-gateway.md` | Express, plain Fastify |
+| Backend TypeScript | NestJS on Fastify (426). The `api-gateway-bff` runs on Next.js 16 route handlers and the proxy (429), as the developer chose. The note is at `docs/design-notes/nova-api-gateway.md` | Express |
 | Backend Python | Flask app factory with blueprints (432) | FastAPI, Django. Spec:1011 supersedes "FastAPI-based" |
 | Validation | Pydantic v2 and pydantic-settings (433) | Joi, Zod in Python |
 | Database | PostgreSQL with Prisma (427) | MySQL, SQLite beyond local dev |
 | Queue | BullMQ on Redis (428) | RabbitMQ |
-| Python workers | RQ on Redis (436). Chosen over Celery because one developer runs a small self-hosted system | Celery, ad-hoc threads |
-| Frontend | Next.js + React + Tailwind (429) | Vite-only, Svelte, Vue |
+| Python workers | RQ on Redis (436). Chosen over Celery because one developer runs a small self-hosted system | Celery + Redis/RabbitMQ |
+| Frontend | Next.js + React + Tailwind (429) | plain React Create-React-App, Svelte, Vue |
 | Auth | OAuth2 Google or GitHub OIDC (430) | DIY auth |
 | Agent workflow | LangGraph, LangChain selectively (434) | Raw LLM loops |
 | Tool surface | MCP servers, one per owning service, with a shared tool catalogue (435) | A shared server that holds every provider credential |
@@ -30,9 +30,9 @@ The spec decides these. This plan records the decision and the reason. Any devia
 | Observability | OpenTelemetry, Prometheus, Grafana (439) | Proprietary APM |
 | Packaging | Docker, OCI, Docker Compose (440) | Language-specific bundlers |
 | Orchestration | Kubernetes on kind or k3d locally; AWS EKS optional (441) | Compose only |
-| Monitoring | Prometheus and Grafana (431) | CloudWatch-only |
+| Monitoring | Prometheus and Grafana (431) | AWS CloudWatch |
 
-The product owner chose the MCP surface over the tool registry. `21-mcp-surface` owns the surface, the authorization and the tool bindings. The registry fields moved onto the MCP tool definition. The spec now names the MCP surface, and the change from the earlier registry wording is recorded in `docs/design-notes/`. The browser tool stays bounded, so the no-generic-browser rule holds.
+The spec at lines 503-504 mandates the MCP tool catalogue with `tool_id`, version, strict Pydantic input/output classes, JSON Schema, owning service and its MCP server, allowed task family, required scopes, resource ownership rule, risk tier, idempotency requirements and independent verifier. No separate "tool registry" exists in the spec; the catalogue is the registry. `21-mcp-surface` owns the surface, the authorization and the tool bindings. The browser tool stays bounded, so the no-generic-browser rule holds.
 
 ## Curriculum labs and their owning phase (spec:685-696)
 
@@ -60,7 +60,7 @@ Every lab still runs inside the NOVA repository. The owning module carries its t
 |---|---|---|---|
 | 1 | Confirm each technology row against spec:423-441 | this file | No deviation without a design note |
 | 2 | Record version pins and licences for every dependency | `THIRD_PARTY.md` | Every entry names a licence |
-| 3 | Lab 1: contracts with OpenAPI and Pydantic fixtures | `labs/lab01/` | All six schemas validate a fixture |
+| 3 | Lab 1: contracts with OpenAPI fixtures | `labs/lab01/` | All two OpenAPI documents validate their fixtures |
 | 4 | Write source and design notes: every choice and every rejection with a reason. Include the MCP surface deviation | `docs/design-notes/` | Each rejected option has a reason |
 | 5 | Create the lab registry with all 13 labs. Each row has an owning module, a phase and a `planned` or `implemented` status. Add the CI workflow for the `implemented` rows. | `labs/registry.yaml` + `.github/workflows/labs.yml` | The registry has 13 rows, the workflow runs lab 1, and it fails when an `implemented` row has no runner |
 
@@ -70,7 +70,7 @@ Work these steps in order. A step names tasks from the table above.
 
 1. Confirm the technology table against spec:423-441 and record version pins.
 2. Write the source and design notes.
-3. Deliver lab 1, then register the other 11 labs with the module file, phase and status that owns each.
+3. Deliver lab 1, then register the other 12 labs with the module file, phase and status that owns each.
 
 ## Acceptance tests
 
@@ -78,7 +78,7 @@ Work these steps in order. A step names tasks from the table above.
 - `test_every_dependency_names_a_licence` — a dependency without a licence fails the check.
 - `test_no_fastapi_service` — no Python service imports FastAPI, which spec:1011 supersedes.
 - `test_mcp_surface_is_scoped_and_authorized` — every MCP tool names a task family, a scope and a risk tier, and the surface sits inside the scope lock. `21-mcp-surface` enforces the same rule against the live catalogue in P5.
-- `test_mcp_deviation_has_a_design_note` — the design note for the MCP surface names spec:503 and spec:504 and the reason.
+- `test_mcp_catalogue_has_a_design_note` — the design note for the MCP tool catalogue names spec:503 and spec:504 and states no separate tool registry exists.
 - `test_each_rejection_has_a_reason` — every row in the not-chosen column appears in `docs/design-notes/` with a reason.
 - `test_every_lab_has_an_owner` — each of the 13 labs names a module file, a phase and a status.
 

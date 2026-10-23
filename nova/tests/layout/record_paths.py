@@ -44,6 +44,22 @@ EXTENSIONLESS_NAMES = ("Makefile", "LICENSE", "CODEOWNERS", "Dockerfile")
 DESIGN_NOTES = (
     "docs/design-notes/nova-api-gateway.md",
     "docs/design-notes/nova-object-store.md",
+    "docs/design-notes/nova-llm-model-provider.md",
+    "docs/design-notes/nova-backend-python.md",
+    "docs/design-notes/nova-validation.md",
+    "docs/design-notes/nova-database.md",
+    "docs/design-notes/nova-queue.md",
+    "docs/design-notes/nova-python-workers.md",
+    "docs/design-notes/nova-frontend.md",
+    "docs/design-notes/nova-auth.md",
+    "docs/design-notes/nova-agent-workflow.md",
+    "docs/design-notes/nova-mcp-surface.md",
+    "docs/design-notes/nova-model-gateway.md",
+    "docs/design-notes/nova-document-parsing.md",
+    "docs/design-notes/nova-observability.md",
+    "docs/design-notes/nova-packaging.md",
+    "docs/design-notes/nova-orchestration.md",
+    "docs/design-notes/nova-monitoring.md",
 )
 
 
@@ -71,6 +87,11 @@ def expected_groups(index):
          "packages/contracts/events/event-envelope.compat.test.ts"],
         ["infra/scripts/backup.sh", "infra/scripts/restore.sh", "infra/scripts/backup-drill.sh",
          "docs/privacy-review.md"],
+        ["labs/lab01/validate-openapi.js", "labs/lab01/fixtures/api-gateway-health-live.json",
+         "labs/lab01/fixtures/api-gateway-health-ready.json", "labs/lab01/fixtures/typescript-template-health-live.json",
+         "labs/lab01/fixtures/typescript-template-health-ready.json", "labs/registry.yaml"],
+        ["THIRD_PARTY.md"],
+        [".github/workflows/labs.yml"],
     ]
 
 

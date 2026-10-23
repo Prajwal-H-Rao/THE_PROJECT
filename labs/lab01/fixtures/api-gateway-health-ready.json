@@ -1,0 +1,4 @@
+{
+  "$schema": "HealthReadyResponse",
+  "status": "ready"
+}
