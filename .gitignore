@@ -51,3 +51,14 @@ next-env.d.ts
 *.pyc
 *.pyo
 *.tsbuildinfo
+
+# Keep package lock files out of the repository.
+**/package-lock.json
+nova/apps/web/package-lock.json
+nova/services/*/package-lock.json
+nova/services/_template/*/package-lock.json
+nova/workers/*/package-lock.json
+nova/packages/*/package-lock.json
+
+# Keep package lock files out of the repository.
+package-lock.json

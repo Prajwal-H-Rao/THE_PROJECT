@@ -6,8 +6,8 @@ import ignored_paths
 EXTRA_DIRECTORY_PREFIXES = ("tests/layout", "labs", "db")
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 96
-EXPECTED_LEAVES = 67
+EXPECTED_DIRECTORIES = 104
+EXPECTED_LEAVES = 73
 EXPECTED_PLACEHOLDERS = 38
 
 # The header that every placeholder file holds.

@@ -39,18 +39,18 @@ The spec's 10-row matrix at line 792 is normative. Reproduce it as policy tests,
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Implement the OIDC authorization-code flow with state and PKCE | identity service | Replay of `state` fails |
+| 1 | Implement the OIDC authorization-code flow with state and PKCE | `services/identity-service/` | Replay of `state` fails |
 | 2 | Issue the session cookies: `nova_session` with `HttpOnly`, `Secure` and `SameSite`, and `nova_csrf` readable with `Secure` and `SameSite`. The token format is from module 01 task 4 | gateway | CSRF on cookie writes fails |
-| 3 | Implement TOTP enrolment and login | identity service | Wrong code rejected, replay rejected |
-| 4 | Add email plus OTP for password reset | identity service | Token is single-use and time-boxed |
-| 5 | Encrypt OAuth refresh tokens at rest with envelope encryption | identity service | Ciphertext only in DB and logs |
-| 6 | Implement scopes per integration and per user | identity service | Scope escalation fails |
+| 3 | Implement TOTP enrolment and login | `services/identity-service/` | Wrong code rejected, replay rejected |
+| 4 | Add email plus OTP for password reset | `services/identity-service/` | Token is single-use and time-boxed |
+| 5 | Encrypt OAuth refresh tokens at rest with envelope encryption | `services/identity-service/` | Ciphertext only in DB and logs |
+| 6 | Implement scopes per integration and per user | `services/identity-service/` | Scope escalation fails |
 | 7 | Implement the resource-ownership check in the repository base layer. Every service created later extends it | repository base layer | Cross-user read fails |
 | 8 | Build the service JWT validation middleware: issuer, audience, expiry, subject, scope. Every service inherits it from the shared gateway path. | gateway middleware | `alg: none` rejected |
-| 9 | Add key rotation for workload keys | identity service | Old key fails after rotation |
+| 9 | Add key rotation for workload keys | `services/identity-service/` | Old key fails after rotation |
 | 10 | Implement step-up authentication for sensitive changes | gateway | Sensitive route demands fresh TOTP |
-| 11 | Build the account-linking flow: one-time nonce issued only from a logged-in session | identity service | A nonce minted outside a logged-in session is refused |
-| 12 | Implement unlink and revoke | identity service | Revocation stops future access |
+| 11 | Build the account-linking flow: one-time nonce issued only from a logged-in session | `services/identity-service/` | A nonce minted outside a logged-in session is refused |
+| 12 | Implement unlink and revoke | `services/identity-service/` | Revocation stops future access |
 | 13 | Add CORS allow-list, CSP, body and file limits, SSRF guard | gateway | Each control has a test |
 | 14 | Add rate limiting and account lockout | gateway | Lockout triggers and recovers |
 | 15 | Encode the 10 matrix rows as policy tests, against the rule schema `08-policy-approval` builds in tasks 1-3, before module 07 | policy service | All 10 pass |
