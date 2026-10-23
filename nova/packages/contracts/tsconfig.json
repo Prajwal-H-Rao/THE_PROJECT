@@ -13,11 +13,14 @@
   "include": [
     "service-token.ts",
     "service-token.test.ts",
-    "event-envelope.ts",
-    "event-consumers.ts",
-    "event-envelope.test.ts",
-    "event-consumers.test.ts",
+    "events/event-envelope.ts",
+    "events/event-consumers.ts",
+    "events/event-envelope.test.ts",
+    "events/event-consumers.test.ts",
+    "events/event-envelope.compat.test.ts",
     "service-api.ts",
-    "service-api.test.ts"
+    "service-api.test.ts",
+    "migrations/runner.ts",
+    "migrations/runner.test.ts"
   ]
 }

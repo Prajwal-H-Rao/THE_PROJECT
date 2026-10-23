@@ -58,6 +58,19 @@ def expected_groups(index):
         [tree_checks.TEMPLATE_DIRECTORY],
         list(DESIGN_NOTES),
         ["infra/edge/Caddyfile", "infra/edge/README.md"],
+        ["packages/contracts/migrations/runner.ts", "packages/contracts/migrations/runner.test.ts"] +
+        [f"packages/contracts/migrations/{i:02d}-{name}.sql" for i, name in [
+            (1, "roles-and-schemas"), (2, "identity-schema"), (3, "audit-schema"),
+            (4, "policy-schema"), (5, "inbox-schema"), (6, "tasks-schema"),
+            (7, "finance-schema"), (8, "trips-schema"), (9, "jobs-schema"),
+            (10, "registry-schema"), (11, "export-deletion"), (12, "indexes"),
+            (13, "audit-search")
+        ]],
+        ["packages/contracts/events/event-envelope.ts", "packages/contracts/events/event-consumers.ts",
+         "packages/contracts/events/event-envelope.test.ts", "packages/contracts/events/event-consumers.test.ts",
+         "packages/contracts/events/event-envelope.compat.test.ts"],
+        ["infra/scripts/backup.sh", "infra/scripts/restore.sh", "infra/scripts/backup-drill.sh",
+         "docs/privacy-review.md"],
     ]
 
 

@@ -13,20 +13,30 @@
       "default": "./dist/service-token.js"
     },
     "./event-envelope": {
-      "types": "./dist/event-envelope.d.ts",
-      "default": "./dist/event-envelope.js"
+      "types": "./dist/events/event-envelope.d.ts",
+      "default": "./dist/events/event-envelope.js"
+    },
+    "./event-consumers": {
+      "types": "./dist/events/event-consumers.d.ts",
+      "default": "./dist/events/event-consumers.js"
     },
     "./service-api": {
       "types": "./dist/service-api.d.ts",
       "default": "./dist/service-api.js"
+    },
+    "./migrations": {
+      "types": "./dist/migrations/runner.d.ts",
+      "default": "./dist/migrations/runner.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/event-envelope.test.js dist/event-consumers.test.js dist/service-api.test.js"
+    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/migrations/runner.test.js"
   },
   "devDependencies": {
     "@types/node": "22.19.1",
+    "@types/pg": "^8.23.1",
+    "pg": "8.16.3",
     "typescript": "5.9.3"
   }
 }
