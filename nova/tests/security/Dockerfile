@@ -6,4 +6,4 @@ WORKDIR /app
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 USER 1000:1000
-CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "nova/tests/security/test_database_isolation.py", "nova/tests/security/test_object_prefix_isolation.py"]
+CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "nova/tests/security/test_database_isolation.py", "nova/tests/security/test_object_prefix_isolation.py", "nova/tests/security/test_event_delivery.py"]

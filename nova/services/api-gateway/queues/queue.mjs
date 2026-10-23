@@ -2,8 +2,6 @@
  * The shared queue connection of the gateway. It holds one queue with one client.
  */
 
-import { randomBytes } from "node:crypto";
-
 import { Queue } from "bullmq";
 
 /** The name of the single BullMQ queue that module 01 owns. */
@@ -37,11 +35,6 @@ export function openQueue(connection) {
     // WHY: no worker needs an event stream here. The scripts answer on their own.
     defaultJobOptions: { removeOnComplete: false, removeOnFail: false },
   });
-}
-
-/** Return one opaque payload. The gateway names no field of any job payload. */
-export function opaquePayload() {
-  return randomBytes(PAYLOAD_BYTES).toString("base64");
 }
 
 /** Close the queue and its shared socket. The script exits only after the close. */

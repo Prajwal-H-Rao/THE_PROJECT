@@ -1,0 +1,48 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "nova-api-gateway",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/v1/health/live": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "The fixed answer of this endpoint.",
+            "json": {
+              "status": "live"
+            }
+          }
+        }
+      }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "The fixed answer of this endpoint.",
+            "json": {
+              "status": "ready"
+            }
+          }
+        }
+      }
+    },
+    "/v1/internal": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "The fixed answer of this endpoint.",
+            "json": {
+              "ok": true,
+              "service": "string",
+              "scope": "string",
+              "trace_id": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

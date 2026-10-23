@@ -10,5 +10,14 @@
     "strict": true,
     "types": ["node"]
   },
-  "include": ["service-token.ts", "service-token.test.ts"]
+  "include": [
+    "service-token.ts",
+    "service-token.test.ts",
+    "event-envelope.ts",
+    "event-consumers.ts",
+    "event-envelope.test.ts",
+    "event-consumers.test.ts",
+    "service-api.ts",
+    "service-api.test.ts"
+  ]
 }

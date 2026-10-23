@@ -11,11 +11,19 @@
     ".": {
       "types": "./dist/service-token.d.ts",
       "default": "./dist/service-token.js"
+    },
+    "./event-envelope": {
+      "types": "./dist/event-envelope.d.ts",
+      "default": "./dist/event-envelope.js"
+    },
+    "./service-api": {
+      "types": "./dist/service-api.d.ts",
+      "default": "./dist/service-api.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js"
+    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/event-envelope.test.js dist/event-consumers.test.js dist/service-api.test.js"
   },
   "devDependencies": {
     "@types/node": "22.19.1",

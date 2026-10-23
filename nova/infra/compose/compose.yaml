@@ -111,6 +111,7 @@ services:
       - ../../db/init:/app/nova/db/init:ro
       - ../../tests/security/test_database_isolation.py:/app/nova/tests/security/test_database_isolation.py:ro
       - ../../tests/security/test_object_prefix_isolation.py:/app/nova/tests/security/test_object_prefix_isolation.py:ro
+      - ../../tests/security/test_event_delivery.py:/app/nova/tests/security/test_event_delivery.py:ro
       - ../../tests/security/sigv4_request.py:/app/nova/tests/security/sigv4_request.py:ro
     depends_on:
       postgres:

@@ -1,10 +1,11 @@
 /**
- * The enqueue script of the restart test. It adds one echo job with an opaque
- * payload and prints the job id. The verify script reads the same job after the
- * broker restarts.
+ * The enqueue script of the restart test. It adds one echo job whose payload is
+ * one base64url event envelope token, and prints the job id. The verify script
+ * reads the same job after the broker restarts.
  */
 
-import { connectionOf, closeQueue, ECHO_JOB_NAME, opaquePayload, openQueue } from "./queue.mjs";
+import { buildEnvelope, encodeEnvelope } from "./envelope.mjs";
+import { connectionOf, closeQueue, ECHO_JOB_NAME, openQueue } from "./queue.mjs";
 
 const RECORD_PREFIX = "ENQUEUE";
 
@@ -13,8 +14,11 @@ async function main() {
   let queue;
   try {
     queue = openQueue(connectionOf());
-    const id = "echo-" + opaquePayload().slice(0, 8).toLowerCase();
-    const payload = opaquePayload();
+    // WHY: one envelope per job. The id and the token both derive from this
+    // single object, so the record line names the same event the queue holds.
+    const envelope = buildEnvelope(ECHO_JOB_NAME + ".request", "api-gateway", ECHO_JOB_NAME);
+    const payload = encodeEnvelope(envelope);
+    const id = "echo-" + payload.slice(0, 8).toLowerCase();
     const job = await queue.add(ECHO_JOB_NAME, { payload }, { jobId: id });
     console.log(
       RECORD_PREFIX + " job=" + String(job.id) + " name=" + ECHO_JOB_NAME
