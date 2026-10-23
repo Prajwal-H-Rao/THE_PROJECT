@@ -11,6 +11,7 @@ CREATE TABLE identity_service.users (
     avatar_url        TEXT,
     locale            TEXT NOT NULL DEFAULT 'en',
     timezone          TEXT NOT NULL DEFAULT 'UTC',
+    password_hash     TEXT, -- bcrypt hash for password authentication
     created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 ) AUTHORIZATION identity_service;

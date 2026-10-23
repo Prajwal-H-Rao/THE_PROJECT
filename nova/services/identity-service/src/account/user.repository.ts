@@ -11,6 +11,7 @@ export interface UserRecord {
   avatar_url: string | null;
   locale: string;
   timezone: string;
+  password_hash: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -143,5 +144,22 @@ export class UserRepository {
     const sql = `UPDATE identity_service.users SET ${fields.join(", ")} WHERE user_id = $1 RETURNING *`;
     const result = await (client ?? this.pool).query(sql, params);
     return result.rows[0] ?? null;
+  }
+
+  /** Update a user's password hash. */
+  async updatePasswordHash(userId: string, passwordHash: string, client?: PoolClient): Promise<void> {
+    await (client ?? this.pool).query(
+      `UPDATE identity_service.users SET password_hash = $1, updated_at = NOW() WHERE user_id = $2`,
+      [passwordHash, userId]
+    );
+  }
+
+  /** Get a user's password hash. */
+  async getPasswordHash(userId: string, client?: PoolClient): Promise<string | null> {
+    const result = await (client ?? this.pool).query(
+      `SELECT password_hash FROM identity_service.users WHERE user_id = $1`,
+      [userId]
+    );
+    return result.rows[0]?.password_hash ?? null;
   }
 }

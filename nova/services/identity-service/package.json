@@ -26,6 +26,8 @@
     "@nestjs/platform-fastify": "^10.4.22",
     "@nestjs/swagger": "^7.4.2",
     "@nova/contracts": "file:../../packages/contracts",
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "fastify": "^4.28.1",
