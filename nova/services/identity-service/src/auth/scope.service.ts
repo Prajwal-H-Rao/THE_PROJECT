@@ -32,21 +32,25 @@ export class ScopeService {
       [integrationName, scopeName]
     );
 
-    if (scopeExists.rows[0]?.is_sensitive) {
-      // Check if user already has a sensitive scope for this integration
-      const hasSensitive = await (client ?? this.pool).query(
-        `SELECT 1 FROM identity_service.user_scopes us
-         JOIN identity_service.integration_scopes ins
-           ON us.integration_name = ins.integration_name
-          AND us.scope_name = ins.scope_name
-         WHERE us.user_id = $1
-           AND us.integration_name = $2
-           AND ins.is_sensitive = true
-           AND us.revoked_at IS NULL`,
-        [integrationName]
-      );
-      if (scopeExists.rows[0].is_sensitive && scopeExists.rowCount === 0) {
-        throw new Error(`Scope escalation: user must have a sensitive scope granted before requesting ${integrationName}:${integrationName}`);
+    if (requestedSensitive.rows[0]?.is_sensitive) {
+      // Allow system/admin to grant first sensitive scope without prior grant
+      const isPrivilegedGrantor = grantedBy === "system" || grantedBy === "admin";
+      if (!isPrivilegedGrantor) {
+        // Check if user already has a sensitive scope for this integration
+        const hasSensitive = await (client ?? this.pool).query(
+          `SELECT 1 FROM identity_service.user_scopes us
+           JOIN identity_service.integration_scopes ins
+             ON us.integration_name = ins.integration_name
+            AND us.scope_name = ins.scope_name
+           WHERE us.user_id = $1
+             AND us.integration_name = $2
+             AND ins.is_sensitive = true
+             AND us.revoked_at IS NULL`,
+          [userId, integrationName]
+        );
+        if (!hasSensitive.rows[0]) {
+          throw new Error(`Scope escalation: user must have a sensitive scope granted before requesting ${integrationName}:${scopeName}`);
+        }
       }
     }
 
@@ -58,13 +62,14 @@ export class ScopeService {
          granted_at = NOW(),
          granted_by = EXCLUDED.granted_by
        RETURNING user_scope_id`,
-      [integrationName, scopeName, grantedBy]
+      [userId, integrationName, scopeName, grantedBy]
     );
     return result.rows[0].user_scope_id;
   }
 
   /** Revoke a user's scope for an integration. */
   async revokeUserScope(
+    userId: string,
     integrationName: string,
     scopeName: string,
     client?: PoolClient
@@ -72,8 +77,8 @@ export class ScopeService {
     const result = await (client ?? this.pool).query(
       `UPDATE identity_service.user_scopes
        SET revoked_at = NOW()
-       WHERE integration_name = $1 AND scope_name = $2 AND revoked_at IS NULL`,
-      [integrationName, scopeName]
+       WHERE user_id = $1 AND integration_name = $2 AND scope_name = $3 AND revoked_at IS NULL`,
+      [userId, integrationName, scopeName]
     );
     return (result.rowCount ?? 0) > 0;
   }
@@ -134,7 +139,7 @@ export class ScopeService {
          AND us.integration_name = $2
          AND ins.is_sensitive = true
          AND us.revoked_at IS NULL`,
-      [integrationName]
+      [userId, integrationName]
     );
 
     return (hasSensitive.rowCount ?? 0) > 0;

@@ -12,6 +12,7 @@ export interface SessionClaims {
   readonly tenant: string;
   readonly channel: string;
   readonly csrf: string;
+  readonly roles: readonly string[];
   readonly iat: number;
   readonly exp: number;
 }
@@ -80,6 +81,8 @@ export function readClaims(payload: string): SessionClaims | null {
   const tenant = record["tenant"];
   const channel = record["channel"];
   const csrf = record["csrf"];
+  const roles = record["roles"];
+  const rolesArray: readonly string[] = Array.isArray(roles) ? roles.map(String) : [];
   const iat = record["iat"];
   const exp = record["exp"];
   if (!isText(sub) || !isText(sid) || !isText(tenant) || !isText(channel) || !isText(csrf)) {
@@ -88,7 +91,7 @@ export function readClaims(payload: string): SessionClaims | null {
   if (!isNumber(iat) || !isNumber(exp)) {
     return null;
   }
-  return { sub, sid, tenant, channel, csrf, iat, exp };
+  return { sub, sid, tenant, channel, csrf, roles: rolesArray, iat, exp };
 }
 
 /** Return true when the value is a base64url string in its canonical form. */

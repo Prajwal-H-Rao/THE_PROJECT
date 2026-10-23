@@ -3,6 +3,8 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { Pool, PoolClient } from "pg";
 
+import { BaseRepository } from "../common/base.repository.js";
+
 export interface UserRecord {
   user_id: string;
   email: string;
@@ -43,15 +45,13 @@ export interface LinkChannelIdentityInput {
 }
 
 @Injectable()
-export class UserRepository {
-  constructor(@Inject("PG_POOL") private readonly pool: Pool) {}
+export class UserRepository extends BaseRepository {
+  constructor(@Inject("PG_POOL") pool: Pool) {
+    super(pool);
+  }
 
   async findById(userId: string, client?: PoolClient): Promise<UserRecord | null> {
-    const result = await (client ?? this.pool).query(
-      `SELECT * FROM identity_service.users WHERE user_id = $1`,
-      [userId]
-    );
-    return result.rows[0] ?? null;
+    return this.findOwned<UserRecord>(userId, "users", userId, "user_id", "user_id", client);
   }
 
   async findByEmail(email: string, client?: PoolClient): Promise<UserRecord | null> {

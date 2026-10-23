@@ -5,6 +5,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from "@nestjs/swagger";
 import type { Response, Request } from "express";
 import { OidcService, OidcProviderConfig } from "./oidc.service.js";
 import { SessionService } from "../session/session.service.js";
+import { RbacService } from "./rbac.service.js";
 import { ConfigService } from "@nestjs/config";
 
 @ApiTags("auth")
@@ -13,8 +14,27 @@ export class AuthController {
   constructor(
     private readonly oidc: OidcService,
     private readonly sessionService: SessionService,
+    private readonly rbacService: RbacService,
     private readonly config: ConfigService
   ) {}
+
+  private readonly cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: 3600 * 1000, // 1 hour
+    path: "/",
+  };
+
+  private setSessionCookies(res: Response, token: string, csrfToken: string): void {
+    res.cookie("nova_session", token, this.cookieOptions);
+    res.cookie("nova_csrf", csrfToken, { ...this.cookieOptions, httpOnly: false }); // CSRF needs to be readable by JS
+  }
+
+  private clearSessionCookies(res: Response): void {
+    res.clearCookie("nova_session", { ...this.cookieOptions, maxAge: 0 });
+    res.clearCookie("nova_csrf", { ...this.cookieOptions, maxAge: 0 });
+  }
 
   @Get("login/:provider")
   @ApiOperation({ summary: "Initiate OIDC login" })
@@ -48,18 +68,24 @@ export class AuthController {
       const userInfo = await this.oidc.fetchUserInfo(provider, tokens.access_token);
       const { userId, isNew } = await this.oidc.findOrCreateUser(provider, userInfo);
 
-      // Create session
+      // Fetch user roles for RBAC
+      const roles = await this.rbacService.getUserRoles(userId);
+      const roleNames = roles.map(r => r.role);
+
+      // Create session with roles
       const { token, csrfToken } = await this.sessionService.createSession(
         userId,
         userInfo.hd ?? "default",
-        provider
+        provider,
+        roleNames
       );
 
-      // Build redirect URL with token and csrf in query params (or set cookies)
+      // Set secure cookies instead of passing tokens in URL
+      this.setSessionCookies(res, token, csrfToken);
+
+      // Redirect to frontend
       const frontendUrl = this.config.get("FRONTEND_URL") ?? "http://localhost:3000";
       const callbackUrl = new URL(`${frontendUrl}/auth/callback`);
-      callbackUrl.searchParams.set("token", token);
-      callbackUrl.searchParams.set("csrf", csrfToken);
       callbackUrl.searchParams.set("new_user", String(isNew));
 
       res.redirect(callbackUrl.toString());
@@ -75,7 +101,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Logout - revoke session" })
   @ApiResponse({ status: 200, description: "Logged out" })
-  async logout(@Req() req: Request, @Body() body: { token?: string }): Promise<{ ok: boolean }> {
+  async logout(@Req() req: Request, @Body() body: { token?: string }, @Res() res: Response): Promise<{ ok: boolean }> {
     // Extract token from body or Authorization header
     const token = body.token ?? req.headers.authorization?.replace("Bearer ", "");
     if (token) {
@@ -85,6 +111,7 @@ export class AuthController {
         }
       });
     }
+    this.clearSessionCookies(res);
     return { ok: true };
   }
 

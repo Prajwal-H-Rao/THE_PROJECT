@@ -13,6 +13,7 @@ describe("session token service", () => {
     tenant: "tenant-789",
     channel: "web",
     csrf: "csrf-token-abc",
+    roles: ["user"],
   };
 
   it("issues a valid session token", () => {

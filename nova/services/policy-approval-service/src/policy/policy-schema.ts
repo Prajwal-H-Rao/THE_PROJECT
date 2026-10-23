@@ -40,6 +40,7 @@ export interface PolicyDecisionResponse {
     readonly payloadHash: string;
     readonly expirySeconds: number;
     readonly nonce: string;
+    readonly requiresStepUp?: boolean;
   };
 }
 

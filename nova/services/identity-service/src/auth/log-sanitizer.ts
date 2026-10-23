@@ -51,7 +51,7 @@ export function sanitizeForLogging(obj: unknown, customPatterns: RegExp[] = []):
 }
 
 /** Sanitize a string by replacing secret patterns. */
-function sanitizeString(str: string, customPatterns: RegExp[] = []): string {
+export function sanitizeString(str: string, customPatterns: RegExp[] = []): string {
   let result = str;
   const allPatterns = [...SECRET_PATTERNS, ...customPatterns];
   for (const pattern of allPatterns) {
@@ -81,6 +81,7 @@ function isSensitiveKey(key: string): boolean {
     "session",
     "csrf",
     "totp",
+    "totp_token",
     "otp",
     "pin",
     "ssn",
@@ -89,7 +90,8 @@ function isSensitiveKey(key: string): boolean {
     "cvv",
     "cvc",
   ];
-  return sensitiveKeys.some(key => key.toLowerCase().includes(key.toLowerCase()));
+  const lowerKey = key.toLowerCase();
+  return sensitiveKeys.some(sk => lowerKey.includes(sk.toLowerCase()));
 }
 
 /** Create a sanitizing logger wrapper. */

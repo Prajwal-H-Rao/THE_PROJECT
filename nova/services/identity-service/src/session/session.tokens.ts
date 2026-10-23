@@ -10,6 +10,7 @@ export interface SessionClaims {
   readonly tenant: string;
   readonly channel: string;
   readonly csrf: string;
+  readonly roles: readonly string[];
   readonly iat: number;
   readonly exp: number;
 }
@@ -104,7 +105,9 @@ export function verifySessionToken(token: string, secret: string, nowSeconds: nu
   if (exp <= nowSeconds) {
     return { ok: false, reason: "expired_token" };
   }
-  return { ok: true, claims: { sub, sid, tenant, channel, csrf, iat, exp } };
+  const roles = record["roles"];
+  const rolesArray: string[] = Array.isArray(roles) ? roles.map(String) : ["user"];
+  return { ok: true, claims: { sub, sid, tenant, channel, csrf, roles: rolesArray, iat, exp } };
 }
 
 /** Generate a cryptographically random session ID. */

@@ -56,6 +56,7 @@ export class PolicyDecisionService {
           payloadHash: request.payloadHash,
           expirySeconds: 3600, // 1 hour default
           nonce,
+          requiresStepUp: rule.requiresStepUp ?? false,
         },
       };
     }

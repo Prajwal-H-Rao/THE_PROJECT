@@ -41,6 +41,9 @@ export const CHANNEL_HEADER = "x-nova-channel";
 /** The header that carries the trace id to the route handler. */
 export const TRACE_HEADER = "x-nova-trace-id";
 
+/** The header that carries the user roles to the route handler. */
+export const ROLES_HEADER = "x-nova-roles";
+
 let limiter: RateLimiter | null = null;
 
 /** Return the limiter of the process. Module 07 task 14 moves the limit onto the shared store. */
@@ -94,7 +97,13 @@ export async function proxy(request: NextRequest): Promise<Response> {
     // Check body size limit
     const bodyLimitError = await checkBodyLimit(request);
     if (bodyLimitError) return bodyLimitError;
-    // SSRF guard for outbound requests (handled in route handlers)
+    // SSRF guard for internal service calls
+    if (request.nextUrl.pathname.startsWith(INTERNAL_PREFIX)) {
+      const ssrfCheck = checkSsrfGuard(request.nextUrl.hostname, request.nextUrl.port ? parseInt(request.nextUrl.port) : undefined);
+      if (!ssrfCheck) {
+        return reject(403, "ssrf_blocked", context, request);
+      }
+    }
     // Step-up authentication for sensitive paths
     if (needsStepUp(request, request.nextUrl.pathname)) {
       const stepUp = await verifyStepUp(request, request.nextUrl.pathname);
@@ -152,10 +161,12 @@ function pass(request: NextRequest, session: SessionContext, context: TraceConte
   headers.delete(TENANT_HEADER);
   headers.delete(CHANNEL_HEADER);
   headers.delete(TRACE_HEADER);
+  headers.delete(ROLES_HEADER);
   headers.set(USER_HEADER, session.userId);
   headers.set(TENANT_HEADER, session.tenant);
   headers.set(CHANNEL_HEADER, session.channel);
   headers.set(TRACE_HEADER, context.traceId);
+  headers.set(ROLES_HEADER, session.claims.roles.join(","));
   const response = withTrace(NextResponse.next({ request: { headers } }), context);
   const corsOrigin = request.headers.get("origin");
   applyCorsHeaders(response, corsOrigin);

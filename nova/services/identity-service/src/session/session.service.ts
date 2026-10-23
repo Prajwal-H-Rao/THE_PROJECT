@@ -29,6 +29,7 @@ export class SessionService {
     userId: string,
     tenantId: string,
     channel: string,
+    roles: string[] = ["user"],
     client?: PoolClient
   ): Promise<{ token: string; session: SessionRecord; csrfToken: string }> {
     const sessionId = generateSessionId();
@@ -56,6 +57,7 @@ export class SessionService {
       tenant: tenantId,
       channel,
       csrf: csrfToken,
+      roles,
     };
     const token = issueSessionToken(claims, this.secret, this.ttlSeconds);
 
