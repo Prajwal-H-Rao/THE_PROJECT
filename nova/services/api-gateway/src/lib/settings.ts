@@ -32,6 +32,7 @@ export interface Settings {
   readonly serviceJwtSecret: string;
   readonly serviceTokenIssuer: string;
   readonly serviceTokenAudience: string;
+  readonly stepUpSecret: string;
 }
 
 /** The error that a bad environment raises. Its message holds no secret. */
@@ -74,6 +75,7 @@ export function loadSettings(env: NodeJS.ProcessEnv = process.env): Settings {
     serviceJwtSecret: serviceSecret,
     serviceTokenIssuer: textValue(env.NOVA_SERVICE_TOKEN_ISSUER, DEFAULT_SERVICE_ISSUER),
     serviceTokenAudience: textValue(env.NOVA_SERVICE_TOKEN_AUDIENCE, DEFAULT_SERVICE_AUDIENCE),
+    stepUpSecret: env.NOVA_STEP_UP_SECRET ?? "",
   };
 }
 

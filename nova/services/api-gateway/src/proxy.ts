@@ -20,6 +20,11 @@ import type { SessionContext } from "@/lib/session";
 import { settings } from "@/lib/settings";
 import { resolveTrace, traceparentOf } from "@/lib/trace";
 import type { TraceContext } from "@/lib/trace";
+import { handleCorsPreflight, applyCorsHeaders } from "@/lib/cors";
+import { applyCspHeaders } from "@/lib/csp";
+import { checkBodyLimit } from "@/lib/body-limit";
+import { checkSsrfGuard } from "@/lib/ssrf";
+import { verifyStepUp, needsStepUp } from "@/lib/step-up";
 
 /** The internal route prefix. Its own token rule runs before the session chain. */
 const INTERNAL_PREFIX = "/api/internal/";
@@ -48,7 +53,11 @@ function rateLimiter(): RateLimiter {
 }
 
 /** Run the request chain. It answers every request exactly once. */
-export function proxy(request: NextRequest): Response {
+export async function proxy(request: NextRequest): Promise<Response> {
+  // Handle CORS preflight first
+  const corsPreflight = handleCorsPreflight(request);
+  if (corsPreflight) return corsPreflight;
+
   const context = resolveTrace(request);
   try {
     const current = settings();
@@ -80,6 +89,17 @@ export function proxy(request: NextRequest): Response {
       const failure = checkCookieWrite(request, session.context.claims, current.allowedOrigins);
       if (failure !== null) {
         return reject(failure.status, failure.code, context, request);
+      }
+    }
+    // Check body size limit
+    const bodyLimitError = await checkBodyLimit(request);
+    if (bodyLimitError) return bodyLimitError;
+    // SSRF guard for outbound requests (handled in route handlers)
+    // Step-up authentication for sensitive paths
+    if (needsStepUp(request, request.nextUrl.pathname)) {
+      const stepUp = await verifyStepUp(request, request.nextUrl.pathname);
+      if (!stepUp.ok) {
+        return reject(403, "step_up_required", context, request);
       }
     }
     return pass(request, session.context, context);
@@ -118,6 +138,9 @@ function reject(
 ): Response {
   const response = errorResponse(status, code, context.traceId, headers);
   logRequest(request.method, request.nextUrl.pathname, status, context.traceId);
+  const corsOrigin = request.headers.get("origin");
+  applyCorsHeaders(response, corsOrigin);
+  applyCspHeaders(response);
   return withTrace(response, context);
 }
 
@@ -133,7 +156,11 @@ function pass(request: NextRequest, session: SessionContext, context: TraceConte
   headers.set(TENANT_HEADER, session.tenant);
   headers.set(CHANNEL_HEADER, session.channel);
   headers.set(TRACE_HEADER, context.traceId);
-  return withTrace(NextResponse.next({ request: { headers } }), context);
+  const response = withTrace(NextResponse.next({ request: { headers } }), context);
+  const corsOrigin = request.headers.get("origin");
+  applyCorsHeaders(response, corsOrigin);
+  applyCspHeaders(response);
+  return response;
 }
 
 /** Add the trace headers to an answer. */
