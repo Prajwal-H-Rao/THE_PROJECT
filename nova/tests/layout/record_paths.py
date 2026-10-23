@@ -57,6 +57,7 @@ def expected_groups(index):
         repo_files(),
         [tree_checks.TEMPLATE_DIRECTORY],
         list(DESIGN_NOTES),
+        ["infra/edge/Caddyfile", "infra/edge/README.md"],
     ]
 
 

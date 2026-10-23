@@ -89,6 +89,83 @@ jobs:
           npm run build:test
           npm test
 
+      - name: Test the image runs non-root and holds no secret
+        run: |
+          docker buildx build --load -t nova/image-proof \
+            --build-context contracts=nova/packages/contracts \
+            -f nova/services/api-gateway/Dockerfile nova/services/api-gateway
+          user=$(docker image inspect --format '{{.Config.User}}' nova/image-proof)
+          case "$user" in
+            "" | "0" | "0:0" | "root")
+              echo "the image runs as the invalid user $user"
+              exit 1
+              ;;
+          esac
+          echo "test_images_run_non_root: Config.User=$user"
+          # WHY: the value prefixes of nova/infra/compose/.env.example name every
+          # local secret value. The env names sit in code by design, so the scan
+          # asserts the values only. The cap skips binary addon blobs.
+          docker run --rm --network none nova/image-proof node -e '
+            const fs = require("fs");
+            const cap = 2000000;
+            const bad = ["nova-local-", "nova-store-", "BEGIN PRIVATE KEY"];
+            const found = [];
+            function walk(dir) {
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const path = dir + "/" + entry.name;
+                if (entry.isDirectory()) walk(path);
+                else if (fs.statSync(path).size < cap) found.push(path);
+              }
+            }
+            walk("/app");
+            let hit = false;
+            for (const path of found) {
+              for (const needle of bad) {
+                if (fs.readFileSync(path, "utf8").includes(needle)) {
+                  console.log("SECRET " + needle + " in " + path);
+                  hit = true;
+                }
+              }
+            }
+            if (!hit) {
+              console.log("the image holds no secret");
+            } else {
+              process.exit(1);
+            }
+          '
+
+      - name: Test the HTTPS edge
+        run: |
+          cp nova/infra/compose/.env.example nova/infra/compose/.env
+          chmod 600 nova/infra/compose/.env
+          compose="docker compose -f nova/infra/compose/compose.yaml -f nova/infra/compose/compose.platform.yaml --profile edge"
+          $compose down -v --remove-orphans
+          $compose up -d --build --wait edge api-gateway
+          # Extract the Caddy root CA from the data volume.
+          CA=$(docker run --rm -v $(docker volume ls -qf name=caddy-data):/data alpine:3.21 cat /data/caddy/pki/authorities/local/root.crt 2>/dev/null)
+          if [ -z "$CA" ]; then
+            echo "failed to extract Caddy root CA"
+            $compose down -v --remove-orphans
+            rm -f nova/infra/compose/.env
+            exit 1
+          fi
+          echo "$CA" > /tmp/caddy-root-ca.pem
+          # HTTPS request with the Caddy CA and host resolve.
+          curl -fsS --cacert /tmp/caddy-root-ca.pem --resolve nova-gateway.test:443:127.0.0.1 https://nova-gateway.test/health/live | grep -q '"status":"live"'
+          # Plain HTTP on port 80 (unpublished) must be refused.
+          set +e
+          curl -fsS --max-time 5 --resolve nova-gateway.test:80:127.0.0.1 http://nova-gateway.test/health/live >/dev/null 2>&1
+          http_status=$?
+          set -e
+          if [ $http_status -eq 0 ]; then
+            echo "plain HTTP answered, expected refusal"
+            $compose down -v --remove-orphans
+            rm -f nova/infra/compose/.env
+            exit 1
+          fi
+          $compose down -v --remove-orphans
+          rm -f nova/infra/compose/.env
+
       - name: Test the database and object isolation suites
         run: |
           cp nova/infra/compose/.env.example nova/infra/compose/.env
@@ -112,6 +189,7 @@ jobs:
           record=$($compose run --rm --build queue-runner node queues/enqueue.mjs 2>/dev/null | grep '^ENQUEUE ') || status=$?
           job=$(printf '%s\n' "$record" | grep -o 'job=[^ ]*' | head -1 | cut -d= -f2)
           payload=$(printf '%s\n' "$record" | grep -o 'payload=[^ ]*' | cut -d= -f2)
+          enqueue_trace=$(printf '%s\n' "$record" | grep -o 'trace=[^ ]*' | head -1 | cut -d= -f2)
           if [ -z "$job" ] || [ -z "$payload" ]; then
             echo "the enqueue record is incomplete: $record"
             exit 1
@@ -125,6 +203,11 @@ jobs:
               exit 1
               ;;
           esac
+          verify_trace=$(printf '%s\n' "$proof" | grep -o 'trace=[^ ]*' | head -1 | cut -d= -f2)
+          if [ -z "$enqueue_trace" ] || [ -z "$verify_trace" ] || [ "$enqueue_trace" != "$verify_trace" ]; then
+            echo "the trace did not span the broker restart: $enqueue_trace $verify_trace"
+            exit 1
+          fi
           $compose down -v --remove-orphans
           rm -f nova/infra/compose/.env
           exit $status

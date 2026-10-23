@@ -1,0 +1,16 @@
+# The public HTTPS edge for NOVA. It terminates TLS and proxies to the api-gateway.
+# auto_https off + single https site = no :80 listener. Plain HTTP is refused.
+# tls internal = Caddy issues its own local CA and hostname cert.
+
+{
+	admin off
+	auto_https off
+}
+
+https://nova-gateway.test {
+	tls internal
+	reverse_proxy api-gateway:8000 {
+		header_up X-Forwarded-Proto https
+		header_up X-Forwarded-Host {host}
+	}
+}

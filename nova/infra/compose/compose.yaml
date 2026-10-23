@@ -136,7 +136,8 @@ services:
 networks:
   # WHY three networks. The name of each names its trust layer at spec:693. The bridge
   # engine drops cross-network traffic, so the untrusted network proves module 01 rule 9.
-  # The internal flag denies egress on every network. The edge network stays empty here.
+  # The internal flag denies egress on every network. The edge network carries the public
+  # edge service (Caddy) which joins both nova-edge and nova-app.
   nova-app:
     driver: bridge
     internal: true

@@ -75,3 +75,47 @@ services:
     networks:
       - nova-app
     profiles: [test]
+
+  # The public HTTPS edge. It terminates TLS and proxies to the api-gateway.
+  # The api-gateway service builds from the multi-stage Dockerfile with the contracts
+  # build context (mirrors the CI image proof step). It joins only nova-app.
+  # The edge service (Caddy) joins nova-edge and nova-app, publishes port 443,
+  # and uses a named volume for the Caddy data directory so the local CA persists.
+  api-gateway:
+    build:
+      context: ../../services/api-gateway
+      dockerfile: Dockerfile
+      contexts:
+        contracts: ../../packages/contracts
+    environment:
+      NOVA_SESSION_SECRET: ${NOVA_SESSION_SECRET:?the local secret file holds no session secret}
+      NOVA_SERVICE_JWT_SECRET: ${NOVA_SERVICE_JWT_SECRET:?the local secret file holds no service jwt secret}
+      NOVA_PORT: "8000"
+      PORT: "8000"
+      NODE_ENV: production
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - nova-app
+    profiles: [edge]
+
+  edge:
+    image: caddy:2.9.1-alpine@sha256:4c4d1b5b8b5c1c1c8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b
+    # WHY: the Caddyfile lives in nova/infra/edge/. The data volume holds the local CA
+    # that Caddy generates with tls internal. The CI step extracts the CA from this volume.
+    volumes:
+      - ../../infra/edge/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    environment:
+      NOVA_GATEWAY_HOST: api-gateway
+      NOVA_GATEWAY_PORT: "8000"
+    ports:
+      - "443:443"
+    networks:
+      - nova-edge
+      - nova-app
+    profiles: [edge]
+
+volumes:
+  caddy-data:

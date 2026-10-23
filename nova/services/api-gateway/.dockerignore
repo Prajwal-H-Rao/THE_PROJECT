@@ -1,0 +1,6 @@
+# The build context of the api-gateway image. It carries source and manifests
+# only, so the workspace and the stale build output stay out of the build.
+node_modules/
+.next/
+dist/
+queues/

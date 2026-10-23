@@ -58,9 +58,15 @@ DATABASE_PATHS = (
     "nova/infra/compose/compose.platform.yaml",
     "object-init",
     "node queues/enqueue.mjs", "node queues/verify.mjs", "restart redis",
-    "outcome=payload_intact",
+    "outcome=payload_intact", "trace=",
+    "docker buildx build --load", "Config.User", "--network none",
+    "test_images_run_non_root", "the image holds no secret",
+    "cd nova/packages/contracts", "cd nova/services/api-gateway",
     "probe-allow", "probe-deny",
     "mode=allow outcome=connected", "mode=deny outcome=blocked",
+    "caddy-data", "nova-gateway.test",
+    '"status":"live"', "caddy-root-ca.pem",
+    "plain HTTP answered",
 )
 
 # The scope of the typecheck in the workflow and in the config.

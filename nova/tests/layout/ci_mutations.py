@@ -76,6 +76,11 @@ def remove_guard_step(work):
     return remove_step(work, "Test the default-deny network rule")
 
 
+def remove_edge_step(work):
+    """Remove the HTTPS edge step from the CI workflow."""
+    return remove_step(work, "Test the HTTPS edge")
+
+
 def remove_platform_file(work):
     """Drop the compose.platform.yaml file from every compose command."""
     text = read_file(work, WORKFLOW)

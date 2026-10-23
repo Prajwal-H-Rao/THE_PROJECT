@@ -27,6 +27,17 @@ row. The other TypeScript services keep NestJS on Fastify.
 - The repo holds two backend stacks. The NestJS services start in P2.
 - The `middleware.ts` convention is deprecated in Next.js 16. The gateway uses `proxy.ts`.
 
+## The image (module 01 task 14)
+
+The image build sets `output: "standalone"`. The standalone server reads the
+standard `PORT` env, not the `NOVA_PORT` the package wires for `next start`,
+so a compose service for this image maps `PORT`. With the standalone output,
+`next start` still serves locally but prints a warning. A future Next.js bump
+that hardens that warning into an error would break the CI gateway test step;
+that bump then revisits the local run script. The build stays clean. The CI
+image step pins the non-root user and greps the image files for the local
+secret value prefixes `nova-local-` and `nova-store-`.
+
 ## The boundary
 
 The gateway holds the session, the rate limit, the CSRF and origin checks, the trace ids and the

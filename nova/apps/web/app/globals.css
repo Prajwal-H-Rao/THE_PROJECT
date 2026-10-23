@@ -1,0 +1,102 @@
+/*
+ * The token file of the web app. The values are the spec token table at
+ * spec:253-279, verbatim. The workspace is dark-first: the root holds the
+ * dark set and the light set applies when the system asks for light. The
+ * theme switcher lands with module 15.
+ */
+@import "tailwindcss";
+
+:root {
+  --nova-bg: #0B1220;
+  --nova-bg-sidebar: #0E1728;
+  --nova-surface-1: #121D2E;
+  --nova-surface-2: #172438;
+  --nova-surface-3: #1C2A40;
+  --nova-text: #F0F5FB;
+  --nova-text-muted: #B1BED0;
+  --nova-text-subtle: #8493A8;
+  --nova-border: #2A3A50;
+  --nova-border-strong: #40536D;
+  --nova-primary: #38BDF8;
+  --nova-primary-hover: #7DD3FC;
+  --nova-on-primary: #062033;
+  --nova-secondary: #2DD4BF;
+  --nova-success: #4ADE80;
+  --nova-warning: #FBBF24;
+  --nova-danger: #FB7185;
+  --nova-info: #60A5FA;
+  --nova-pending: #C4B5FD;
+  --nova-focus-ring: #7DD3FC;
+  --nova-overlay: rgb(2 8 23 / 72%);
+  --nova-chart-1: #38BDF8;
+  --nova-chart-2: #2DD4BF;
+  --nova-chart-3: #FBBF24;
+  --nova-chart-4: #C4B5FD;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --nova-bg: #F7F9FC;
+    --nova-bg-sidebar: #FFFFFF;
+    --nova-surface-1: #FFFFFF;
+    --nova-surface-2: #F0F4F9;
+    --nova-surface-3: #E8EEF6;
+    --nova-text: #172033;
+    --nova-text-muted: #536176;
+    --nova-text-subtle: #65748A;
+    --nova-border: #D8E0EA;
+    --nova-border-strong: #AEBBCC;
+    --nova-primary: #0369A1;
+    --nova-primary-hover: #075985;
+    --nova-on-primary: #FFFFFF;
+    --nova-secondary: #0F766E;
+    --nova-success: #15803D;
+    --nova-warning: #92400E;
+    --nova-danger: #BE123C;
+    --nova-info: #1D4ED8;
+    --nova-pending: #6D28D9;
+    --nova-focus-ring: #0369A1;
+    --nova-overlay: rgb(15 23 42 / 32%);
+    --nova-chart-1: #0369A1;
+    --nova-chart-2: #0F766E;
+    --nova-chart-3: #B45309;
+    --nova-chart-4: #6D28D9;
+  }
+}
+
+/* The Tailwind theme maps the semantic names on the --nova-* tokens, so a
+ * component class never carries a hex value (spec:249). */
+@theme inline {
+  --color-background: var(--nova-bg);
+  --color-foreground: var(--nova-text);
+  --color-card: var(--nova-surface-1);
+  --color-card-foreground: var(--nova-text);
+  --color-popover: var(--nova-surface-1);
+  --color-popover-foreground: var(--nova-text);
+  --color-muted: var(--nova-surface-2);
+  --color-muted-foreground: var(--nova-text-muted);
+  --color-primary: var(--nova-primary);
+  --color-primary-foreground: var(--nova-on-primary);
+  --color-secondary: var(--nova-surface-3);
+  --color-secondary-foreground: var(--nova-text);
+  --color-accent: var(--nova-surface-2);
+  --color-accent-foreground: var(--nova-text);
+  --color-destructive: var(--nova-danger);
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: var(--nova-border);
+  --color-input: var(--nova-border);
+  --color-ring: var(--nova-focus-ring);
+  --color-subtle: var(--nova-text-subtle);
+  --color-sidebar: var(--nova-bg-sidebar);
+  --color-chart-1: var(--nova-chart-1);
+  --color-chart-2: var(--nova-chart-2);
+  --color-chart-3: var(--nova-chart-3);
+  --color-chart-4: var(--nova-chart-4);
+}
+
+@layer base {
+  body {
+    background-color: var(--nova-bg);
+    color: var(--nova-text);
+  }
+}

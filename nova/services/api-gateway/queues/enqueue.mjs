@@ -5,6 +5,7 @@
  */
 
 import { buildEnvelope, encodeEnvelope } from "./envelope.mjs";
+import { traceContext } from "./traceparent.mjs";
 import { connectionOf, closeQueue, ECHO_JOB_NAME, openQueue } from "./queue.mjs";
 
 const RECORD_PREFIX = "ENQUEUE";
@@ -14,15 +15,23 @@ async function main() {
   let queue;
   try {
     queue = openQueue(connectionOf());
-    // WHY: one envelope per job. The id and the token both derive from this
-    // single object, so the record line names the same event the queue holds.
-    const envelope = buildEnvelope(ECHO_JOB_NAME + ".request", "api-gateway", ECHO_JOB_NAME);
+    // WHY: one trace id and one envelope per job. The record line prints the
+    // trace id and the token carries the same id, so the restart compare proves
+    // that the id spans the broker.
+    const trace = traceContext(process.env.NOVA_TRACEPARENT);
+    const envelope = buildEnvelope(
+      ECHO_JOB_NAME + ".request",
+      "api-gateway",
+      ECHO_JOB_NAME,
+      trace.traceId,
+    );
     const payload = encodeEnvelope(envelope);
     const id = "echo-" + payload.slice(0, 8).toLowerCase();
     const job = await queue.add(ECHO_JOB_NAME, { payload }, { jobId: id });
     console.log(
       RECORD_PREFIX + " job=" + String(job.id) + " name=" + ECHO_JOB_NAME
-        + " bytes=" + String(payload.length) + " payload=" + payload,
+        + " trace=" + trace.traceId + " bytes=" + String(payload.length)
+        + " payload=" + payload,
     );
     await closeQueue(queue);
     process.exit(0);

@@ -4,6 +4,7 @@
  * the process exit code and one record line.
  */
 
+import { decodeEnvelope } from "./envelope.mjs";
 import { connectionOf, closeQueue, ECHO_JOB_NAME, openQueue } from "./queue.mjs";
 
 const RECORD_PREFIX = "VERIFY";
@@ -36,9 +37,13 @@ async function main() {
       await closeQueue(queue);
       process.exit(1);
     }
+    // WHY: the decoded token carries the correlation id of the trace. Echoing it
+    // lets the restart step prove that one id spans the broker intact.
+    const decoded = decodeEnvelope(expected);
+    const traceId = decoded !== null ? decoded.correlation_id : "";
     console.log(
       RECORD_PREFIX + " job=" + String(job.id) + " state=" + String(await job.getState())
-        + " outcome=payload_intact",
+        + " trace=" + traceId + " outcome=payload_intact",
     );
     await closeQueue(queue);
     process.exit(0);

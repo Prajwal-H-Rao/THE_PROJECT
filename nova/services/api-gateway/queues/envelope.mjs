@@ -9,15 +9,18 @@ import { createHash, randomUUID } from "node:crypto";
 /** The schema version this module writes. Bump only with a reader upgrade. */
 export const ENVELOPE_SCHEMA_VERSION = 1;
 
-/** Build one envelope object. The caller encodes it once and derives the id. */
-export function buildEnvelope(eventType, producer, subjectId) {
+/** Build one envelope object. The caller encodes it once and derives the id.
+ * A caller may pin the correlation id; the trace flow uses the trace id. */
+export function buildEnvelope(eventType, producer, subjectId, correlationId) {
   return {
     event_id: randomUUID(),
     event_type: eventType,
     schema_version: ENVELOPE_SCHEMA_VERSION,
     occurred_at: new Date().toISOString(),
     producer,
-    correlation_id: randomUUID(),
+    correlation_id: typeof correlationId === "string" && correlationId !== ""
+      ? correlationId
+      : randomUUID(),
     causation_id: randomUUID(),
     subject_id: subjectId,
     user_id: "system",
