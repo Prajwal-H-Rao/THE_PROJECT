@@ -4,6 +4,8 @@
 
 import { computeApprovalHash } from "@nova/contracts/approval-hash";
 
+export { computeApprovalHash };
+
 /** The durable grant record. Mirrors the approvals table columns. */
 export interface GrantRecord {
   readonly grantId: string;
@@ -18,6 +20,12 @@ export interface GrantRecord {
   readonly expiresAtMs: number;
   readonly consumedAtMs: number | null;
   readonly revokedAtMs: number | null;
+  // Approval card fields (Task 8)
+  readonly preview?: unknown;
+  readonly cardHash?: string;
+  readonly permissions?: readonly string[];
+  readonly consequence?: string;
+  readonly ruleId?: string;
 }
 
 /** One verify call. `nowMs` is injectable so tests need no clock mocks. */

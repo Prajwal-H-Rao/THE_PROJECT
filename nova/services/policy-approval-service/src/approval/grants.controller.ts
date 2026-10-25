@@ -4,11 +4,11 @@
  * WHY: expiry is judged by the server clock only; a caller-supplied nowMs is
  * stripped, so an expired grant can never verify from the wire. */
 
-import { BadRequestException, Body, ConflictException, Controller, HttpCode, HttpStatus, NotFoundException, Param, Post } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { BadRequestException, Body, ConflictException, Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Query } from "@nestjs/common";
+import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import type { GrantRecord, GrantVerdict, GrantVerifyAttempt } from "./grant-binding.js";
-import type { ConsumeVerdict, CreateGrantInput, RevokeVerdict } from "./grants.service.js";
-import { GrantValidationError, GrantsService } from "./grants.service.js";
+import type { ConsumeVerdict, CreateGrantInput, CreateGrantWithDetailsInput, RevokeVerdict } from "./grants.service.js";
+import { GrantValidationError, GrantsService, MAX_PREVIEW_BYTES } from "./grants.service.js";
 
 @ApiTags("policy-grants")
 @Controller("policy")
@@ -21,6 +21,20 @@ export class GrantsController {
   create(@Body() input: CreateGrantInput): GrantRecord {
     try {
       return this.grantsService.createGrant(input);
+    } catch (error) {
+      if (error instanceof GrantValidationError) {
+        throw new BadRequestException({ error: error.code, message: error.message });
+      }
+      throw error;
+    }
+  }
+
+  @Post("grants/with-details")
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create an approval grant with card preview details" })
+  createWithDetails(@Body() input: CreateGrantWithDetailsInput): GrantRecord {
+    try {
+      return this.grantsService.createGrantWithDetails(input);
     } catch (error) {
       if (error instanceof GrantValidationError) {
         throw new BadRequestException({ error: error.code, message: error.message });
@@ -83,5 +97,30 @@ export class GrantsController {
       }
       throw error;
     }
+  }
+
+  @Get("grants/:nonce/card")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Get approval card for display" })
+  @ApiQuery({ name: "service", required: true, description: "Service requesting the card (validated against grant.service)" })
+  async getCard(@Param("nonce") nonce: string, @Query("service") service: string): Promise<{
+    target: string;
+    preview: unknown;
+    permissions: readonly string[];
+    consequence: string;
+    expiresAtMs: number;
+    cardHash: string;
+  }> {
+    if (!/^[0-9a-f]{32}$/i.test(nonce)) {
+      throw new BadRequestException({ error: "invalid_nonce", message: "nonce must be a 32-char hex string" });
+    }
+    if (typeof service !== "string" || service === "") {
+      throw new BadRequestException({ error: "invalid_service", message: "service query parameter is required" });
+    }
+    const card = await this.grantsService.getGrantCard(nonce, service);
+    if (card === null) {
+      throw new NotFoundException({ error: "no_preview", message: "Grant not found, service mismatch, or no preview available" });
+    }
+    return card;
   }
 }

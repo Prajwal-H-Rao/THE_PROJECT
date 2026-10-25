@@ -23,6 +23,7 @@
     "service-api.ts",
     "service-api.test.ts",
     "migrations/runner.ts",
-    "migrations/runner.test.ts"
+    "migrations/runner.test.ts",
+    "migrations/25-approval-card.sql"
   ]
 }

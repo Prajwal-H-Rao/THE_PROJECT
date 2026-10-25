@@ -106,3 +106,62 @@ the repository implementation for a SQL adapter.
 
 Postgres is unavailable locally, so the policy-approval-service tests run and
 pass only on developer machines. CI has no policy-service job today.
+
+## Approval card API (Task 8)
+
+Task 8 adds the approval card API for chat display. The card shows the user
+exactly what action is being approved, with a hash that binds the preview.
+
+**Card creation flow:**
+1. Client calls `POST /policy/decide` → receives decision + `approvalRequired` with 16-char nonce
+2. If `needs_approval`, client calls `POST /policy/grants/with-details` with:
+   - Full payload from the original request (becomes the preview)
+   - Permissions, consequence, ruleId derived from the matched policy rule
+3. Grants service creates grant with:
+   - `preview` = exact payload object (bounded to 10KB)
+   - `cardHash` = `computeApprovalHash(preview)` (separate from `payloadHash`)
+   - `permissions` = `rule.allowedActions ?? [action]`
+   - `consequence` = from riskTier + sensitivity mapping table
+   - `ruleId` = matched rule ID
+   - Returns 32-char `grantNonce`
+
+**Card display:**
+- Client calls `GET /policy/grants/:grantNonce/card?service=X` (32-char nonce)
+- Service validates grant exists, service matches, preview exists
+- Returns `{ target, preview, permissions, consequence, expiresAtMs, cardHash }`
+- Client verifies: `computeApprovalHash(displayedPreview) === cardHash`
+- If preview edited → hash mismatch detected
+
+**Hash binding:**
+- `cardHash` = `computeApprovalHash(preview)` (separate from `payloadHash`)
+- Preview is the EXACT object shown to user (no sanitization)
+- Edit preview → hash mismatch
+- Preview bounded to 10KB max (enforced at service layer)
+
+**Permissions derivation:**
+- `permissions = rule.allowedActions ?? [action]` (fallback to single action)
+
+**Consequence mapping (riskTier × sensitivity):**
+- tier1+low: "Low risk: read-only action"
+- tier1+medium: "Medium risk: may modify own data"
+- tier1+high: "High risk: may modify team data"
+- tier1+critical: "Critical risk: may affect organization data"
+- tier2+low: "Low risk: creates resources"
+- tier2+medium: "Medium risk: modifies shared resources"
+- tier2+high: "High risk: may affect organization data"
+- tier2+critical: "Critical risk: irreversible operation"
+- tier3+low: "Low risk: external read"
+- tier3+medium: "Medium risk: external write"
+- tier3+high: "High risk: external admin"
+- tier3+critical: "Critical risk: irreversible external operation"
+- tier4+*: "Critical risk: irreversible operation"
+
+**Card endpoint security:**
+- `GET /policy/grants/:nonce/card?service=X` (32-char grant nonce)
+- Validates `grant.service === service` (defense-in-depth)
+- Returns 404 if: grant not found, service mismatch, or no preview
+- 32-char nonce = 128-bit entropy (unguessable capability URL)
+
+**Migration:**
+- Migration 25 adds `preview JSONB`, `card_hash CHAR(64)`, `permissions JSONB`, `consequence TEXT`, `rule_id TEXT` to `approvals` table
+- Existing grants get NULL preview → card endpoint returns 404 `{ error: "no_preview" }`

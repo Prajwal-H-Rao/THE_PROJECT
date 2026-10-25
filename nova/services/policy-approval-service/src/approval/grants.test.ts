@@ -5,7 +5,8 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { GrantsService, GrantValidationError, InMemoryGrantRepository, CreateGrantInput, ConsumeVerdict, GrantRepository } from "./grants.service.js";
+import { computeApprovalHash } from "@nova/contracts/approval-hash";
+import { GrantsService, GrantValidationError, InMemoryGrantRepository, CreateGrantInput, CreateGrantWithDetailsInput, ConsumeVerdict, GrantRepository, MAX_PREVIEW_BYTES } from "./grants.service.js";
 import { GrantsController } from "./grants.controller.js";
 import { GrantVerifyAttempt } from "./grant-binding.js";
 
@@ -336,4 +337,89 @@ test("concurrent consume vs revoke on same nonce: exactly one succeeds", async (
     // Consume should have failed because revoke won.
     assert.deepEqual(consumeResult, { ok: false, reason: "already_revoked" });
   }
+});
+
+function grantWithDetailsInput(overrides: Partial<CreateGrantWithDetailsInput> = {}): CreateGrantWithDetailsInput {
+  return {
+    userId: UUID,
+    service: "inbox-service",
+    action: "send",
+    target: "message:draft-1",
+    payload: { body: "hello", to: "x@example.com" },
+    ttlSeconds: 300,
+    nowMs: NOW,
+    ...overrides,
+  };
+}
+
+test("create grant with details and get card verifies hash", async () => {
+  const { grantsService } = service();
+  const preview = { body: "hello", to: "x@example.com" };
+  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({ preview }));
+  assert.ok(record.cardHash);
+  assert.equal(record.cardHash.length, 64);
+  const card = await grantsService.getGrantCard(record.nonce, "inbox-service");
+  assert.ok(card);
+  assert.deepEqual(card.preview, preview);
+  assert.equal(card.cardHash, record.cardHash);
+  // Client-side verification: compute hash of displayed preview
+  const clientHash = computeApprovalHash(card.preview);
+  assert.equal(clientHash, card.cardHash);
+});
+
+test("edit preview locally causes hash mismatch", async () => {
+  const { grantsService } = service();
+  const preview = { body: "hello", to: "x@example.com" };
+  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({ preview }));
+  const card = await grantsService.getGrantCard(record.nonce, "inbox-service");
+  assert.ok(card);
+  const originalHash = computeApprovalHash(card.preview!);
+  assert.equal(originalHash, card.cardHash);
+  // Edit the preview locally
+  const editedPreview = { ...(card.preview as Record<string, unknown>), body: "hello world" };
+  const editedHash = computeApprovalHash(editedPreview);
+  assert.notEqual(editedHash, card.cardHash);
+});
+
+test("card endpoint returns 404 for wrong service", async () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({ preview: { body: "hello" } }));
+  const card = await grantsService.getGrantCard(record.nonce, "calendar-service");
+  assert.equal(card, null);
+});
+
+test("card endpoint returns 404 for unknown nonce", async () => {
+  const { grantsService } = service();
+  const card = await grantsService.getGrantCard("ab".repeat(16), "inbox-service");
+  assert.equal(card, null);
+});
+
+test("card endpoint returns null for grant without preview", async () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrant(grantInput()); // no preview
+  const card = await grantsService.getGrantCard(record.nonce, "inbox-service");
+  assert.equal(card, null);
+});
+
+test("create grant with details validates preview size limit", () => {
+  const { grantsService } = service();
+  const largePreview = { data: "x".repeat(MAX_PREVIEW_BYTES + 1) };
+  assert.throws(() => grantsService.createGrantWithDetails(grantWithDetailsInput({ preview: largePreview })), GrantValidationError);
+});
+
+test("create grant with details stores provided permissions and consequence", () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({
+    action: "send",
+    preview: { body: "hello" },
+    ruleId: "test-rule",
+    permissions: ["send"],
+    consequence: "Medium risk: may modify own data",
+  }));
+  assert.ok(record.permissions);
+  assert.ok(record.consequence);
+  assert.ok(record.ruleId);
+  assert.equal(record.ruleId, "test-rule");
+  assert.deepEqual(record.permissions, ["send"]);
+  assert.equal(record.consequence, "Medium risk: may modify own data");
 });
