@@ -31,11 +31,15 @@
     "./migrations": {
       "types": "./dist/migrations/runner.d.ts",
       "default": "./dist/migrations/runner.js"
+    },
+    "./grant-verification": {
+      "types": "./dist/grant-verification.d.ts",
+      "default": "./dist/grant-verification.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/migrations/runner.test.js"
+    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/grant-verification.test.js dist/migrations/runner.test.js"
   },
   "devDependencies": {
     "@types/node": "22.19.1",

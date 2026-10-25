@@ -6,9 +6,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { computeApprovalHash } from "@nova/contracts/approval-hash";
-import { GrantsService, GrantValidationError, InMemoryGrantRepository, CreateGrantInput, CreateGrantWithDetailsInput, ConsumeVerdict, GrantRepository, MAX_PREVIEW_BYTES } from "./grants.service.js";
+import { GrantsService, GrantValidationError, EditGrantInput } from "./grants.service.js";
+import { CreateGrantInput, CreateGrantWithDetailsInput } from "./grant-creation.js";
+import { InMemoryGrantRepository } from "./grant-repository.js";
+import { GrantRepository, ConsumeVerdict, RevokeVerdict, StatusVerdict, EditVerdict } from "./grant-repository-types.js";
+import { MAX_PREVIEW_BYTES } from "./grant-card.js";
 import { GrantsController } from "./grants.controller.js";
 import { GrantVerifyAttempt } from "./grant-binding.js";
+import { PolicyDecisionService } from "../policy/policy-decision.service.js";
 
 const UUID = "8f2dc4e0-3f2a-4b8e-9d11-5a9b7c2e6f01";
 const OTHER_UUID = "3b9a1f2e-6c4d-42e8-8a70-1d5e9f3b2c44";
@@ -136,7 +141,10 @@ test("the wired verify path judges expiry with the server clock, not a caller cl
     grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: hourAgo + 60_000 })),
     { ok: false, reason: "expired" },
   );
-  const controller = new GrantsController(grantsService);
+  const mockPolicyDecisionService = {
+    decide: () => ({ decision: "allow" as const, ruleId: "test", policyVersion: 1 }),
+  } as unknown as PolicyDecisionService;
+  const controller = new GrantsController(grantsService, mockPolicyDecisionService);
   const forgedClock = hourAgo + 1000; // claims the grant is still fresh
   const verdict = controller.verify(record.nonce, { ...verifyInput({ nowMs: forgedClock }), nowMs: forgedClock });
   assert.deepEqual(verdict, { ok: false, reason: "expired" });
@@ -159,7 +167,6 @@ test("invalid creation inputs all throw with a reason code", () => {
 });
 
 import type { GrantRecord } from "./grant-binding.js";
-import type { RevokeVerdict } from "./grants.service.js";
 
 /** Test-only repository that simulates an async race between check and consume/revoke. */
 class RaceTestRepository implements GrantRepository {
@@ -227,6 +234,70 @@ class RaceTestRepository implements GrantRepository {
     };
     this.grants.set(nonce, revokedRecord);
     return { ok: true, revokedAtMs: nowMs };
+  }
+
+  async updateStatus(
+    nonce: string,
+    status: "approved" | "denied" | "expired" | "revoked",
+    decidedBy: string,
+    nowMs: number
+  ): Promise<{ ok: true; decidedAtMs: number } | { ok: false; reason: "unknown_nonce" }> {
+    const record = this.grants.get(nonce);
+    if (record === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    await Promise.resolve();
+    const fresh = this.grants.get(nonce);
+    if (fresh === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    const updatedRecord: GrantRecord = { ...fresh };
+    (updatedRecord as any).status = status;
+    (updatedRecord as any).decidedAtMs = nowMs;
+    (updatedRecord as any).decidedBy = decidedBy;
+    this.grants.set(nonce, updatedRecord);
+    return { ok: true, decidedAtMs: nowMs };
+  }
+
+  async editGrant(
+    nonce: string,
+    newPayload: unknown,
+    newPayloadHash: string,
+    newCardHash: string | undefined,
+    newPreview: unknown | undefined,
+    newPermissions: readonly string[] | undefined,
+    newConsequence: string | undefined,
+    newRuleId: string | undefined,
+    newExpiresAtMs: number,
+    nowMs: number
+  ): Promise<GrantRecord | { ok: false; reason: "unknown_nonce" | "already_terminal" }> {
+    const record = this.grants.get(nonce);
+    if (record === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    await Promise.resolve();
+    const fresh = this.grants.get(nonce);
+    if (fresh === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    if (fresh.consumedAtMs !== null || fresh.revokedAtMs !== null || (fresh as any).status) {
+      return { ok: false, reason: "already_terminal" };
+    }
+    const editedRecord: GrantRecord = {
+      ...fresh,
+      payloadHash: newPayloadHash,
+      preview: newPreview,
+      cardHash: newCardHash,
+      permissions: newPermissions,
+      consequence: newConsequence,
+      ruleId: newRuleId,
+      expiresAtMs: newExpiresAtMs,
+    };
+    delete (editedRecord as any).status;
+    delete (editedRecord as any).decidedAtMs;
+    delete (editedRecord as any).decidedBy;
+    this.grants.set(nonce, editedRecord);
+    return editedRecord;
   }
 }
 

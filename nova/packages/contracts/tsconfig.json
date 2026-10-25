@@ -22,6 +22,8 @@
     "events/event-envelope.compat.test.ts",
     "service-api.ts",
     "service-api.test.ts",
+    "grant-verification.ts",
+    "grant-verification.test.ts",
     "migrations/runner.ts",
     "migrations/runner.test.ts",
     "migrations/25-approval-card.sql"
