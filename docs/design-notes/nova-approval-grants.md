@@ -55,6 +55,46 @@ the server clock only: the verify endpoint strips any caller-supplied `nowMs`
 and uses `Date.now()`. The service-level injectable `nowMs` exists for
 deterministic tests and trusted internal callers, never for wire input.
 
+## Single-use consumption
+
+Task 5 adds single-use enforcement. The `consumed_at` column (added in migration 24)
+is the authoritative consumption state. The `POST /policy/grants/:nonce/consume`
+endpoint atomically sets `consumed_at` via a conditional update (`WHERE consumed_at
+IS NULL`). The in-memory repository emulates this with a synchronous check-and-set.
+
+`verifyBinding` validates **binding validity only** (payload hash, identity, expiry,
+revocation, policy version). It does **not** check consumption status. A consumed
+grant's binding remains mathematically valid; callers must use `consumeGrant` to
+enforce single-use. This separation keeps binding logic pure and consumption a
+separate lifecycle concern.
+
+**Revoked-before-expiry precedence:** `verifyBinding` checks revocation before
+expiry. A grant that is both revoked and expired denies as `"revoked"` because
+revocation is an explicit admin action with audit semantics that supersedes
+natural expiry.
+
+## Revocation
+
+Task 6 adds revocation. The `revoked_at` column (added in migration 24)
+is the authoritative revocation state. The `POST /policy/grants/:nonce/revoke`
+endpoint atomically sets `revoked_at` via a conditional update
+(`WHERE revoked_at IS NULL AND consumed_at IS NULL`). The in-memory
+repository emulates this with a synchronous check-and-set.
+
+**Mutually exclusive terminal states:** a grant can be **consumed** OR **revoked**,
+never both. The state machine enforces:
+
+- Active → consume → Consumed
+- Active → revoke → Revoked
+- Consumed → revoke → fails ("already_used")
+- Revoked → consume → fails ("already_revoked")
+- Revoked → revoke → idempotent success (returns original timestamp)
+- Consumed → consume → fails ("already_used")
+
+`verifyBinding` checks revocation before expiry (see precedence above).
+A revoked grant denies as `"revoked"` regardless of expiry or consumption.
+A consumed grant's binding remains valid (binding validity ≠ consumption).
+
 ## Storage status
 
 The DB migration `24-approval-grants.sql` defines the durable shape of the

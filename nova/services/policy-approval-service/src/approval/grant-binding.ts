@@ -74,12 +74,14 @@ export function verifyBinding(record: GrantRecord, attempt: GrantVerifyAttempt):
   if (attempt.target !== record.target) {
     return { ok: false, reason: "target_mismatch" };
   }
+  // WHY: revoked is an explicit admin action with audit semantics;
+  // it takes precedence over natural expiry. Check revoked first.
+  if (record.revokedAtMs !== null) {
+    return { ok: false, reason: "revoked" };
+  }
   const nowMs = attempt.nowMs ?? Date.now();
   if (nowMs >= record.expiresAtMs) {
     return { ok: false, reason: "expired" };
-  }
-  if (record.revokedAtMs !== null) {
-    return { ok: false, reason: "revoked" };
   }
   // WHY: HTTP callers may send a number version; the column and record are text.
   if (String(attempt.policyVersion) !== record.policyVersion) {

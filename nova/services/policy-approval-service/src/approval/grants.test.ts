@@ -5,7 +5,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { GrantsService, GrantValidationError, InMemoryGrantRepository, CreateGrantInput } from "./grants.service.js";
+import { GrantsService, GrantValidationError, InMemoryGrantRepository, CreateGrantInput, ConsumeVerdict, GrantRepository } from "./grants.service.js";
 import { GrantsController } from "./grants.controller.js";
 import { GrantVerifyAttempt } from "./grant-binding.js";
 
@@ -154,5 +154,186 @@ test("invalid creation inputs all throw with a reason code", () => {
   } catch (error) {
     assert.ok(error instanceof GrantValidationError);
     assert.equal((error as GrantValidationError).code, "invalid_payload");
+  }
+});
+
+import type { GrantRecord } from "./grant-binding.js";
+import type { RevokeVerdict } from "./grants.service.js";
+
+/** Test-only repository that simulates an async race between check and consume/revoke. */
+class RaceTestRepository implements GrantRepository {
+  private readonly grants = new Map<string, GrantRecord>();
+
+  save(record: GrantRecord): void {
+    this.grants.set(record.nonce, record);
+  }
+
+  findByNonce(nonce: string): GrantRecord | null {
+    return this.grants.get(nonce) ?? null;
+  }
+
+  async tryConsume(nonce: string, nowMs: number): Promise<ConsumeVerdict> {
+    const record = this.grants.get(nonce);
+    if (record === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    if (record.consumedAtMs !== null) {
+      return { ok: false, reason: "already_used" };
+    }
+    if (record.revokedAtMs !== null) {
+      return { ok: false, reason: "already_revoked" };
+    }
+    // WHY: yield between check and mutation to force the race window.
+    await Promise.resolve();
+    // Re-check after yield: another thread may have consumed.
+    const current = this.grants.get(nonce);
+    if (current === undefined || current.consumedAtMs !== null || current.revokedAtMs !== null) {
+      return { ok: false, reason: "already_used" };
+    }
+    const consumedRecord: GrantRecord = {
+      ...record,
+      consumedAtMs: nowMs,
+    };
+    this.grants.set(nonce, consumedRecord);
+    return { ok: true, consumedAtMs: nowMs };
+  }
+
+  async tryRevoke(nonce: string, nowMs: number): Promise<RevokeVerdict> {
+    const record = this.grants.get(nonce);
+    if (record === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    if (record.consumedAtMs !== null) {
+      return { ok: false, reason: "already_used" };
+    }
+    if (record.revokedAtMs !== null) {
+      // WHY: idempotent — re-revoking returns success with the original timestamp.
+      return { ok: true, revokedAtMs: record.revokedAtMs };
+    }
+    // WHY: yield between check and mutation to force the race window.
+    await Promise.resolve();
+    // Re-check after yield: another thread may have revoked.
+    const current = this.grants.get(nonce);
+    if (current === undefined || current.consumedAtMs !== null) {
+      return { ok: false, reason: "already_used" };
+    }
+    if (current.revokedAtMs !== null) {
+      return { ok: true, revokedAtMs: current.revokedAtMs };
+    }
+    const revokedRecord: GrantRecord = {
+      ...record,
+      revokedAtMs: nowMs,
+    };
+    this.grants.set(nonce, revokedRecord);
+    return { ok: true, revokedAtMs: nowMs };
+  }
+}
+
+test("consume is single-use: concurrent consume calls on same nonce yield exactly one success", async () => {
+  const raceRepo = new RaceTestRepository();
+  const grantsService = new GrantsService(raceRepo);
+  const record = grantsService.createGrant(grantInput());
+  // Two concurrent consume calls on the same nonce.
+  const [result1, result2] = await Promise.all([
+    grantsService.consumeGrant(record.nonce),
+    grantsService.consumeGrant(record.nonce),
+  ]);
+  const successes = [result1, result2].filter((r) => r.ok).length;
+  assert.equal(successes, 1, "exactly one consume must succeed");
+  const failure = [result1, result2].find((r) => !r.ok);
+  assert.deepEqual(failure, { ok: false, reason: "already_used" });
+});
+
+test("verifyBinding returns ok on consumed grant (binding valid, just spent)", () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrant(grantInput());
+  // Consume via service directly (bypassing race repo for this check).
+  grantsService.consumeGrant(record.nonce);
+  // Binding is still valid; consumption is separate from binding.
+  assert.equal(grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: NOW + 1000 })).ok, true);
+});
+
+test("consume with malformed nonce throws validation error", async () => {
+  const { grantsService } = service();
+  await assert.rejects(grantsService.consumeGrant("not-hex"), GrantValidationError);
+  await assert.rejects(grantsService.consumeGrant("ab".repeat(15)), GrantValidationError);
+});
+
+test("revoke succeeds on active grant", async () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrant(grantInput());
+  const verdict = await grantsService.revokeGrant(record.nonce);
+  assert.equal(verdict.ok, true);
+  assert.ok(typeof verdict.revokedAtMs === "number");
+  // Second revoke is idempotent — returns same timestamp.
+  const verdict2 = await grantsService.revokeGrant(record.nonce);
+  assert.equal(verdict2.ok, true);
+  assert.equal(verdict2.revokedAtMs, verdict.revokedAtMs);
+});
+
+test("revoke on consumed grant fails with already_used", async () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrant(grantInput());
+  await grantsService.consumeGrant(record.nonce);
+  const verdict = await grantsService.revokeGrant(record.nonce);
+  assert.deepEqual(verdict, { ok: false, reason: "already_used" });
+});
+
+test("consume on revoked grant fails with already_revoked", async () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrant(grantInput());
+  await grantsService.revokeGrant(record.nonce);
+  const verdict = await grantsService.consumeGrant(record.nonce);
+  assert.deepEqual(verdict, { ok: false, reason: "already_revoked" });
+});
+
+test("verify denies revoked grant before expiry check", async () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrant(grantInput({ ttlSeconds: 300 }));
+  await grantsService.revokeGrant(record.nonce);
+  // Grant is revoked but not expired — verifyBinding should deny as "revoked"
+  const verdict = grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: NOW + 1000 }));
+  assert.deepEqual(verdict, { ok: false, reason: "revoked" });
+});
+
+test("revoke with malformed nonce throws validation error", async () => {
+  const { grantsService } = service();
+  await assert.rejects(grantsService.revokeGrant("not-hex"), GrantValidationError);
+  await assert.rejects(grantsService.revokeGrant("ab".repeat(15)), GrantValidationError);
+});
+
+test("concurrent revoke calls on same nonce are idempotent (both succeed with same timestamp)", async () => {
+  const raceRepo = new RaceTestRepository();
+  const grantsService = new GrantsService(raceRepo);
+  const record = grantsService.createGrant(grantInput());
+  // Two concurrent revoke calls on the same nonce.
+  const [result1, result2] = await Promise.all([
+    grantsService.revokeGrant(record.nonce),
+    grantsService.revokeGrant(record.nonce),
+  ]);
+  assert.equal(result1.ok, true);
+  assert.equal(result2.ok, true);
+  assert.equal(result1.revokedAtMs, result2.revokedAtMs, "both revokes must return the same timestamp");
+});
+
+test("concurrent consume vs revoke on same nonce: exactly one succeeds", async () => {
+  const raceRepo = new RaceTestRepository();
+  const grantsService = new GrantsService(raceRepo);
+  const record = grantsService.createGrant(grantInput());
+  // Two concurrent calls: one consume, one revoke.
+  const [consumeResult, revokeResult] = await Promise.all([
+    grantsService.consumeGrant(record.nonce),
+    grantsService.revokeGrant(record.nonce),
+  ]);
+  // Exactly one must succeed; the other fails with the correct reason.
+  const successes = [consumeResult, revokeResult].filter((r) => r.ok).length;
+  assert.equal(successes, 1, "exactly one of consume/revoke must succeed");
+  const failure = [consumeResult, revokeResult].find((r) => !r.ok);
+  if (consumeResult.ok) {
+    // Revoke should have failed because consume won.
+    assert.deepEqual(revokeResult, { ok: false, reason: "already_used" });
+  } else {
+    // Consume should have failed because revoke won.
+    assert.deepEqual(consumeResult, { ok: false, reason: "already_revoked" });
   }
 });

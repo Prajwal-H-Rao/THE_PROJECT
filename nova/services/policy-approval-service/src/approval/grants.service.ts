@@ -5,14 +5,28 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { Injectable } from "@nestjs/common";
 import {
- GrantRecord, GrantVerdict, GrantVerifyAttempt, hashObjectPayload, isUuid, verifyBinding
+  GrantRecord, GrantVerdict, GrantVerifyAttempt, hashObjectPayload, isUuid, verifyBinding
 } from "./grant-binding.js";
 
 /** The storage contract. Keyed by nonce: the unique grant key. */
 export interface GrantRepository {
   save(record: GrantRecord): void;
   findByNonce(nonce: string): GrantRecord | null;
+  /** Atomically consume a grant. Returns consume verdict. */
+  tryConsume(nonce: string, nowMs: number): Promise<ConsumeVerdict>;
+  /** Atomically revoke a grant. Returns revoke verdict. */
+  tryRevoke(nonce: string, nowMs: number): Promise<RevokeVerdict>;
 }
+
+/** Result of a consume attempt. */
+export type ConsumeVerdict =
+  | { readonly ok: true; readonly consumedAtMs: number }
+  | { readonly ok: false; readonly reason: "already_used" | "unknown_nonce" | "already_revoked" };
+
+/** Result of a revoke attempt. */
+export type RevokeVerdict =
+  | { readonly ok: true; readonly revokedAtMs: number }
+  | { readonly ok: false; readonly reason: "unknown_nonce" | "already_used" };
 
 /** In-memory repository. Declared stub; see the design note. */
 @Injectable()
@@ -27,6 +41,52 @@ export class InMemoryGrantRepository implements GrantRepository {
   /** Look one grant up by its nonce. */
   findByNonce(nonce: string): GrantRecord | null {
     return this.grants.get(nonce) ?? null;
+  }
+
+  /** Atomically consume a grant. Synchronous check-and-set in one block. */
+  async tryConsume(nonce: string, nowMs: number): Promise<ConsumeVerdict> {
+    const record = this.grants.get(nonce);
+    if (record === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    if (record.consumedAtMs !== null) {
+      return { ok: false, reason: "already_used" };
+    }
+    if (record.revokedAtMs !== null) {
+      return { ok: false, reason: "already_revoked" };
+    }
+    // WHY: GrantRecord is immutable (readonly consumedAtMs). Create a new record
+    // with the updated consumedAtMs to preserve immutability.
+    const consumedRecord: GrantRecord = {
+      ...record,
+      consumedAtMs: nowMs,
+    };
+    this.grants.set(nonce, consumedRecord);
+    return { ok: true, consumedAtMs: nowMs };
+  }
+
+  /** Atomically revoke a grant. Synchronous check-and-set in one block. */
+  async tryRevoke(nonce: string, nowMs: number): Promise<RevokeVerdict> {
+    const record = this.grants.get(nonce);
+    if (record === undefined) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    if (record.consumedAtMs !== null) {
+      // WHY: mutually exclusive terminal states — a consumed grant cannot be revoked.
+      return { ok: false, reason: "already_used" };
+    }
+    if (record.revokedAtMs !== null) {
+      // WHY: idempotent — re-revoking returns success with the original timestamp.
+      return { ok: true, revokedAtMs: record.revokedAtMs };
+    }
+    // WHY: GrantRecord is immutable (readonly revokedAtMs). Create a new record
+    // with the updated revokedAtMs to preserve immutability.
+    const revokedRecord: GrantRecord = {
+      ...record,
+      revokedAtMs: nowMs,
+    };
+    this.grants.set(nonce, revokedRecord);
+    return { ok: true, revokedAtMs: nowMs };
   }
 }
 
@@ -104,5 +164,21 @@ export class GrantsService {
       return { ok: false, reason: "unknown_nonce" };
     }
     return verifyBinding(record, attempt);
+  }
+
+  /** Consume a grant once. Validates nonce format then delegates to repo. */
+  async consumeGrant(nonce: string): Promise<ConsumeVerdict> {
+    if (!/^[0-9a-f]{32}$/i.test(nonce)) {
+      throw new GrantValidationError("invalid_nonce", "nonce must be a 32-char hex string");
+    }
+    return this.repository.tryConsume(nonce, Date.now());
+  }
+
+  /** Revoke a grant. Validates nonce format then delegates to repo. */
+  async revokeGrant(nonce: string): Promise<RevokeVerdict> {
+    if (!/^[0-9a-f]{32}$/i.test(nonce)) {
+      throw new GrantValidationError("invalid_nonce", "nonce must be a 32-char hex string");
+    }
+    return this.repository.tryRevoke(nonce, Date.now());
   }
 }
