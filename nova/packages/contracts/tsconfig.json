@@ -13,6 +13,8 @@
   "include": [
     "service-token.ts",
     "service-token.test.ts",
+    "approval-hash.ts",
+    "approval-hash.test.ts",
     "events/event-envelope.ts",
     "events/event-consumers.ts",
     "events/event-envelope.test.ts",

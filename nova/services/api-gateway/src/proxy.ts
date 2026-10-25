@@ -145,7 +145,7 @@ function reject(
   request: NextRequest,
   headers: Readonly<Record<string, string>> = {},
 ): Response {
-  const response = errorResponse(status, code, context.traceId, headers);
+  const response = errorResponse(status, code, context.traceId, undefined, headers);
   logRequest(request.method, request.nextUrl.pathname, status, context.traceId);
   const corsOrigin = request.headers.get("origin");
   applyCorsHeaders(response, corsOrigin);

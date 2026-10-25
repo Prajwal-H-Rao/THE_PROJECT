@@ -12,6 +12,10 @@
       "types": "./dist/service-token.d.ts",
       "default": "./dist/service-token.js"
     },
+    "./approval-hash": {
+      "types": "./dist/approval-hash.d.ts",
+      "default": "./dist/approval-hash.js"
+    },
     "./event-envelope": {
       "types": "./dist/events/event-envelope.d.ts",
       "default": "./dist/events/event-envelope.js"
@@ -31,7 +35,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/migrations/runner.test.js"
+    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/migrations/runner.test.js"
   },
   "devDependencies": {
     "@types/node": "22.19.1",

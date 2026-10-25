@@ -3,6 +3,7 @@
 import type { NextRequest } from "next/server";
 
 import { BodyTooLargeError, readBody } from "@/lib/body";
+import { validateContract } from "@/lib/contract-validation";
 import { logRequest } from "@/lib/logging";
 import { settings } from "@/lib/settings";
 import { resolveTrace } from "@/lib/trace";
@@ -26,7 +27,15 @@ async function answer(request: NextRequest): Promise<Response> {
   const userId = request.headers.get(USER_HEADER) ?? "";
   try {
     const current = settings();
-    await readBody(request, current.maxBodyBytes);
+    const bodyText = await readBody(request, current.maxBodyBytes);
+    // The proxy holds the session, the CSRF check and the body limit. The
+    // contract check runs here because the handler is the only place that can
+    // read the body.
+    const contractError = validateContract(request.nextUrl.pathname, request.method, bodyText, traceId);
+    if (contractError !== null) {
+      logRequest(request.method, request.nextUrl.pathname, 400, traceId);
+      return contractError;
+    }
     logRequest(request.method, request.nextUrl.pathname, 404, traceId);
     // WHY: the user id proves that the proxy passed the verified context downstream.
     const body: NotFoundBody = { error: "not_found", trace_id: traceId, user_id: userId };

@@ -8,7 +8,7 @@ EXTRA_DIRECTORY_PREFIXES = ("tests/layout", "labs", "db")
 # The tree counts that the repo records. A module task updates them.
 EXPECTED_DIRECTORIES = 105
 EXPECTED_LEAVES = 74
-EXPECTED_PLACEHOLDERS = 38
+EXPECTED_PLACEHOLDERS = 37
 
 # The header that every placeholder file holds.
 PLACEHOLDER_TEXT = "# Placeholder. Git cannot track an empty directory. The owning module task adds the content."

@@ -56,13 +56,15 @@ test("test_cookie_write_with_a_csrf_token_passes", async () => {
     origin: TEST_ORIGIN,
     csrfToken: claims.csrf,
   });
-  const response = await client.post("/api/v1/tasks", { note: "hello" });
+  // The body passes the tasks/create contract, so the request reaches the handler 404.
+  const response = await client.post("/api/v1/tasks", { title: "hello" });
   assert.equal(response.status, 404);
 });
 
 test("test_session_write_needs_no_csrf_token", async () => {
   const client = gatewayClient(gateway.baseUrl, { token: signToken(makeClaims(), TEST_SECRET) });
-  const response = await client.post("/api/v1/tasks", { note: "hello" });
+  // The body passes the tasks/create contract, so the request reaches the handler 404.
+  const response = await client.post("/api/v1/tasks", { title: "hello" });
   assert.equal(response.status, 404);
 });
 

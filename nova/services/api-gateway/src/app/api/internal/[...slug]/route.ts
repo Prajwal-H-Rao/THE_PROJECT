@@ -3,6 +3,9 @@
 import type { NextRequest } from "next/server";
 
 import { logRequest } from "@/lib/logging";
+import { BodyTooLargeError, readBody } from "@/lib/body";
+import { validateContract } from "@/lib/contract-validation";
+import { settings } from "@/lib/settings";
 import { SERVICE_ID_HEADER, SERVICE_SCOPE_HEADER } from "@/lib/service-auth";
 
 /** The header that carries the trace id. The proxy sets it. */
@@ -23,6 +26,30 @@ export async function GET(request: NextRequest): Promise<Response> {
 
 /** Accept writes from service callers too. The chain has verified the call. */
 export async function POST(request: NextRequest): Promise<Response> {
+  const traceId = request.headers.get(TRACE_HEADER) ?? "";
+  // WHY: fail-closed first. Headers.get returns null for an absent header, so
+  // both null and "" mean the proxy never passed a verified service context
+  // and the call answers closed before the handler reads anything else.
+  const serviceId = request.headers.get(SERVICE_ID_HEADER);
+  if (serviceId === null || serviceId === "") {
+    return answer(request);
+  }
+  let bodyText: string;
+  try {
+    bodyText = await readBody(request, settings().maxBodyBytes);
+  } catch (error) {
+    if (error instanceof BodyTooLargeError) {
+      // WHY: an oversize body must answer 413, not a raw 500.
+      logRequest(request.method, request.nextUrl.pathname, 413, traceId);
+      return Response.json({ error: "body_too_large", trace_id: traceId }, { status: 413 });
+    }
+    throw error;
+  }
+  const contractError = validateContract(request.nextUrl.pathname, request.method, bodyText, traceId);
+  if (contractError !== null) {
+    logRequest(request.method, request.nextUrl.pathname, 400, traceId);
+    return contractError;
+  }
   return answer(request);
 }
 

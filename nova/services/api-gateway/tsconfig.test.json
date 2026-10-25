@@ -1,14 +1,22 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
     "noEmit": false,
-    "rootDir": "src",
-    "outDir": "dist",
+    "esModuleInterop": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "jsx": "react-jsx",
-    "plugins": [],
-    "incremental": false
+    "incremental": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": ["node"]
   },
-  "include": ["src/test/**/*.ts"]
+  "include": ["src/test/**/*.ts"],
+  "exclude": ["src/lib/**/*.ts", "src/**/*.tsx", "next-env.d.ts", ".next", "node_modules", "dist"]
 }

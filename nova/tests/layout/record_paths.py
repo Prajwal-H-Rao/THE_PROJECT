@@ -60,6 +60,7 @@ DESIGN_NOTES = (
     "docs/design-notes/nova-packaging.md",
     "docs/design-notes/nova-orchestration.md",
     "docs/design-notes/nova-monitoring.md",
+    "docs/design-notes/nova-approval-grants.md",
 )
 
 
@@ -83,7 +84,7 @@ def expected_groups(index):
             (13, "audit-search"), (14, "password-reset-tokens"), (15, "refresh-tokens"),
             (16, "scopes"), (17, "resource-ownership"), (18, "key-rotation"),
             (19, "account-linking"), (20, "unlink-revoke"), (21, "rate-limiting"),
-            (22, "cors-csp-limits-ssrf"), (23, "rbac-roles")
+            (22, "cors-csp-limits-ssrf"), (23, "rbac-roles"), (24, "approval-grants")
         ]],
         ["packages/contracts/events/event-envelope.ts", "packages/contracts/events/event-consumers.ts",
          "packages/contracts/events/event-envelope.test.ts", "packages/contracts/events/event-consumers.test.ts",

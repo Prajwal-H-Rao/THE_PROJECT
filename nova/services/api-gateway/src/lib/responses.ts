@@ -4,6 +4,7 @@
 export interface ErrorBody {
   readonly error: string;
   readonly trace_id: string;
+  readonly details?: string;
 }
 
 /** Send a JSON answer. */
@@ -20,8 +21,9 @@ export function errorResponse(
   status: number,
   code: string,
   traceId: string,
+  details?: string,
   headers: Readonly<Record<string, string>> = {},
 ): Response {
-  const body: ErrorBody = { error: code, trace_id: traceId };
-  return jsonResponse(status, body, headers);
+  const body: ErrorBody = { error: code, trace_id: traceId, details };
+  return Response.json(body, { status, headers });
 }
