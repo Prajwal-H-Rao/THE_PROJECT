@@ -45,7 +45,7 @@ def build_checks(index, rows, sections, text, plan, texts, owned, repo_root, ful
         ("Q allow-list", lambda: claims_checks.check_allow_list(extra, tree_checks.EXTRA_DIRECTORY_PREFIXES)),
         ("R spec citations", lambda: source_checks.check_spec_citations(index, text)),
         ("S plan citations", lambda: source_checks.check_plan_citations(repo_root, text, rows)),
-        ("T task bindings", lambda: source_checks.check_task_bindings(text, rows, texts, full_plan)),
+        ("T task bindings", lambda: source_checks.check_task_bindings(text, rows, texts, owned)),
         ("U gitignore", lambda: repo_checks.check_gitignore(repo_root)),
         ("V record sections", lambda: record_claims.check_required_sections(sections)),
         ("W ignored paths", lambda: record_paths.check_ignored_paths(extra)),

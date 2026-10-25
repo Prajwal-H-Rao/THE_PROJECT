@@ -20,6 +20,7 @@ export interface PolicyRule {
   readonly requiresStepUp?: boolean;
   readonly allowedActions?: readonly string[];
   readonly version: number;
+  readonly chatApprovalAllowed?: boolean;
 }
 
 export interface PolicyDecisionRequest {
@@ -42,6 +43,9 @@ export interface PolicyDecisionResponse {
     readonly nonce: string;
     readonly requiresStepUp?: boolean;
   };
+  /** Chat-approval policy (Task 10): whether this action is eligible for chat approval. */
+  readonly chatApprovalAllowed?: boolean;
+  readonly chatApprovalReason?: string;
 }
 
 /** Validate that a policy rule has all required fields and no unknown fields. */
@@ -81,6 +85,12 @@ export function validatePolicyRule(rule: unknown): rule is PolicyRule {
   if (typeof r.version !== "number" || !Number.isInteger(r.version)) {
     return false;
   }
+  if (
+    "chatApprovalAllowed" in r &&
+    typeof r.chatApprovalAllowed !== "boolean"
+  ) {
+    return false;
+  }
   const allowedKeys = new Set([
     "id",
     "actor",
@@ -93,6 +103,7 @@ export function validatePolicyRule(rule: unknown): rule is PolicyRule {
     "requiresStepUp",
     "allowedActions",
     "version",
+    "chatApprovalAllowed",
   ]);
   for (const key of Object.keys(r)) {
     if (!allowedKeys.has(key)) {

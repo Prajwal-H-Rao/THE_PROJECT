@@ -11,6 +11,29 @@ import {
 } from "./policy-schema.js";
 import { createHash } from "node:crypto";
 
+/** Chat approval policy result for the decision flow. */
+interface ChatApprovalPolicy {
+  readonly allowed: boolean;
+  readonly reason: string;
+}
+
+/** Evaluate whether a rule permits chat approval for the given request.
+ *  Returns { allowed: true } if chat approval is permitted for this rule.
+ *  Returns { allowed: false, reason: "chat_approval_not_allowed" } for high-risk rules.
+ *  Returns { allowed: false, reason: "chat_approval_requires_standard_flow" } for others. */
+function evaluateChatApproval(rule: PolicyRule): ChatApprovalPolicy {
+  // High-risk rules (tier3, tier4) never allow chat approval — refuse at policy boundary.
+  if (rule.riskTier === "tier3" || rule.riskTier === "tier4") {
+    return { allowed: false, reason: "chat_approval_not_allowed" };
+  }
+  // Rule explicitly allows chat approval: permit the chat-approval flow.
+  if (rule.chatApprovalAllowed === true) {
+    return { allowed: true, reason: "Chat approval allowed by policy rule" };
+  }
+  // Medium-risk rules without explicit chat approval: standard flow (no chat shortcut).
+  return { allowed: false, reason: "chat_approval_requires_standard_flow" };
+}
+
 @Injectable()
 export class PolicyDecisionService {
   private readonly config = loadFamilies();
@@ -41,6 +64,16 @@ export class PolicyDecisionService {
     // Deterministic decision based on the rule
     const decision = rule.defaultDecision;
 
+    // Evaluate chat-approval policy (Task 10) for all requests with payloadHash.
+    // This does NOT change the decision; it adds metadata for the chat system.
+    let chatApprovalAllowed: boolean | undefined;
+    let chatApprovalReason: string | undefined;
+    if (request.payloadHash) {
+      const chatPolicy = evaluateChatApproval(rule);
+      chatApprovalAllowed = chatPolicy.allowed;
+      chatApprovalReason = chatPolicy.reason;
+    }
+
     if (decision === "needs_approval" && request.payloadHash) {
       // Generate approval requirements bound to the payload hash
       const nonce = createHash("sha256")
@@ -54,10 +87,12 @@ export class PolicyDecisionService {
         reason: `Action requires approval per rule ${rule.id}`,
         approvalRequired: {
           payloadHash: request.payloadHash,
-          expirySeconds: 3600, // 1 hour default
+          expirySeconds: 3600,
           nonce,
           requiresStepUp: rule.requiresStepUp ?? false,
         },
+        chatApprovalAllowed,
+        chatApprovalReason,
       };
     }
 
@@ -66,6 +101,8 @@ export class PolicyDecisionService {
       ruleId: rule.id,
       policyVersion: this.policyVersion,
       reason: decision === "allow" ? "Allowed by policy" : "Denied by policy",
+      chatApprovalAllowed,
+      chatApprovalReason,
     };
   }
 

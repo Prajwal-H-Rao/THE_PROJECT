@@ -12,6 +12,48 @@ import { MAX_PREVIEW_BYTES, validateAndHashPreview, deriveConsequence, derivePer
 const NONCE_BYTES = 16;
 const DEFAULT_POLICY_VERSION = "1";
 
+/** Free-text strings that are not valid approval payloads. */
+const FREE_TEXT_PATTERNS = [
+  /^yes$/i,
+  /^approve$/i,
+  /^ok$/i,
+  /^okay$/i,
+  /^confirm$/i,
+  /^agree$/i,
+  /^allow$/i,
+  /^sure$/i,
+  /^y$/i,
+  /^yep$/i,
+  /^yeah$/i,
+];
+
+/** Check if a payload is free-form text that should not be treated as approval. */
+function isFreeText(payload: unknown): boolean {
+  if (typeof payload !== "string") {
+    return false;
+  }
+  return FREE_TEXT_PATTERNS.some((pattern) => pattern.test(payload.trim()));
+}
+
+/** Validate that payload is a proper object, not free-form text. */
+function validatePayload(payload: unknown): void {
+  if (isFreeText(payload)) {
+    throw new GrantValidationError("free_text_not_allowed", "Free-text approval is not allowed; payload must be a bound action object");
+  }
+  if (typeof payload === "string") {
+    throw new GrantValidationError("free_text_not_allowed", "String payload is not allowed; payload must be a bound action object");
+  }
+  if (payload === null || payload === undefined) {
+    throw new GrantValidationError("free_text_not_allowed", "Payload is required; payload must be a bound action object");
+  }
+  if (Array.isArray(payload)) {
+    throw new GrantValidationError("free_text_not_allowed", "Array payload is not allowed; payload must be a bound action object");
+  }
+  if (typeof payload !== "object") {
+    throw new GrantValidationError("free_text_not_allowed", "Payload must be an object; payload must be a bound action object");
+  }
+}
+
 /** Input for basic grant creation (Task 4). */
 export interface CreateGrantInput {
   readonly userId: string;
@@ -37,6 +79,7 @@ export function createGrant(
   repository: GrantRepository,
   input: CreateGrantInput
 ): GrantRecord {
+  validatePayload(input.payload);
   if (!isUuid(input.userId)) {
     throw new GrantValidationError("invalid_user", "userId must be a UUID");
   }
@@ -77,6 +120,7 @@ export function createGrantWithDetails(
   repository: GrantRepository,
   input: CreateGrantWithDetailsInput
 ): GrantRecord {
+  validatePayload(input.payload);
   // Validate base input
   if (!isUuid(input.userId)) {
     throw new GrantValidationError("invalid_user", "userId must be a UUID");

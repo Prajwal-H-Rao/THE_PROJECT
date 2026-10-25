@@ -494,3 +494,41 @@ test("create grant with details stores provided permissions and consequence", ()
   assert.deepEqual(record.permissions, ["send"]);
   assert.equal(record.consequence, "Medium risk: may modify own data");
 });
+
+test("rejects free-text payload at grant creation (Task 11)", () => {
+  const { grantsService } = service();
+  const freeTexts = ["yes", "approve", "ok", "okay", "confirm", "agree", "allow", "sure", "y", "yep", "yeah"];
+  for (const text of freeTexts) {
+    assert.throws(
+      () => grantsService.createGrant(grantInput({ payload: text })),
+      GrantValidationError,
+      `free text "${text}" should be rejected`
+    );
+    assert.throws(
+      () => grantsService.createGrantWithDetails(grantWithDetailsInput({ payload: text })),
+      GrantValidationError,
+      `free text "${text}" should be rejected in with-details`
+    );
+  }
+});
+
+test("rejects free-text payload at verification (Task 11)", () => {
+  const { grantsService } = service();
+  const record = grantsService.createGrant(grantInput({ payload: { body: "hello" } }));
+  const freeTexts = ["yes", "approve", "ok", "okay", "confirm", "agree", "allow", "sure", "y", "yep", "yeah"];
+  for (const text of freeTexts) {
+    const verdict = grantsService.verifyGrant(record.nonce, verifyInput({ payload: text }));
+    assert.deepEqual(verdict, { ok: false, reason: "free_text_not_allowed" });
+  }
+  // Also reject string payloads that aren't in the free-text list
+  const verdict = grantsService.verifyGrant(record.nonce, verifyInput({ payload: "some random string" }));
+  assert.deepEqual(verdict, { ok: false, reason: "free_text_not_allowed" });
+  // Reject null/undefined
+  const verdictNull = grantsService.verifyGrant(record.nonce, verifyInput({ payload: null }));
+  assert.deepEqual(verdictNull, { ok: false, reason: "free_text_not_allowed" });
+  const verdictUndef = grantsService.verifyGrant(record.nonce, verifyInput({ payload: undefined }));
+  assert.deepEqual(verdictUndef, { ok: false, reason: "free_text_not_allowed" });
+  // Reject array
+  const verdictArr = grantsService.verifyGrant(record.nonce, verifyInput({ payload: ["yes"] }));
+  assert.deepEqual(verdictArr, { ok: false, reason: "free_text_not_allowed" });
+});

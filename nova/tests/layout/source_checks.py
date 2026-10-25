@@ -78,20 +78,20 @@ def token_problems(sentence, path, number, cited):
     return problems
 
 
-def check_task_bindings(text, rows, texts, plan):
+def check_task_bindings(text, rows, texts, owned):
     """Check that every named path belongs to the build sequence task that names it."""
     problems = []
     for sentence in diff_doc.sentences(text):
-        problems += sentence_problems(sentence, texts, plan, False)
+        problems += sentence_problems(sentence, texts, owned, False)
     for row in rows:
         for sentence in diff_doc.sentences(row.get("Note", "")):
-            problems += sentence_problems(sentence, texts, plan, True)
+            problems += sentence_problems(sentence, texts, owned, True)
     if problems:
         return "; ".join(problems)
     return None
 
 
-def sentence_problems(sentence, texts, plan, allow_absence):
+def sentence_problems(sentence, texts, owned, allow_absence):
     """Return the problems of one sentence that names a path."""
     names = BACKTICK.findall(sentence)
     if not names:
@@ -100,7 +100,7 @@ def sentence_problems(sentence, texts, plan, allow_absence):
     if references:
         return binding_problems(sentence, names, references, texts)
     if allow_absence:
-        return absence_problems(sentence, names, plan)
+        return absence_problems(sentence, names, owned)
     return []
 
 
@@ -130,12 +130,13 @@ def names_path(text, name):
     return ("`" + path + "`") in text or ("`" + path + "/`") in text or (" " + path + " ") in text
 
 
-def absence_problems(sentence, names, plan):
+def absence_problems(sentence, names, owned):
     """Return the problems of a sentence that names a path no plan task owns."""
     problems = []
     for name in names:
-        needle = name if "/" in name else name + "/"
-        if needle in plan:
+        # Normalize the name to match the owned paths format (no trailing slash).
+        needle = normalise(name)
+        if needle not in owned:
             problems.append("%s says no plan path matches %s" % (sentence, name))
     return problems
 

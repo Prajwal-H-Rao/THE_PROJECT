@@ -18,6 +18,7 @@ families:
         blastRadius: "self"
         riskTier: "tier1"
         defaultDecision: "allow"
+        chatApprovalAllowed: true
         version: 1
       - id: "inbox.draft"
         actor: "user"
@@ -54,6 +55,7 @@ families:
         blastRadius: "self"
         riskTier: "tier1"
         defaultDecision: "allow"
+        chatApprovalAllowed: true
         version: 1
       - id: "calendar.create"
         actor: "user"
@@ -90,6 +92,7 @@ families:
         blastRadius: "self"
         riskTier: "tier1"
         defaultDecision: "allow"
+        chatApprovalAllowed: true
         version: 1
       - id: "tasks.write"
         actor: "user"
@@ -99,6 +102,7 @@ families:
         blastRadius: "self"
         riskTier: "tier1"
         defaultDecision: "allow"
+        chatApprovalAllowed: true
         version: 1
 
   - name: "finance"
@@ -116,6 +120,7 @@ families:
         blastRadius: "self"
         riskTier: "tier2"
         defaultDecision: "allow"
+        chatApprovalAllowed: true
         version: 1
       - id: "finance.import"
         actor: "user"
@@ -152,6 +157,7 @@ families:
         blastRadius: "self"
         riskTier: "tier1"
         defaultDecision: "allow"
+        chatApprovalAllowed: true
         version: 1
       - id: "trips.write"
         actor: "user"
@@ -178,6 +184,7 @@ families:
         blastRadius: "self"
         riskTier: "tier1"
         defaultDecision: "allow"
+        chatApprovalAllowed: true
         version: 1
       - id: "jobs.match"
         actor: "user"

@@ -151,6 +151,20 @@ def expected_groups(index):
             "services/policy-approval-service/src/health/health.controller.ts",
             "services/policy-approval-service/src/health/health.module.ts",
         ],
+        [
+            "services/audit-service/nest-cli.json",
+            "services/audit-service/package.json",
+            "services/audit-service/package-lock.json",
+            "services/audit-service/tsconfig.json",
+            "services/audit-service/src/app.module.ts",
+            "services/audit-service/src/main.ts",
+            "services/audit-service/src/audit-repository.ts",
+            "services/audit-service/src/audit.controller.ts",
+            "services/audit-service/src/audit.module.ts",
+            "services/audit-service/src/audit.service.ts",
+            "services/audit-service/src/health/health.controller.ts",
+            "services/audit-service/src/health/health.module.ts",
+        ],
     ]
 
 

@@ -44,7 +44,7 @@ This module interleaves with `13-employer-registry` inside P8. See rule 4 in `or
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Define the listing contract. It carries connector ID, canonical URI, employer, role, location, times, source hash, last verified and terms classification. | contracts | Unknown field fails |
+| 1 | Define the listing contract. It carries connector ID, canonical URI, employer, role, location, times, source hash, last verified and terms classification. | contracts, `job-source-worker` | Unknown field fails |
 | 2 | Implement normalisation with provenance on every field | `jobs-service/` | Every field carries source and freshness |
 | 3 | Build the 200-case labelled ranking evaluation set with human labels | `tests/job-eval/` | The set has a manifest and a label file, and `ranking_quality.json` carries the measured score |
 | 4 | Implement hard filters as deterministic code | job service | Filters never call a model |

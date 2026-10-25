@@ -27,7 +27,7 @@ Two channels carry reading, notifications, confirmations and low-risk approvals.
 | 3 | Implement message-ID idempotency with a dedup store | adapter | Duplicate delivery is a no-op |
 | 4 | Add replay protection: timestamp window plus nonce store | adapter | An old signed message fails |
 | 5 | Build the outbound sender with per-user rate limits and opt-in state | adapter | Opt-out stops delivery |
-| 6 | Implement Telegram secret-token header check | `telegram/` | Wrong token returns 403 |
+| 6 | Implement Telegram secret-token header check | `services/telegram-adapter/` | Wrong token returns 403 |
 | 7 | Implement Telegram update offset handling and delivery retry | telegram | Retry does not double-process |
 | 8 | Create the Telegram bot, set a high-entropy `secret_token`, and configure HTTPS webhook delivery | bot config plus `setWebhook` | A request without the secret header returns 403 |
 | 9 | Build the inbound sanitiser that treats text as untrusted data | adapters | Injection in inbound text cannot change policy |

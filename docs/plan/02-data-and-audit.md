@@ -37,6 +37,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 14 | Add a backup and restore script with a drill | `infra/` scripts | Restore into an empty DB passes |
 | 15 | Add indexes on IDs, timestamps and ownership columns | migrations | `EXPLAIN` uses the index |
 | 16 | Build audit search: filter by actor, action, resource, policy result and time, served by the audit service (spec:746) | audit service | An unknown filter is rejected, and a caller reads only rows their role allows |
+| 17 | Implement audit service HTTP endpoints for recording and querying audit events | `services/audit-service/` | All endpoints return expected responses |
 
 ## Build order
 
@@ -60,3 +61,7 @@ Work these steps in order. A step names tasks from the table above.
 - Hash chaining is tamper evidence, not immutability. Say so in the runbook.
 - pgvector ships in P1 so the vector columns exist from the start. The semantic search path stays dormant until P6. Enabling it early costs a small startup check and avoids a privileged migration later.
 - Backup restore is easy to skip. Schedule the drill inside P1, not at the end.
+
+## Owned paths
+
+Module 02 owns the audit service implementation: `services/audit-service/`, `services/audit-service/src/`, `services/audit-service/nest-cli.json`, `services/audit-service/package.json`, `services/audit-service/package-lock.json`, `services/audit-service/tsconfig.json`, `services/audit-service/src/app.module.ts`, `services/audit-service/src/main.ts`, `services/audit-service/src/audit-repository.ts`, `services/audit-service/src/audit.controller.ts`, `services/audit-service/src/audit.module.ts`, `services/audit-service/src/audit.service.ts`, `services/audit-service/src/health/health.controller.ts`, `services/audit-service/src/health/health.module.ts`.

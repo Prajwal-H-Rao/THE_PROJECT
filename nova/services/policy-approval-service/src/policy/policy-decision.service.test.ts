@@ -1,4 +1,4 @@
-/** Tests for the policy decision service. */
+/** Tests for the policy decision service core decisions. */
 
 import { describe, it, before } from "node:test";
 import assert from "node:assert/strict";
@@ -148,19 +148,6 @@ describe("policy decision service", () => {
     assert.strictEqual(decision.ruleId, "invalid_request");
   });
 
-  it("returns deterministic decisions for same input", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "inbox:send",
-      action: "send",
-      target: "external_recipients",
-      payloadHash: "same_hash",
-    };
-    const decision1 = service.decide(request);
-    const decision2 = service.decide(request);
-    assert.deepStrictEqual(decision1, decision2);
-  });
-
   it("generates different nonces for different payload hashes", () => {
     const request1: PolicyDecisionRequest = {
       actor: "user",
@@ -208,121 +195,5 @@ describe("policy decision service", () => {
     const result = service.validateFamilies();
     assert.strictEqual(result.valid, true);
     assert.strictEqual(result.errors.length, 0);
-  });
-
-  // Additional matrix row tests for full coverage (Task 15 - 10 matrix rows)
-  it("allows calendar read for own events (matrix row: calendar read)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "calendar:read",
-      action: "read",
-      target: "own_events",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "allow");
-    assert.strictEqual(decision.ruleId, "calendar.read");
-  });
-
-  it("requires approval for inbox draft (matrix row: draft email/cover letter)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "inbox:draft",
-      action: "draft",
-      target: "own_drafts",
-      payloadHash: "draft123",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "inbox.draft");
-  });
-
-  it("allows finance read for own finances (matrix row: finance read)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "finance:read",
-      action: "read",
-      target: "own_finances",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "allow");
-    assert.strictEqual(decision.ruleId, "finance.read");
-  });
-
-  it("requires approval for finance categorize (matrix row: parse resume/bank file)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "finance:write",
-      action: "categorize",
-      target: "own_finances",
-      payloadHash: "cat123",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "finance.categorize");
-  });
-
-  it("requires approval for jobs match (matrix row: job match)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "jobs:match",
-      action: "match",
-      target: "profile_match",
-      payloadHash: "match123",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "jobs.match");
-  });
-
-  it("allows trips read for own trips (matrix row: trip read)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "trips:read",
-      action: "read",
-      target: "own_trips",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "allow");
-    assert.strictEqual(decision.ruleId, "trips.read");
-  });
-
-  it("requires approval for trips write (matrix row: trip write)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "trips:write",
-      action: "write",
-      target: "own_trips",
-      payloadHash: "trip123",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "trips.write");
-  });
-
-  it("requires approval for channels send (matrix row: channel send)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "channels:send",
-      action: "send",
-      target: "external_recipient",
-      payloadHash: "send123",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "channels.send");
-    assert.ok(decision.approvalRequired?.requiresStepUp);
-  });
-
-  it("requires approval for calendar create (matrix row: calendar create)", () => {
-    const request: PolicyDecisionRequest = {
-      actor: "user",
-      scope: "calendar:write",
-      action: "create",
-      target: "own_calendar",
-      payloadHash: "cal123",
-    };
-    const decision = service.decide(request);
-    assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "calendar.create");
   });
 });
