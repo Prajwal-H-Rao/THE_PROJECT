@@ -165,3 +165,73 @@ exactly what action is being approved, with a hash that binds the preview.
 **Migration:**
 - Migration 25 adds `preview JSONB`, `card_hash CHAR(64)`, `permissions JSONB`, `consequence TEXT`, `rule_id TEXT` to `approvals` table
 - Existing grants get NULL preview → card endpoint returns 404 `{ error: "no_preview" }`
+
+## Policy version pinning (Task 13)
+
+The global policy version is a positive integer that gets pinned in every grant at creation time. The `policy_version` column in the `approvals` table records this version.
+
+**Version bumping:**
+- The policy version can be bumped via `POST /policy/version/bump`
+- Each bump increments the global version by 1
+- The current version is readable via `GET /policy/version`
+- Default version is 1 (configurable via `POLICY_VERSION` environment variable)
+
+**Grant invalidation:**
+- When a grant is created, it stores the current global policy version
+- `verifyBinding` compares the attempt's `policyVersion` with the grant's stored version
+- If they differ, the grant is denied with reason `"policy_version_mismatch"`
+- Bumping the policy version immediately invalidates ALL existing grants
+- This enforces the principle that a policy change expires all outstanding approvals
+
+**Version management:**
+- The version is a simple integer counter (not tied to rule versions)
+- Rule versions in `families.yaml` track individual rule changes
+- The global policy version tracks the overall policy configuration
+- Any change to the policy configuration should bump the version
+- The version is stored in memory; production would persist to DB
+
+**Endpoints:**
+- `GET /policy/version` → `{ currentVersion: number }`
+- `POST /policy/version/bump` → `{ currentVersion: number }` (increments and returns new version)
+
+**Tests:**
+- `test_policy_change_invalidates_grant` — a version bump invalidates old grants
+- `verifyBinding` rejects grants with mismatched policy version
+- New grants after bump pin the new version and verify correctly
+
+## Bulk action policy (Task 14)
+
+The bulk decision endpoint `POST /policy/decide/bulk` evaluates multiple actions in a single request. This prevents silent escalation where a batch of actions could include a high-risk action that would normally require approval.
+
+**Escalation detection:**
+- Actions with riskTier tier3 or tier4 are escalations
+- Actions with `requiresStepUp: true` are escalations
+- Actions matching patterns: `*.apply`, `*.submit`, `*.import`, `*.link`, `*.connect`, `*.add*source`, `*.create*source`, `*.register*source`
+
+**Batch decision logic:**
+- If any item is denied → batch is denied
+- If any item needs approval → batch needs approval
+- If any item is an escalation → batch needs approval (cannot silently allow)
+- Only if all items are allow → batch is allowed
+
+**Response includes:**
+- Overall batch decision
+- Policy version
+- Reason for decision
+- Per-item results with decision, ruleId, reason, approvalRequired, chatApprovalAllowed, chatApprovalReason
+- `hasEscalation` flag indicating if batch contained escalation actions
+
+**Endpoints:**
+- `POST /policy/decide/bulk` — accepts `{ items: BulkDecisionRequestItem[] }`, returns `BulkDecisionResponse`
+
+**Tests:**
+- All allow actions → allow
+- Any deny → deny
+- Any needs_approval → needs_approval
+- Escalation in batch → needs_approval with escalation reason
+- Empty items → rejected
+- Invalid item → rejected
+- Item results contain correct metadata
+- Chat approval metadata preserved
+- High-risk without payloadHash → chat_approval_not_allowed
+- Response includes policyVersion and hasEscalation

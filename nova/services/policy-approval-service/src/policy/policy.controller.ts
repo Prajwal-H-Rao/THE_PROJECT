@@ -3,8 +3,9 @@
 import { Controller, Post, Body, Get, Param, HttpCode, HttpStatus } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { PolicyDecisionService } from "./policy-decision.service.js";
+import { getPolicyVersion, bumpPolicyVersion, getPolicyVersionConfig } from "./policy-version.js";
 import type { PolicyDecisionRequest, PolicyDecisionResponse } from "./policy-schema.js";
-import type { PolicyRule } from "./policy-schema.js";
+import type { PolicyRule, BulkDecisionRequest, BulkDecisionResponse } from "./policy-schema.js";
 
 @ApiTags("policy")
 @Controller("policy")
@@ -17,6 +18,14 @@ export class PolicyController {
   @ApiResponse({ status: 200, description: "Policy decision", type: Object })
   async decide(@Body() request: PolicyDecisionRequest): Promise<PolicyDecisionResponse> {
     return this.decisionService.decide(request);
+  }
+
+  @Post("decide/bulk")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Make a bulk policy decision for multiple actions (Task 14)" })
+  @ApiResponse({ status: 200, description: "Bulk policy decision", type: Object })
+  async decideBulk(@Body() request: BulkDecisionRequest): Promise<BulkDecisionResponse> {
+    return this.decisionService.decideBulk(request);
   }
 
   @Get("rules")
@@ -50,5 +59,24 @@ export class PolicyController {
   @ApiResponse({ status: 200, description: "Validation result" })
   async validate(): Promise<{ valid: boolean; errors: string[] }> {
     return this.decisionService.validateFamilies();
+  }
+
+  /** Get the current policy version. */
+  @Get("version")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Get the current policy version" })
+  @ApiResponse({ status: 200, description: "Current policy version" })
+  async getVersion(): Promise<{ currentVersion: number }> {
+    return getPolicyVersionConfig();
+  }
+
+  /** Bump the policy version. This invalidates all existing grants. */
+  @Post("version/bump")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Bump the policy version (invalidates all grants)" })
+  @ApiResponse({ status: 200, description: "New policy version" })
+  async bumpVersion(): Promise<{ currentVersion: number }> {
+    const newVersion = bumpPolicyVersion();
+    return { currentVersion: newVersion };
   }
 }

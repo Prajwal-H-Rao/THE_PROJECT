@@ -8,9 +8,9 @@ import { computeApprovalHash } from "@nova/contracts/approval-hash";
 import type { GrantRepository } from "./grant-repository-types.js";
 import { GrantValidationError } from "./grants.service.js";
 import { MAX_PREVIEW_BYTES, validateAndHashPreview, deriveConsequence, derivePermissions } from "./grant-card.js";
+import { getPolicyVersion } from "../policy/policy-version.js";
 
 const NONCE_BYTES = 16;
-const DEFAULT_POLICY_VERSION = "1";
 
 /** Free-text strings that are not valid approval payloads. */
 const FREE_TEXT_PATTERNS = [
@@ -104,7 +104,7 @@ export function createGrant(
     action: input.action,
     target: input.target,
     payloadHash,
-    policyVersion: String(input.policyVersion ?? DEFAULT_POLICY_VERSION),
+    policyVersion: String(input.policyVersion ?? getPolicyVersion()),
     nonce: randomBytes(NONCE_BYTES).toString("hex"),
     createdAtMs: nowMs,
     expiresAtMs: nowMs + input.ttlSeconds * 1000,
@@ -163,7 +163,7 @@ export function createGrantWithDetails(
     action: input.action,
     target: input.target,
     payloadHash,
-    policyVersion: String(input.policyVersion ?? DEFAULT_POLICY_VERSION),
+    policyVersion: String(input.policyVersion ?? getPolicyVersion()),
     nonce: randomBytes(NONCE_BYTES).toString("hex"),
     createdAtMs: nowMs,
     expiresAtMs: nowMs + input.ttlSeconds * 1000,
