@@ -1,0 +1,41 @@
+# Document Service - Python Dependencies
+# Pinned versions for reproducibility
+
+# Flask web framework
+flask==3.1.0
+flask-cors==5.0.0
+
+# Redis and RQ
+redis==5.2.1
+rq==1.19.2
+
+# MinIO client
+minio==7.2.10
+
+# Document parsers
+pymupdf==1.24.7          # PDF parsing (fitz)
+python-docx==1.1.2       # DOCX parsing
+pandas==2.2.3            # CSV/XLSX parsing
+openpyxl==3.1.5          # XLSX engine
+
+# OCR
+pytesseract==0.3.13      # Tesseract wrapper
+
+# Pydantic
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# Utilities
+python-magic==0.4.27     # MIME type detection
+python-dotenv==1.0.1     # Environment loading
+
+# Testing
+pytest==8.3.4
+pytest-mock==3.14.1
+pytest-cov==6.0.0
+pytest-asyncio==0.24.0
+
+# Type checking
+mypy==1.14.1
+types-redis==5.2.1.2
+types-pymupdf==1.24.7.1

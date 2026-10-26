@@ -13,15 +13,15 @@ labs:
     name: "One vertical slice: upload, Flask parser, evidence-linked profile, React review view"
     owning_module: "06-document-ml-sandbox"
     phase: "P3"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "python labs/lab02/run_lab.py"
 
   - number: 3
     name: "Service identity and policy with the parser behind an authenticated endpoint"
     owning_module: "06-document-ml-sandbox"
     phase: "P3"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "python labs/lab03/run_lab.py"
 
   - number: 4
     name: "Agent workflow plan → validate → await_approval → execute → verify → audit"

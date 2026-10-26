@@ -1,0 +1,1 @@
+"""Worker package for document service."""

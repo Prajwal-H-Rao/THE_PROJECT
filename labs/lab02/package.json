@@ -1,0 +1,14 @@
+{
+  "name": "nova-lab02",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lab 2: Upload to Flask parser to evidence-linked profile",
+  "type": "module",
+  "scripts": {
+    "test": "python run_lab.py"
+  },
+  "dependencies": {
+    "requests": "^2.32.3"
+  },
+  "devDependencies": {}
+}

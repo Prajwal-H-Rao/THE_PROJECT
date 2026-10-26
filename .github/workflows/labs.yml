@@ -23,6 +23,11 @@ jobs:
         with:
           node-version: "22.23.4"
 
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
       - name: Load lab registry
         id: registry
         run: |
@@ -59,6 +64,28 @@ for lab in labs:
         if: ${{ fromJson(steps.registry.outputs.count) > 0 }}
         run: |
           node labs/lab01/validate-openapi.js
+
+      - name: Install dependencies for Lab 2
+        if: ${{ fromJson(steps.registry.outputs.count) > 1 }}
+        run: |
+          # Lab 2 is a Python lab
+          cd labs/lab02 && pip install -r requirements.txt 2>/dev/null || pip install requests
+
+      - name: Run Lab 2 - Document Parser Evidence-Linked Profile
+        if: ${{ fromJson(steps.registry.outputs.count) > 1 }}
+        run: |
+          cd labs/lab02 && python run_lab.py
+
+      - name: Install dependencies for Lab 3
+        if: ${{ fromJson(steps.registry.outputs.count) > 2 }}
+        run: |
+          # Lab 3 is a Python lab
+          cd labs/lab03 && pip install -r requirements.txt 2>/dev/null || pip install requests
+
+      - name: Run Lab 3 - Parser Authenticated Internal Endpoint
+        if: ${{ fromJson(steps.registry.outputs.count) > 2 }}
+        run: |
+          cd labs/lab03 && python run_lab.py
 
       - name: Fail if no implemented labs found
         if: ${{ steps.registry.outputs.count == '0' }}
