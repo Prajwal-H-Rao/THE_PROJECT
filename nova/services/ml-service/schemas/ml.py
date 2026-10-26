@@ -79,3 +79,4 @@ class SkillExtractionResponse(BaseModel):
 
     skills: list[ExtractedSkill] = Field(description="Extracted skills")
     model: str = Field(description="Model used")
+

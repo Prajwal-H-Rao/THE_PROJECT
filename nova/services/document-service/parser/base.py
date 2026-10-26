@@ -6,15 +6,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from nova.services.document_service.schemas import ParserSettings
 from nova.services.document_service.schemas.extraction import (
+    Confidence,
+    FieldExtraction,
     ParsedDocument,
     ParsedDocumentMetadata,
-    FieldExtraction,
-    SourceSpan,
-    Confidence,
     ReviewStatus,
+    SourceSpan,
 )
-from nova.services.document_service.schemas import ParserSettings
 
 
 @dataclass

@@ -1,21 +1,18 @@
 """DOCX parser using python-docx with paragraph provenance."""
 
 from pathlib import Path
-from typing import Any
 
 from docx import Document
-from docx.table import Table
-from docx.text.paragraph import Paragraph
 
 from nova.services.document_service.parser.base import BaseParser, ParseResult
 from nova.services.document_service.schemas import ParserSettings
 from nova.services.document_service.schemas.extraction import (
+    Confidence,
+    FieldExtraction,
     ParsedDocument,
     ParsedDocumentMetadata,
-    FieldExtraction,
-    SourceSpan,
-    Confidence,
     ReviewStatus,
+    SourceSpan,
 )
 
 

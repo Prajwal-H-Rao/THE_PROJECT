@@ -1,6 +1,5 @@
 """Inference worker for ML tasks."""
 
-import json
 import os
 import redis
 from rq import Queue, Worker
@@ -30,7 +29,11 @@ def enqueue_embedding_job(texts: list[str], model: str = "all-MiniLM-L6-v2") -> 
     return job.id
 
 
-def enqueue_classification_job(text: str, labels: list[str] | None = None, model: str = "distilbert-base-uncased") -> str:
+def enqueue_classification_job(
+    text: str,
+    labels: list[str] | None = None,
+    model: str = "distilbert-base-uncased",
+) -> str:
     queue = get_inference_queue()
     job = queue.enqueue(
         "nova.workers.inference_worker.tasks.classification_task",

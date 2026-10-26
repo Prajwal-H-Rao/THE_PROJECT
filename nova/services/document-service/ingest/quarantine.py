@@ -2,7 +2,6 @@
 
 import hashlib
 import mimetypes
-import os
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -118,8 +117,8 @@ def quarantine_file(
     try:
         # Write file
         quarantine_path.write_bytes(file_bytes)
-    except OSError as e:
-        raise QuarantineError(f"Failed to write quarantine file: {e}")
+    except OSError:
+        raise QuarantineError("Failed to write quarantine file")
 
     # Return metadata for job enqueueing
     return {

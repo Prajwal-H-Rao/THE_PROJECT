@@ -1,16 +1,13 @@
 """Object storage for parsed documents."""
 
 import json
-import uuid
-from datetime import datetime
 from io import BytesIO
-from typing import Any
 
 from minio import Minio
 from minio.error import S3Error
 
 from nova.services.document_service.schemas import DocumentServiceSettings
-from nova.services.document_service.schemas.extraction import ExtractionEnvelope, ParsedDocument
+from nova.services.document_service.schemas.extraction import ExtractionEnvelope
 
 
 def get_minio_client(settings: DocumentServiceSettings) -> Minio:
@@ -42,7 +39,6 @@ def store_parsed_document(envelope: ExtractionEnvelope, settings: DocumentServic
 
     # Generate content-addressed object key
     document = envelope.document
-    doc_id = str(document.metadata.document_id)
     sha256 = document.metadata.sha256
 
     # Use SHA-256 as object key for content addressing
@@ -130,6 +126,7 @@ def list_parsed_documents(
     offset: int = 0,
 ) -> list[dict[str, Any]]:
     """List parsed documents with pagination."""
+    import json
     client = get_minio_client(settings)
 
     results = []

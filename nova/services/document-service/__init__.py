@@ -1,9 +1,9 @@
 """Flask app factory for the document service."""
 
-from flask import Flask, jsonify, request
 from werkzeug.exceptions import RequestEntityTooLarge
+from flask import Flask, jsonify, request
 
-from nova.services.document_service.schemas import DocumentServiceSettings, QuarantineSettings
+from nova.services.document_service.schemas import DocumentServiceSettings
 
 
 def create_app(settings: DocumentServiceSettings | None = None) -> Flask:

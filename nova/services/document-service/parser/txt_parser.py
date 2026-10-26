@@ -1,18 +1,17 @@
 """TXT and bank statement parser."""
 
-from pathlib import Path
-from typing import Any
 import re
+from pathlib import Path
 
 from nova.services.document_service.parser.base import BaseParser, ParseResult
 from nova.services.document_service.schemas import ParserSettings
 from nova.services.document_service.schemas.extraction import (
+    Confidence,
+    FieldExtraction,
     ParsedDocument,
     ParsedDocumentMetadata,
-    FieldExtraction,
-    SourceSpan,
-    Confidence,
     ReviewStatus,
+    SourceSpan,
 )
 
 
@@ -237,6 +236,3 @@ class TXTParser(BaseParser):
         )
 
         return ParseResult(document=document, warnings=self.warnings.copy())
-
-
-import re

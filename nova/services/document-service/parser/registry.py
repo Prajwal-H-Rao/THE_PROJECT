@@ -1,12 +1,11 @@
 """Parser registry and factory."""
 
 from pathlib import Path
-from typing import Any
 
 from nova.services.document_service.parser.base import BaseParser, ParseResult
-from nova.services.document_service.parser.pdf_parser import PDFParser
-from nova.services.document_service.parser.docx_parser import DOCXParser
 from nova.services.document_service.parser.csv_parser import CSVParser
+from nova.services.document_service.parser.docx_parser import DOCXParser
+from nova.services.document_service.parser.pdf_parser import PDFParser
 from nova.services.document_service.parser.txt_parser import TXTParser
 from nova.services.document_service.schemas import ParserSettings
 

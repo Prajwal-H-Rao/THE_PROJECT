@@ -2,16 +2,16 @@
 
 import fitz  # PyMuPDF
 from pathlib import Path
-from typing import Any
 
 from nova.services.document_service.parser.base import BaseParser, ParseResult
 from nova.services.document_service.schemas import ParserSettings
 from nova.services.document_service.schemas.extraction import (
-    ParsedDocument,
-    FieldExtraction,
-    SourceSpan,
     Confidence,
+    FieldExtraction,
+    ParsedDocument,
+    ParsedDocumentMetadata,
     ReviewStatus,
+    SourceSpan,
 )
 
 

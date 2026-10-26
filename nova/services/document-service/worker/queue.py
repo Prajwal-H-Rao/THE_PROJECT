@@ -1,8 +1,6 @@
 """RQ worker queue for document parsing jobs."""
 
-import uuid
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 import redis
@@ -10,7 +8,6 @@ from rq import Queue, Worker
 from rq.job import Job
 
 from nova.services.document_service.schemas import DocumentServiceSettings, WorkerSettings
-from nova.services.document_service.parser.registry import ParserRegistry
 
 
 def get_redis_connection(settings: WorkerSettings) -> redis.Redis:

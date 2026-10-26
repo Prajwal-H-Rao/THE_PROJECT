@@ -1,27 +1,16 @@
 """Ingest endpoint for document upload and quarantine."""
 
-import hashlib
-import mimetypes
-import os
-import uuid
-from datetime import datetime
-from pathlib import Path
-from typing import Any
-
 from flask import Blueprint, current_app, jsonify, request
-from werkzeug.utils import secure_filename
 
-from nova.services.document_service.schemas import (
-    DocumentServiceSettings,
-    QuarantineSettings,
-    ParsedDocumentMetadata,
-)
+from nova.services.document_service.schemas import DocumentServiceSettings
 from nova.services.document_service.ingest.quarantine import (
     quarantine_file,
     validate_file,
     QuarantineError,
     ValidationError,
 )
+from nova.services.document_service.worker.queue import enqueue_parse_job
+from nova.services.document_service.storage import get_parsed_document
 
 ingest_bp = Blueprint("ingest", __name__)
 
@@ -60,7 +49,6 @@ def upload_document():
         )
 
         # Enqueue parsing job
-        from nova.services.document_service.worker.queue import enqueue_parse_job
         job_id = enqueue_parse_job(
             document_id=quarantine_result["document_id"],
             quarantine_path=quarantine_result["quarantine_path"],
@@ -77,10 +65,10 @@ def upload_document():
 
     except ValidationError as e:
         return jsonify({"error": "validation_failed", "message": str(e)}), 400
-    except QuarantineError as e:
-        current_app.logger.error("Quarantine failed: %s", e)
+    except QuarantineError:
+        current_app.logger.error("Quarantine failed")
         return jsonify({"error": "quarantine_failed", "message": "Failed to store file"}), 500
-    except Exception as e:
+    except Exception:
         current_app.logger.exception("Upload failed")
         return jsonify({"error": "upload_failed", "message": "Internal error"}), 500
 
@@ -89,13 +77,10 @@ def upload_document():
 def document_status(document_id: str):
     """Get the parsing status of a document."""
     try:
-        uuid.UUID(document_id)  # Validate UUID format
+        from uuid import UUID
+        UUID(document_id)  # Validate UUID format
     except ValueError:
         return jsonify({"error": "invalid_id", "message": "Invalid document ID format"}), 400
-
-    # Check object store for result
-    from nova.services.document_service.storage import get_parsed_document
-    from nova.services.document_service.schemas.extraction import ExtractionEnvelope
 
     try:
         envelope = get_parsed_document(document_id, current_app.config["settings"])
@@ -113,7 +98,7 @@ def document_status(document_id: str):
             "field_count": len(envelope.document.fields),
             "warnings": envelope.document.warnings,
         }), 200
-    except Exception as e:
+    except Exception:
         current_app.logger.exception("Status check failed")
         return jsonify({"error": "status_failed", "message": "Failed to check status"}), 500
 
@@ -122,12 +107,10 @@ def document_status(document_id: str):
 def get_document(document_id: str):
     """Get the full parsed document."""
     try:
-        uuid.UUID(document_id)
+        from uuid import UUID
+        UUID(document_id)
     except ValueError:
         return jsonify({"error": "invalid_id", "message": "Invalid document ID format"}), 400
-
-    from nova.services.document_service.storage import get_parsed_document
-    from nova.services.document_service.schemas.extraction import ExtractionEnvelope
 
     try:
         envelope = get_parsed_document(document_id, current_app.config["settings"])
@@ -136,6 +119,6 @@ def get_document(document_id: str):
 
         # Return the full extraction envelope
         return jsonify(envelope.to_storage_dict()), 200
-    except Exception as e:
+    except Exception:
         current_app.logger.exception("Document retrieval failed")
         return jsonify({"error": "retrieval_failed", "message": "Failed to retrieve document"}), 500

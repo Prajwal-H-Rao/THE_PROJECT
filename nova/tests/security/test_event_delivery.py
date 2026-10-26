@@ -8,7 +8,6 @@ delivery cannot hold a second row (module 01 task 13, spec:755 and spec:756).
 
 import json
 import os
-
 import psycopg
 
 

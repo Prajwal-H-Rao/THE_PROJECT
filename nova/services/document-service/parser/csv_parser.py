@@ -1,19 +1,18 @@
 """CSV and XLSX parser using pandas with column provenance."""
 
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
 from nova.services.document_service.parser.base import BaseParser, ParseResult
 from nova.services.document_service.schemas import ParserSettings
 from nova.services.document_service.schemas.extraction import (
+    Confidence,
+    FieldExtraction,
     ParsedDocument,
     ParsedDocumentMetadata,
-    FieldExtraction,
-    SourceSpan,
-    Confidence,
     ReviewStatus,
+    SourceSpan,
 )
 
 
@@ -194,6 +193,3 @@ class CSVParser(BaseParser):
                 continue
 
         raise ValueError("Could not parse CSV with any supported encoding")
-
-
-from nova.services.document_service.schemas.extraction import SourceSpan

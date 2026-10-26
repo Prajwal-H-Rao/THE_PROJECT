@@ -1,17 +1,16 @@
 """CLI for document service worker."""
 
-import sys
 import argparse
-from typing import Any
+import sys
 
 from nova.services.document_service.schemas import DocumentServiceSettings
-from nova.services.document_service.worker.queue import start_worker, get_redis_connection
+from nova.services.document_service.worker.queue import get_redis_connection, start_worker
 
 
 def run_worker():
     """Run the RQ worker."""
     settings = DocumentServiceSettings()
-    print(f"Starting document parser worker...")
+    print("Starting document parser worker...")
     print(f"Redis: {settings.worker.redis_url}")
     print(f"Max jobs: {settings.worker.max_jobs}")
     print(f"Default timeout: {settings.worker.default_timeout}s")

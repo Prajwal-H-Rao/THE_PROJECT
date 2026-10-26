@@ -9,8 +9,8 @@ Exit rules. The deny mode exits 1 when the connect succeeds, else 0. The allow m
 exits 0 when the connect succeeds, else 1. Both rules fail their own non-attempt states.
 """
 
-import socket
 import os
+import socket
 import sys
 
 # The connect timeout in seconds. A hang must never stall the CI step.

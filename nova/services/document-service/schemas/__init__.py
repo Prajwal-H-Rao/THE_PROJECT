@@ -1,26 +1,26 @@
 """Pydantic v2 contracts for the document service."""
 
 from .extraction import (
+    Confidence,
     ExtractionEnvelope,
     FieldExtraction,
-    SourceSpan,
-    Confidence,
-    ReviewStatus,
     ParsedDocument,
     ParsedDocumentMetadata,
+    ReviewStatus,
+    SourceSpan,
 )
-from .settings import DocumentServiceSettings, QuarantineSettings, ParserSettings, WorkerSettings
+from .settings import DocumentServiceSettings, ParserSettings, QuarantineSettings, WorkerSettings
 
 __all__ = [
+    "Confidence",
     "ExtractionEnvelope",
     "FieldExtraction",
-    "SourceSpan",
-    "Confidence",
-    "ReviewStatus",
     "ParsedDocument",
     "ParsedDocumentMetadata",
+    "ReviewStatus",
+    "SourceSpan",
     "DocumentServiceSettings",
-    "QuarantineSettings",
     "ParserSettings",
+    "QuarantineSettings",
     "WorkerSettings",
 ]

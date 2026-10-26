@@ -4,14 +4,14 @@ from flask import Flask, jsonify, request
 from werkzeug.exceptions import RequestEntityTooLarge
 
 from nova.services.ml_service.schemas.ml import (
-    EmbeddingRequest,
-    EmbeddingResponse,
     ClassificationRequest,
     ClassificationResponse,
     ClassificationResult,
+    EmbeddingRequest,
+    EmbeddingResponse,
+    ExtractedSkill,
     SkillExtractionRequest,
     SkillExtractionResponse,
-    ExtractedSkill,
 )
 
 # Lazy-loaded models

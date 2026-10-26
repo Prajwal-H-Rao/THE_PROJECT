@@ -2,7 +2,6 @@
 
 import httpx
 import os
-from typing import Any
 
 ML_SERVICE_URL = os.getenv("ML_SERVICE_URL", "http://ml-service:8080")
 
@@ -28,7 +27,11 @@ def embedding_task(texts: list[str], model: str = "all-MiniLM-L6-v2") -> dict[st
     }))
 
 
-def classification_task(text: str, labels: list[str] | None = None, model: str = "distilbert-base-uncased") -> dict[str, Any]:
+def classification_task(
+    text: str,
+    labels: list[str] | None = None,
+    model: str = "distilbert-base-uncased",
+) -> dict[str, Any]:
     """Classify text."""
     import asyncio
     return asyncio.run(_call_ml_service("/classify", {
@@ -52,7 +55,11 @@ def embedding_task_sync(texts: list[str], model: str = "all-MiniLM-L6-v2") -> di
     return embedding_task(texts, model)
 
 
-def classification_task_sync(text: str, labels: list[str] | None = None, model: str = "distilbert-base-uncased") -> dict[str, Any]:
+def classification_task_sync(
+    text: str,
+    labels: list[str] | None = None,
+    model: str = "distilbert-base-uncased",
+) -> dict[str, Any]:
     return classification_task(text, labels, model)
 
 

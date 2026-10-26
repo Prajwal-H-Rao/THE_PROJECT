@@ -10,12 +10,11 @@ The admin API answers on two path forms. The script tries the MinIO-compatible p
 first and falls back to the native prefix, so both store versions work.
 """
 
+import http.client
 import json
 import os
 import sys
 import time
-
-import http.client
 
 sys.path.insert(0, os.environ.get("INIT_MOUNTS", "/opt"))
 
