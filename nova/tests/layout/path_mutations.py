@@ -34,8 +34,8 @@ def wrong_ignored_files(work):
     """Change the ignored files that the extra paths section states."""
     return replace_diff(
         work,
-        "The ignored files are .coverage and next-env.d.ts.",
-        "The ignored files are .coverage and next-env.d.ts and .pyc.")
+        "The ignored files are .coverage, next-env.d.ts and package-lock.json.",
+        "The ignored files are .coverage, next-env.d.ts and package-lock.json and .pyc.")
 
 
 def wrong_ignored_directory_suffixes(work):

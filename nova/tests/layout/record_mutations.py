@@ -79,8 +79,8 @@ def wrong_leaf_count(work):
     """Change the leaf directory count in the extra paths section."""
     return replace_diff(
         work,
-        "105 directories below the root, 74 leaf directories, 38 .gitkeep placeholder files",
-        "105 directories below the root, 74 leaf directories, 39 .gitkeep placeholder files")
+        "The tree holds 116 directories below the root, 80 leaf directories and 37 .gitkeep placeholder files",
+        "The tree holds 116 directories below the root, 80 leaf directories and 38 .gitkeep placeholder files")
 
 
 def missing_module_file(work):
