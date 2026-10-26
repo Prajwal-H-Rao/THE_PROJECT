@@ -43,6 +43,13 @@ CREATE TABLE notes_memory_service.notes (
 CREATE INDEX idx_notes_user_id ON notes_memory_service.notes (user_id);
 CREATE INDEX idx_notes_tags ON notes_memory_service.notes USING GIN (tags);
 CREATE INDEX idx_notes_created_at ON notes_memory_service.notes (created_at);
+
+-- pgvector IVFFLAT index for semantic search.
+-- The 'lists' parameter should be tuned based on table size:
+--   - For small datasets (<100K rows): lists = 10-100
+--   - For large datasets: lists = rows / 1000 or sqrt(rows)
+--   - Recommended: REINDEX with optimal lists after data load.
+-- Default lists=100 is a reasonable starting point for development.
 CREATE INDEX idx_notes_content_vector ON notes_memory_service.notes
     USING ivfflat (content_vector vector_cosine_ops)
     WITH (lists = 100);

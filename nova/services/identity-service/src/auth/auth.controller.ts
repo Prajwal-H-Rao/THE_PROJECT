@@ -26,6 +26,14 @@ export class AuthController {
     path: "/",
   };
 
+  private readonly pkceCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: 10 * 60 * 1000, // 10 minutes (matches OIDC state TTL)
+    path: "/",
+  };
+
   private setSessionCookies(res: Response, token: string, csrfToken: string): void {
     res.cookie("nova_session", token, this.cookieOptions);
     res.cookie("nova_csrf", csrfToken, { ...this.cookieOptions, httpOnly: false }); // CSRF needs to be readable by JS
@@ -34,6 +42,16 @@ export class AuthController {
   private clearSessionCookies(res: Response): void {
     res.clearCookie("nova_session", { ...this.cookieOptions, maxAge: 0 });
     res.clearCookie("nova_csrf", { ...this.cookieOptions, maxAge: 0 });
+  }
+
+  private setPkceCookie(res: Response, codeVerifier: string): void {
+    res.cookie("nova_pkce", codeVerifier, this.pkceCookieOptions);
+  }
+
+  private getAndClearPkceCookie(req: Request, res: Response): string | undefined {
+    const codeVerifier = req.cookies?.["nova_pkce"];
+    res.clearCookie("nova_pkce", { ...this.pkceCookieOptions, maxAge: 0 });
+    return codeVerifier;
   }
 
   @Get("login/:provider")
@@ -46,7 +64,8 @@ export class AuthController {
     @Query("redirect_uri") redirectUri: string,
     @Res() res: Response
   ): Promise<void> {
-    const { url } = await this.oidc.getAuthorizationUrl(provider, redirectUri);
+    const { url, codeVerifier } = await this.oidc.getAuthorizationUrl(provider, redirectUri);
+    this.setPkceCookie(res, codeVerifier);
     res.redirect(url);
   }
 
@@ -61,10 +80,15 @@ export class AuthController {
     @Query("code") code: string,
     @Query("state") state: string,
     @Query("redirect_uri") redirectUri: string,
+    @Req() req: Request,
     @Res() res: Response
   ): Promise<void> {
     try {
-      const { tokens, stateRecord } = await this.oidc.exchangeCode(provider, code, state, redirectUri);
+      const codeVerifier = this.getAndClearPkceCookie(req, res);
+      if (!codeVerifier) {
+        throw new Error("Missing PKCE code verifier");
+      }
+      const { tokens, stateRecord } = await this.oidc.exchangeCode(provider, code, state, redirectUri, codeVerifier);
       const userInfo = await this.oidc.fetchUserInfo(provider, tokens.access_token);
       const { userId, isNew } = await this.oidc.findOrCreateUser(provider, userInfo);
 

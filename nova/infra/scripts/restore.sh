@@ -33,7 +33,10 @@ psql --host="$PGHOST" --port="$PGPORT" --username="$PGUSER" --dbname="$PGDATABAS
 # Decrypt and decompress, then restore
 if [[ -n "$AGE_PRIVKEY" ]]; then
     echo "[restore] Decrypting with age..."
-    age -d -i <(echo "$AGE_PRIVKEY") "$BACKUP_FILE" | zstd -d -c | pg_restore \
+    # Use a temporary file for the private key to avoid process substitution issues
+    AGE_KEY_FILE=$(mktemp)
+    echo "$AGE_PRIVKEY" > "$AGE_KEY_FILE"
+    age -d -i "$AGE_KEY_FILE" "$BACKUP_FILE" | zstd -d -c | pg_restore \
         --host="$PGHOST" \
         --port="$PGPORT" \
         --username="$PGUSER" \
@@ -42,6 +45,7 @@ if [[ -n "$AGE_PRIVKEY" ]]; then
         --no-privileges \
         --jobs=4 \
         --verbose
+    rm -f "$AGE_KEY_FILE"
 else
     echo "[restore] WARNING: NOVA_BACKUP_AGE_PRIVKEY not set, assuming unencrypted backup"
     zstd -d -c "$BACKUP_FILE" | pg_restore \

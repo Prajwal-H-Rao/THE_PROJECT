@@ -20,7 +20,7 @@ CREATE TABLE identity_service.refresh_tokens (
     token_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES identity_service.users (user_id) ON DELETE CASCADE,
     provider        TEXT NOT NULL, -- 'google', 'github'
-    encrypted_token BYTEA NOT NULL, -- envelope-encrypted refresh token
+    encrypted_token BYTEA NOT NULL, -- envelope-encrypted refresh token (format: len(dek)||enc_dek||enc_token)
     key_id          UUID NOT NULL REFERENCES identity_service.encryption_keys (key_id),
     scope           TEXT NOT NULL,
     expires_at      TIMESTAMPTZ,
@@ -32,6 +32,7 @@ CREATE INDEX idx_refresh_tokens_user_id ON identity_service.refresh_tokens (user
 CREATE INDEX idx_refresh_tokens_provider ON identity_service.refresh_tokens (provider);
 
 -- Function to encrypt a refresh token using envelope encryption
+-- Format: 4-byte big-endian length of encrypted DEK || encrypted DEK || encrypted token
 CREATE OR REPLACE FUNCTION identity_service.encrypt_refresh_token(
     p_plaintext TEXT,
     p_key_id UUID
@@ -41,6 +42,7 @@ DECLARE
     v_dek BYTEA;
     v_encrypted_dek BYTEA;
     v_encrypted_token BYTEA;
+    v_dek_len INTEGER;
 BEGIN
     -- Get the master key material for this key version
     SELECT key_material INTO v_key_material
@@ -60,8 +62,9 @@ BEGIN
     -- Encrypt the plaintext token with the DEK
     v_encrypted_token := pgp_sym_encrypt(p_plaintext, v_dek);
 
-    -- Return concatenated: encrypted_dek || encrypted_token
-    RETURN v_encrypted_dek || v_encrypted_token;
+    -- Store length of encrypted DEK as 4-byte big-endian prefix
+    v_dek_len := octet_length(v_encrypted_dek);
+    RETURN (v_dek_len)::INT4TOBE4 || v_encrypted_dek || v_encrypted_token;
 END;
 $$;
 
@@ -72,11 +75,11 @@ CREATE OR REPLACE FUNCTION identity_service.decrypt_refresh_token(
 ) RETURNS TEXT LANGUAGE plpgsql AS $$
 DECLARE
     v_key_material BYTEA;
-    v_dek_len INTEGER := 32;
     v_encrypted_dek BYTEA;
     v_encrypted_token BYTEA;
     v_dek BYTEA;
     v_plaintext TEXT;
+    v_dek_len INTEGER;
 BEGIN
     -- Get the master key material
     SELECT key_material INTO v_key_material
@@ -87,12 +90,18 @@ BEGIN
         RAISE EXCEPTION 'Encryption key not found: %', p_key_id;
     END IF;
 
-    -- Extract encrypted DEK (first 32+overhead bytes) and encrypted token
-    -- pgp_sym_encrypt adds overhead; we need to know the DEK size
-    -- For simplicity, we store the DEK length prefix
-    -- This is a simplified implementation
-    v_encrypted_dek := substring(p_encrypted FROM 1 FOR 88); -- pgp_sym_encrypt overhead for 32-byte key
-    v_encrypted_token := substring(p_encrypted FROM 89);
+    -- Extract DEK length from first 4 bytes
+    IF octet_length(p_encrypted) < 4 THEN
+        RAISE EXCEPTION 'Invalid encrypted token format: too short';
+    END IF;
+    v_dek_len := (substring(p_encrypted FROM 1 FOR 4))::INT4FROMBE4;
+
+    -- Extract encrypted DEK and encrypted token
+    IF octet_length(p_encrypted) < 4 + v_dek_len THEN
+        RAISE EXCEPTION 'Invalid encrypted token format: truncated';
+    END IF;
+    v_encrypted_dek := substring(p_encrypted FROM 5 FOR v_dek_len);
+    v_encrypted_token := substring(p_encrypted FROM 5 + v_dek_len);
 
     -- Decrypt the DEK
     v_dek := pgp_sym_decrypt(v_encrypted_dek, v_key_material);
@@ -102,6 +111,15 @@ BEGIN
 
     RETURN v_plaintext;
 END;
+$$;
+
+-- Helper functions for 4-byte big-endian int encoding/decoding
+CREATE OR REPLACE FUNCTION int4tobe4(p_val INTEGER) RETURNS BYTEA LANGUAGE sql IMMUTABLE AS $$
+    SELECT set_byte(set_byte(set_byte(set_byte('\x00\x00\x00\x00'::BYTEA, 0, (p_val >> 24) & 255), 1, (p_val >> 16) & 255), 2, (p_val >> 8) & 255), 3, p_val & 255);
+$$;
+
+CREATE OR REPLACE FUNCTION int4frombe4(p_bytes BYTEA) RETURNS INTEGER LANGUAGE sql IMMUTABLE AS $$
+    SELECT (get_byte(p_bytes, 0) << 24) | (get_byte(p_bytes, 1) << 16) | (get_byte(p_bytes, 2) << 8) | get_byte(p_bytes, 3);
 $$;
 
 -- Function to store a refresh token
@@ -184,3 +202,11 @@ BEGIN
     RETURN ROW_COUNT;
 END;
 $$;
+
+-- Grant execute to identity_service role
+GRANT EXECUTE ON FUNCTION identity_service.encrypt_refresh_token(TEXT, UUID) TO identity_service;
+GRANT EXECUTE ON FUNCTION identity_service.decrypt_refresh_token(BYTEA, UUID) TO identity_service;
+GRANT EXECUTE ON FUNCTION identity_service.store_refresh_token(UUID, TEXT, TEXT, TEXT, TIMESTAMPTZ) TO identity_service;
+GRANT EXECUTE ON FUNCTION identity_service.get_refresh_token(UUID) TO identity_service;
+GRANT EXECUTE ON FUNCTION identity_service.revoke_refresh_token(UUID) TO identity_service;
+GRANT EXECUTE ON FUNCTION identity_service.revoke_all_refresh_tokens(UUID) TO identity_service;

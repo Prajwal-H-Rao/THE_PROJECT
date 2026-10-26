@@ -3,11 +3,13 @@
 import { Module } from "@nestjs/common";
 import { AuditController } from "./audit.controller.js";
 import { AuditService } from "./audit.service.js";
-import { InMemoryAuditRepository } from "./audit-repository.js";
+import { SqlAuditRepository } from "./audit-repository.sql.js";
+import { DbModule } from "./db/db.module.js";
 
 @Module({
+  imports: [DbModule],
   controllers: [AuditController],
-  providers: [AuditService, InMemoryAuditRepository],
+  providers: [AuditService, SqlAuditRepository],
   exports: [AuditService],
 })
 export class AuditModule {}

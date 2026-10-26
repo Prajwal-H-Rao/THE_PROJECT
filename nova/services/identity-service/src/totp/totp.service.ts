@@ -19,9 +19,9 @@ export class TotpService {
     return authenticator.keyuri(email, issuer, secret);
   }
 
-  /** Verify a TOTP token. */
-  verifyToken(token: string, secret: string): boolean {
-    return authenticator.check(token, secret);
+  /** Generate a per-user salt for backup code hashing. */
+  generateBackupCodeSalt(): string {
+    return randomBytes(16).toString("hex");
   }
 
   /** Generate backup codes for a user. */
@@ -33,14 +33,14 @@ export class TotpService {
     return codes;
   }
 
-  /** Hash a backup code for storage. */
-  hashBackupCode(code: string): string {
-    return createHmac("sha256", "nova-backup-code-salt").update(code).digest("hex");
+  /** Hash a backup code with per-user salt. */
+  hashBackupCode(code: string, salt: string): string {
+    return createHmac("sha256", salt).update(code).digest("hex");
   }
 
   /** Verify a backup code against stored hashes. */
-  verifyBackupCode(code: string, storedHashes: string[]): { valid: boolean; index: number } {
-    const hashed = this.hashBackupCode(code);
+  verifyBackupCode(code: string, storedHashes: string[], salt: string): { valid: boolean; index: number } {
+    const hashed = this.hashBackupCode(code, salt);
     const index = storedHashes.indexOf(hashed);
     return { valid: index >= 0, index };
   }
@@ -52,12 +52,13 @@ export class TotpService {
     backupCodes: string[],
     client?: PoolClient
   ): Promise<void> {
-    const hashedCodes = backupCodes.map((c) => this.hashBackupCode(c));
+    const salt = this.generateBackupCodeSalt();
+    const hashedCodes = backupCodes.map((c) => this.hashBackupCode(c, salt));
     await (client ?? this.pool).query(
-      `INSERT INTO identity_service.totp_secrets (user_id, secret, backup_codes, enabled_at)
-       VALUES ($1, $2, $3, NOW())
-       ON CONFLICT (user_id) DO UPDATE SET secret = $2, backup_codes = $3, enabled_at = NOW()`,
-      [userId, secret, JSON.stringify(hashedCodes)]
+      `INSERT INTO identity_service.totp_secrets (user_id, secret, backup_codes, salt, enabled_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (user_id) DO UPDATE SET secret = $2, backup_codes = $3, salt = $4, enabled_at = NOW()`,
+      [userId, secret, JSON.stringify(hashedCodes), salt]
     );
   }
 
@@ -70,15 +71,16 @@ export class TotpService {
   }
 
   /** Get TOTP secret for a user. */
-  async getTotpSecret(userId: string, client?: PoolClient): Promise<{ secret: string; backup_codes: string[] } | null> {
+  async getTotpSecret(userId: string, client?: PoolClient): Promise<{ secret: string; backup_codes: string[]; salt: string } | null> {
     const result = await (client ?? this.pool).query(
-      `SELECT secret, backup_codes FROM identity_service.totp_secrets WHERE user_id = $1`,
+      `SELECT secret, backup_codes, salt FROM identity_service.totp_secrets WHERE user_id = $1`,
       [userId]
     );
     if (result.rows.length === 0) return null;
     return {
       secret: result.rows[0].secret,
       backup_codes: result.rows[0].backup_codes,
+      salt: result.rows[0].salt,
     };
   }
 
@@ -89,14 +91,14 @@ export class TotpService {
     client?: PoolClient
   ): Promise<{ valid: boolean; usedBackupCode: boolean }> {
     const result = await (client ?? this.pool).query(
-      `SELECT secret, backup_codes FROM identity_service.totp_secrets WHERE user_id = $1`,
+      `SELECT secret, backup_codes, salt FROM identity_service.totp_secrets WHERE user_id = $1`,
       [userId]
     );
     if (result.rows.length === 0) {
       return { valid: false, usedBackupCode: false };
     }
 
-    const { secret, backup_codes } = result.rows[0];
+    const { secret, backup_codes, salt } = result.rows[0];
 
     // Try TOTP first
     if (authenticator.check(token, secret)) {
@@ -105,7 +107,7 @@ export class TotpService {
 
     // Try backup codes
     const backupHashes = backup_codes as string[];
-    const { valid, index } = this.verifyBackupCode(token, backupHashes);
+    const { valid, index } = this.verifyBackupCode(token, backupHashes, salt);
     if (valid) {
       // Remove used backup code
       const newCodes = backupHashes.filter((_, i) => i !== index);

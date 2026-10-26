@@ -38,6 +38,7 @@ families:
         riskTier: "tier3"
         defaultDecision: "needs_approval"
         requiresStepUp: true
+        isEscalation: true
         version: 1
 
   - name: "calendar"
@@ -75,6 +76,7 @@ families:
         riskTier: "tier3"
         defaultDecision: "needs_approval"
         requiresStepUp: true
+        isEscalation: true
         version: 1
 
   - name: "tasks"
@@ -131,6 +133,7 @@ families:
         riskTier: "tier3"
         defaultDecision: "needs_approval"
         requiresStepUp: true
+        isEscalation: true
         version: 1
       - id: "finance.categorize"
         actor: "user"
@@ -204,6 +207,7 @@ families:
         riskTier: "tier3"
         defaultDecision: "needs_approval"
         requiresStepUp: true
+        isEscalation: true
         version: 1
 
   - name: "channels"
@@ -222,6 +226,7 @@ families:
         riskTier: "tier3"
         defaultDecision: "needs_approval"
         requiresStepUp: true
+        isEscalation: true
         version: 1
       - id: "channels.send"
         actor: "user"

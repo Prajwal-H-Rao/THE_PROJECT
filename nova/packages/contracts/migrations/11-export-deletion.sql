@@ -9,9 +9,6 @@ CREATE OR REPLACE FUNCTION audit_activity_service.export_user_data(p_user_id UUI
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     v_result JSONB := '{}'::JSONB;
-    v_schema TEXT;
-    v_table TEXT;
-    v_query TEXT;
     v_rows JSONB;
 BEGIN
     -- Identity schema
@@ -88,14 +85,24 @@ BEGIN
 END;
 $$;
 
+-- Permanent table to store deletion object refs (survives transaction boundaries)
+CREATE TABLE IF NOT EXISTS audit_activity_service.deletion_object_refs (
+    user_id UUID NOT NULL REFERENCES identity_service.users (user_id) ON DELETE CASCADE,
+    ref TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, ref)
+) AUTHORIZATION audit_activity_service;
+
+CREATE INDEX idx_deletion_object_refs_user_id ON audit_activity_service.deletion_object_refs (user_id);
+
 -- Function to delete all data for a user (GDPR Art. 17 right to erasure)
 -- Cascades through all five target stores: vectors, object refs, queue tasks, channel mappings, caches.
 -- The vector leg runs from P6 when 10-tasks-notes activates it.
 CREATE OR REPLACE FUNCTION audit_activity_service.delete_user_data(p_user_id UUID)
 RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
-    v_object_refs TEXT[];
-    v_ref TEXT;
+    v_object_refs TEXT[] := '{}';
+    v_new_refs TEXT[];
 BEGIN
     -- 1. Collect all object store references before deleting rows
     -- Finances: receipt_ref, statement_ref
@@ -103,37 +110,44 @@ BEGIN
         SELECT receipt_ref FROM finance_service.finances WHERE user_id = p_user_id AND receipt_ref IS NOT NULL
         UNION ALL
         SELECT statement_ref FROM finance_service.finances WHERE user_id = p_user_id AND statement_ref IS NOT NULL
-    ) t INTO v_object_refs;
+    ) t INTO v_new_refs;
+    v_object_refs := v_object_refs || COALESCE(v_new_refs, '{}');
 
     -- Notes: source_ref (may point to email_id, document_id, URL)
     SELECT array_agg(ref) FROM (
         SELECT source_ref FROM notes_memory_service.notes WHERE user_id = p_user_id AND source_ref IS NOT NULL
-    ) t INTO v_object_refs;
+    ) t INTO v_new_refs;
+    v_object_refs := v_object_refs || COALESCE(v_new_refs, '{}');
 
     -- Trips: itinerary_ref
     SELECT array_agg(ref) FROM (
         SELECT itinerary_ref FROM trips_service.trips WHERE user_id = p_user_id AND itinerary_ref IS NOT NULL
-    ) t INTO v_object_refs;
+    ) t INTO v_new_refs;
+    v_object_refs := v_object_refs || COALESCE(v_new_refs, '{}');
 
     -- Emails: raw_ref, attachments (JSONB array of objects with refs)
     SELECT array_agg(ref) FROM (
         SELECT raw_ref FROM inbox_service.emails WHERE user_id = p_user_id AND raw_ref IS NOT NULL
         UNION ALL
-        SELECT jsonb_array_elements_text(attachments->>'ref') FROM inbox_service.emails
+        SELECT elem->>'ref' FROM inbox_service.emails,
+        LATERAL jsonb_array_elements(attachments) AS elem
         WHERE user_id = p_user_id AND attachments IS NOT NULL
-    ) t INTO v_object_refs;
+    ) t INTO v_new_refs;
+    v_object_refs := v_object_refs || COALESCE(v_new_refs, '{}');
 
     -- Events: raw_ref
     SELECT array_agg(ref) FROM (
         SELECT raw_ref FROM inbox_service.events WHERE user_id = p_user_id AND raw_ref IS NOT NULL
-    ) t INTO v_object_refs;
+    ) t INTO v_new_refs;
+    v_object_refs := v_object_refs || COALESCE(v_new_refs, '{}');
 
     -- Jobs: raw_ref on listings, confirmation_ref on submissions
     SELECT array_agg(ref) FROM (
         SELECT raw_ref FROM jobs_service.job_listing WHERE user_id = p_user_id AND raw_ref IS NOT NULL
         UNION ALL
         SELECT confirmation_ref FROM jobs_service.application_submission WHERE user_id = p_user_id AND confirmation_ref IS NOT NULL
-    ) t INTO v_object_refs;
+    ) t INTO v_new_refs;
+    v_object_refs := v_object_refs || COALESCE(v_new_refs, '{}');
 
     -- 2. Delete from all domain tables (CASCADE handles FKs where defined)
     DELETE FROM jobs_service.application_submission WHERE user_id = p_user_id;
@@ -169,12 +183,10 @@ BEGIN
     SET payload = jsonb_set(payload, '{user_deleted}', 'true'::JSONB)
     WHERE actor_id = p_user_id::TEXT OR resource_id = p_user_id::TEXT;
 
-    -- 6. Return object refs for the caller to delete from object store
+    -- 6. Store object refs in permanent table for async object store deletion
     -- The actual object store deletion is async and runs from the application layer.
-    -- This function returns the refs via a temporary table.
-    CREATE TEMP TABLE IF NOT EXISTS _deletion_object_refs (ref TEXT PRIMARY KEY) ON COMMIT DROP;
-    INSERT INTO _deletion_object_refs (ref)
-    SELECT unnest(v_object_refs)
+    INSERT INTO audit_activity_service.deletion_object_refs (user_id, ref)
+    SELECT p_user_id, unnest(v_object_refs)
     ON CONFLICT DO NOTHING;
 END;
 $$;
@@ -183,7 +195,15 @@ $$;
 CREATE OR REPLACE FUNCTION audit_activity_service.get_deletion_object_refs(p_user_id UUID)
 RETURNS SETOF TEXT LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
-    RETURN QUERY SELECT ref FROM _deletion_object_refs;
+    RETURN QUERY SELECT ref FROM audit_activity_service.deletion_object_refs WHERE user_id = p_user_id;
+END;
+$$;
+
+-- Function to clear processed deletion refs
+CREATE OR REPLACE FUNCTION audit_activity_service.clear_deletion_object_refs(p_user_id UUID)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+    DELETE FROM audit_activity_service.deletion_object_refs WHERE user_id = p_user_id;
 END;
 $$;
 
@@ -191,3 +211,4 @@ $$;
 GRANT EXECUTE ON FUNCTION audit_activity_service.export_user_data(UUID) TO audit_activity_service;
 GRANT EXECUTE ON FUNCTION audit_activity_service.delete_user_data(UUID) TO audit_activity_service;
 GRANT EXECUTE ON FUNCTION audit_activity_service.get_deletion_object_refs(UUID) TO audit_activity_service;
+GRANT EXECUTE ON FUNCTION audit_activity_service.clear_deletion_object_refs(UUID) TO audit_activity_service;

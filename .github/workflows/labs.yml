@@ -44,16 +44,16 @@ import json, sys
 labs = json.loads('${{ steps.registry.outputs.implemented_labs }}')
 for lab in labs:
     if not lab.get('test_command'):
-        print(f'FAIL: Lab {lab[\"number\"]} ({lab[\"name\"]}) has status=implemented but no test_command')
+        print(f'FAIL: Lab {lab["number"]} ({lab["name"]}) has status=implemented but no test_command')
         sys.exit(1)
-    print(f'OK: Lab {lab[\"number\"]} has test command: {lab[\"test_command\"]}')
+    print(f'OK: Lab {lab["number"]} has test command: {lab["test_command"]}')
 "
 
       - name: Install dependencies for Lab 1
         if: ${{ fromJson(steps.registry.outputs.count) > 0 }}
         run: |
-          # Lab 1 needs ajv which is in contracts package
-          cd nova/packages/contracts && npm ci
+          # Lab 1 has its own package.json with ajv dependency
+          cd labs/lab01 && npm ci
 
       - name: Run Lab 1 - Contracts OpenAPI Fixture Validation
         if: ${{ fromJson(steps.registry.outputs.count) > 0 }}

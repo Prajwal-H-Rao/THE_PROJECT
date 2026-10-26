@@ -2,7 +2,8 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { GrantVerificationClient, GrantVerificationError, computeApprovalHash, canonicalPayload } from "./grant-verification.js";
+import { GrantVerificationClient } from "./grant-verification.js";
+import { GrantVerificationError, computeApprovalHash, canonicalPayload } from "./grant-verification-types.js";
 
 /** Mock fetch implementation for testing. */
 function createMockFetch(responses: Map<string, { status: number; body: unknown }>) {

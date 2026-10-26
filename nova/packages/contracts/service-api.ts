@@ -1,9 +1,5 @@
 /** The versioned service API contract. Deterministic builders write the pinned docs. */
 
-import { writeFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
 /** The OpenAPI version the documents pin. */
 export const OPENAPI_VERSION = "3.1.0";
 
@@ -86,10 +82,4 @@ export function breakingChanges(baseline: ServiceDocument, current: ServiceDocum
     }
   }
   return problems;
-}
-
-/** Write one document to the committed openapi folder. The bytes are the record. */
-export async function writeDocument(fileName: string, doc: ServiceDocument): Promise<void> {
-  const folder = path.resolve(fileURLToPath(new URL("../openapi/", import.meta.url)));
-  await writeFile(path.join(folder, fileName), JSON.stringify(doc, null, 2) + "\n", "utf8");
 }

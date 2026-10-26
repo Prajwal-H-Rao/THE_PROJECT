@@ -25,7 +25,6 @@ RETURNS SETOF audit_activity_service.audit_log LANGUAGE plpgsql SECURITY DEFINER
 DECLARE
     v_caller_role TEXT := current_user;
     v_where TEXT := '';
-    v_params TEXT[] := '{}';
     v_query TEXT;
     v_row audit_activity_service.audit_log;
 BEGIN
@@ -35,55 +34,46 @@ BEGIN
     -- - other services: can read rows where resource_id matches their resources
     -- - unrecognized roles: denied (no rows returned)
 
-    -- Build WHERE clause dynamically
+    -- Build WHERE clause dynamically with positional parameters
+    -- We use a fixed parameter mapping: $1-$10 for filters, $11 for limit, $12 for offset
     IF p_actor_type IS NOT NULL THEN
-        v_where := v_where || ' AND actor_type = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_actor_type;
+        v_where := v_where || ' AND actor_type = $1';
     END IF;
 
     IF p_actor_id IS NOT NULL THEN
-        v_where := v_where || ' AND actor_id = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_actor_id;
+        v_where := v_where || ' AND actor_id = $2';
     END IF;
 
     IF p_action IS NOT NULL THEN
-        v_where := v_where || ' AND action = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_action;
+        v_where := v_where || ' AND action = $3';
     END IF;
 
     IF p_resource_type IS NOT NULL THEN
-        v_where := v_where || ' AND resource_type = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_resource_type;
+        v_where := v_where || ' AND resource_type = $4';
     END IF;
 
     IF p_resource_id IS NOT NULL THEN
-        v_where := v_where || ' AND resource_id = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_resource_id;
+        v_where := v_where || ' AND resource_id = $5';
     END IF;
 
     IF p_policy_result IS NOT NULL THEN
-        v_where := v_where || ' AND policy_result = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_policy_result;
+        v_where := v_where || ' AND policy_result = $6';
     END IF;
 
     IF p_execution_status IS NOT NULL THEN
-        v_where := v_where || ' AND execution_status = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_execution_status;
+        v_where := v_where || ' AND execution_status = $7';
     END IF;
 
     IF p_verification_type IS NOT NULL THEN
-        v_where := v_where || ' AND verification_type = $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_verification_type;
+        v_where := v_where || ' AND verification_type = $8';
     END IF;
 
     IF p_from IS NOT NULL THEN
-        v_where := v_where || ' AND occurred_at >= $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_from;
+        v_where := v_where || ' AND occurred_at >= $9';
     END IF;
 
     IF p_to IS NOT NULL THEN
-        v_where := v_where || ' AND occurred_at <= $' || (array_length(v_params, 1) + 1);
-        v_params := v_params || p_to;
+        v_where := v_where || ' AND occurred_at <= $10';
     END IF;
 
     -- Access control: restrict rows based on caller role
@@ -102,15 +92,19 @@ BEGIN
         RETURN QUERY SELECT * FROM audit_activity_service.audit_log WHERE false;
     END IF;
 
-    -- Build and execute the query
+    -- Build and execute the query with all 12 parameter positions
     v_query := 'SELECT * FROM audit_activity_service.audit_log WHERE true ' || v_where ||
-               ' ORDER BY occurred_at DESC LIMIT $' || (array_length(v_params, 1) + 1) ||
-               ' OFFSET $' || (array_length(v_params, 1) + 2);
-    v_params := v_params || p_limit || p_offset;
+               ' ORDER BY occurred_at DESC LIMIT $11 OFFSET $12';
 
-    FOR v_row IN EXECUTE v_query USING v_params LOOP
+    -- Execute with all 12 parameters (NULL for unset ones)
+    FOR v_row IN EXECUTE v_query USING
+        p_actor_type, p_actor_id, p_action, p_resource_type, p_resource_id,
+        p_policy_result, p_execution_status, p_verification_type, p_from, p_to,
+        p_limit, p_offset
+    LOOP
         RETURN NEXT v_row;
     END LOOP;
+
     RETURN;
 END;
 $$;

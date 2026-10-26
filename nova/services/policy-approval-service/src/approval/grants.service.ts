@@ -17,6 +17,7 @@ import {
   handleEditGrant
 } from "./grant-outcomes.js";
 import { createGrant, createGrantWithDetails } from "./grant-creation.js";
+import { approvalMetrics } from "./approval-metrics.js";
 
 /** The input for grant creation. */
 export interface CreateGrantInput {
@@ -68,12 +69,16 @@ export class GrantsService {
 
   /** Create one grant bound to payload hash, user, target, expiry and nonce. */
   createGrant(input: CreateGrantInput): GrantRecord {
-    return createGrant(this.repository, input);
+    const record = createGrant(this.repository, input);
+    approvalMetrics.recordCreated(record);
+    return record;
   }
 
   /** Create a grant with approval card details (Task 8). */
   createGrantWithDetails(input: CreateGrantWithDetailsInput): GrantRecord {
-    return createGrantWithDetails(this.repository, input);
+    const record = createGrantWithDetails(this.repository, input);
+    approvalMetrics.recordCreated(record);
+    return record;
   }
 
   /** Verify one attempt against the stored grant. */
@@ -90,7 +95,12 @@ export class GrantsService {
     if (!/^[0-9a-f]{32}$/i.test(nonce)) {
       throw new GrantValidationError("invalid_nonce", "nonce must be a 32-char hex string");
     }
-    return this.repository.tryConsume(nonce, Date.now());
+    const record = this.repository.findByNonce(nonce);
+    const verdict = await this.repository.tryConsume(nonce, Date.now());
+    if (verdict.ok && record) {
+      approvalMetrics.recordConsumed(record, verdict.consumedAtMs!);
+    }
+    return verdict;
   }
 
   /** Revoke a grant. Validates nonce format then delegates to repo. */
@@ -98,7 +108,12 @@ export class GrantsService {
     if (!/^[0-9a-f]{32}$/i.test(nonce)) {
       throw new GrantValidationError("invalid_nonce", "nonce must be a 32-char hex string");
     }
-    return this.repository.tryRevoke(nonce, Date.now());
+    const record = this.repository.findByNonce(nonce);
+    const verdict = await this.repository.tryRevoke(nonce, Date.now());
+    if (verdict.ok && record) {
+      approvalMetrics.recordRevoked(record, verdict.revokedAtMs!);
+    }
+    return verdict;
   }
 
   /** Get grant card for display (Task 8). Validates service matches. */
@@ -122,17 +137,32 @@ export class GrantsService {
 
   /** Approve a grant. Sets status to approved. */
   async approveGrant(nonce: string, decidedBy: string): Promise<StatusVerdict> {
-    return handleApproveGrant(this.repository, nonce, decidedBy);
+    const record = this.repository.findByNonce(nonce);
+    const verdict = await handleApproveGrant(this.repository, nonce, decidedBy);
+    if (verdict.ok && record) {
+      approvalMetrics.recordApproved(record, verdict.decidedAtMs!);
+    }
+    return verdict;
   }
 
   /** Reject a grant. Sets status to denied and revokes the grant. */
   async rejectGrant(nonce: string, decidedBy: string): Promise<StatusVerdict> {
-    return handleRejectGrant(this.repository, nonce, decidedBy);
+    const record = this.repository.findByNonce(nonce);
+    const verdict = await handleRejectGrant(this.repository, nonce, decidedBy);
+    if (verdict.ok && record) {
+      approvalMetrics.recordRejected(record, verdict.decidedAtMs!);
+    }
+    return verdict;
   }
 
   /** Expire a grant. Sets status to expired and revokes the grant. */
   async expireGrant(nonce: string, decidedBy: string): Promise<StatusVerdict> {
-    return handleExpireGrant(this.repository, nonce, decidedBy);
+    const record = this.repository.findByNonce(nonce);
+    const verdict = await handleExpireGrant(this.repository, nonce, decidedBy);
+    if (verdict.ok && record) {
+      approvalMetrics.recordExpired(record, verdict.decidedAtMs!);
+    }
+    return verdict;
   }
 
   /** Edit a grant. Re-hashes the payload and card, then re-routes to policy.

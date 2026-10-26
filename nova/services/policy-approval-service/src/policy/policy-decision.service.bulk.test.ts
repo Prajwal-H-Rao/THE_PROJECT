@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PolicyDecisionService } from "./policy-decision.service.js";
-import { BulkDecisionRequest } from "./policy-schema.js";
+import { BulkDecisionRequest } from "./policy-bulk-schema.js";
 import { resetPolicyVersion } from "./policy-version.js";
 
 test("bulk: all allow actions returns allow", () => {
@@ -37,7 +37,7 @@ test("bulk: any deny returns deny", () => {
   const decision = service.decideBulk(request);
   assert.strictEqual(decision.decision, "deny");
   assert.strictEqual(decision.reason, "Batch contains denied action");
-  const deniedItem = decision.items.find((i) => i.decision === "deny");
+  const deniedItem = decision.items.find((i: { decision: string }) => i.decision === "deny");
   assert.ok(deniedItem);
   assert.strictEqual(deniedItem.decision, "deny");
 });
@@ -54,7 +54,7 @@ test("bulk: any needs_approval returns needs_approval", () => {
   const decision = service.decideBulk(request);
   assert.strictEqual(decision.decision, "needs_approval");
   assert.strictEqual(decision.reason, "Batch contains action requiring approval");
-  const needsApprovalItem = decision.items.find((i) => i.decision === "needs_approval");
+  const needsApprovalItem = decision.items.find((i: { decision: string }) => i.decision === "needs_approval");
   assert.ok(needsApprovalItem);
 });
 

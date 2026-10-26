@@ -242,3 +242,17 @@ jobs:
           $compose down -v --remove-orphans
           rm -f nova/infra/compose/.env
           exit $status
+
+      - name: Test backup and restore drill
+        run: |
+          cp nova/infra/compose/.env.example nova/infra/compose/.env
+          chmod 600 nova/infra/compose/.env
+          compose="docker compose -f nova/infra/compose/compose.yaml -f nova/infra/compose/compose.platform.yaml --profile test"
+          $compose down -v --remove-orphans
+          $compose up -d --build --wait postgres
+          $compose exec -T postgres pg_isready -U nova -d nova
+          # Run the backup drill script
+          NOVA_BACKUP_AGE_PUBKEY="" NOVA_BACKUP_AGE_PRIVKEY="" \
+          $compose run --rm --workdir /app nova/infra/scripts/backup-drill.sh
+          $compose down -v --remove-orphans
+          rm -f nova/infra/compose/.env

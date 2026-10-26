@@ -5,7 +5,8 @@ import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { PolicyDecisionService } from "./policy-decision.service.js";
 import { getPolicyVersion, bumpPolicyVersion, getPolicyVersionConfig } from "./policy-version.js";
 import type { PolicyDecisionRequest, PolicyDecisionResponse } from "./policy-schema.js";
-import type { PolicyRule, BulkDecisionRequest, BulkDecisionResponse } from "./policy-schema.js";
+import type { PolicyRule } from "./policy-schema.js";
+import type { BulkDecisionRequest, BulkDecisionResponse } from "./policy-bulk-schema.js";
 
 @ApiTags("policy")
 @Controller("policy")

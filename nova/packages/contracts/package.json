@@ -36,9 +36,17 @@
       "types": "./dist/grant-verification.d.ts",
       "default": "./dist/grant-verification.js"
     },
+    "./grant-verification-types": {
+      "types": "./dist/grant-verification-types.d.ts",
+      "default": "./dist/grant-verification-types.js"
+    },
     "./audit-contracts": {
       "types": "./dist/audit-contracts.d.ts",
       "default": "./dist/audit-contracts.js"
+    },
+    "./event-consumers.sql": {
+      "types": "./dist/events/event-consumers.sql.d.ts",
+      "default": "./dist/events/event-consumers.sql.js"
     }
   },
   "scripts": {

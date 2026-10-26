@@ -141,10 +141,7 @@ test("the wired verify path judges expiry with the server clock, not a caller cl
     grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: hourAgo + 60_000 })),
     { ok: false, reason: "expired" },
   );
-  const mockPolicyDecisionService = {
-    decide: () => ({ decision: "allow" as const, ruleId: "test", policyVersion: 1 }),
-  } as unknown as PolicyDecisionService;
-  const controller = new GrantsController(grantsService, mockPolicyDecisionService);
+  const controller = new GrantsController(grantsService);
   const forgedClock = hourAgo + 1000; // claims the grant is still fresh
   const verdict = controller.verify(record.nonce, { ...verifyInput({ nowMs: forgedClock }), nowMs: forgedClock });
   assert.deepEqual(verdict, { ok: false, reason: "expired" });

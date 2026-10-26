@@ -3,10 +3,17 @@
 import { decodeEnvelope, envelopeId } from "./event-envelope.js";
 import type { EventEnvelope } from "./event-envelope.js";
 
-/** A record of the event ids that one consumer already processed. */
+/** A record of the event ids that one consumer already processed (synchronous). */
 export interface ReceiptsStore {
   readonly hold: (eventId: string) => boolean;
   readonly record: (eventId: string) => void;
+}
+
+/** Async version of ReceiptsStore for SQL adapters. */
+export interface AsyncReceiptsStore {
+  readonly hold: (eventId: string) => Promise<boolean>;
+  readonly record: (eventId: string) => Promise<void>;
+  readonly holdAndRecord: (eventId: string) => Promise<"processed" | "duplicate">
 }
 
 /** The in-memory receipts store. The tests use it; a store may hold rows later. */
@@ -24,6 +31,27 @@ export class InMemoryReceipts implements ReceiptsStore {
   }
 }
 
+/** In-memory async receipts store for testing async patterns. */
+export class InMemoryAsyncReceipts implements AsyncReceiptsStore {
+  private readonly seen = new Set<string>();
+
+  async hold(eventId: string): Promise<boolean> {
+    return this.seen.has(eventId);
+  }
+
+  async record(eventId: string): Promise<void> {
+    this.seen.add(eventId);
+  }
+
+  async holdAndRecord(eventId: string): Promise<"processed" | "duplicate"> {
+    if (this.seen.has(eventId)) {
+      return "duplicate";
+    }
+    this.seen.add(eventId);
+    return "processed";
+  }
+}
+
 /** The output of one delivery attempt. */
 export type Delivery = "processed" | "duplicate";
 
@@ -35,6 +63,11 @@ export function deliverOnce(envelope: EventEnvelope, receipts: ReceiptsStore): D
   }
   receipts.record(eventId);
   return "processed";
+}
+
+/** Deliver one envelope at most once per id using async store. */
+export async function deliverOnceAsync(envelope: EventEnvelope, receipts: AsyncReceiptsStore): Promise<Delivery> {
+  return receipts.holdAndRecord(envelope.eventId);
 }
 
 /** Deliver one envelope keyed by its content address. The token must decode first. */
@@ -51,4 +84,14 @@ export function deliverTokenOnce(token: string, receipts: ReceiptsStore): Delive
   }
   receipts.record(contentId);
   return "processed";
+}
+
+/** Deliver one envelope keyed by its content address using async store. */
+export async function deliverTokenOnceAsync(token: string, receipts: AsyncReceiptsStore): Promise<Delivery | "rejected"> {
+  const parsed = decodeEnvelope(token);
+  if (parsed === null) {
+    return "rejected";
+  }
+  const contentId = envelopeId(parsed);
+  return receipts.holdAndRecord(contentId);
 }

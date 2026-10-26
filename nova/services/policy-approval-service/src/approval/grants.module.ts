@@ -4,13 +4,15 @@
 
 import { Module } from "@nestjs/common";
 import { GrantsController } from "./grants.controller.js";
+import { GrantsLifecycleController } from "./grants-lifecycle.controller.js";
+import { GrantsMetricsController } from "./grants-metrics.controller.js";
 import { GrantsService } from "./grants.service.js";
 import { InMemoryGrantRepository } from "./grant-repository.js";
 import { PolicyModule } from "../policy/policy.module.js";
 
 @Module({
   imports: [PolicyModule],
-  controllers: [GrantsController],
+  controllers: [GrantsController, GrantsLifecycleController, GrantsMetricsController],
   providers: [GrantsService, InMemoryGrantRepository],
   exports: [GrantsService],
 })

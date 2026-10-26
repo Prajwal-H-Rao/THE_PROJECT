@@ -103,9 +103,10 @@ export class OidcService {
     provider: "google" | "github",
     code: string,
     state: string,
-    redirectUri: string
+    redirectUri: string,
+    codeVerifier: string
   ): Promise<{ tokens: TokenResponse; stateRecord: OidcStateRecord }> {
-    const stateRecord = await this.stateStore.consume(state);
+    const stateRecord = await this.stateStore.consume(state, codeVerifier);
     if (!stateRecord) {
       throw new Error("Invalid or expired state");
     }
@@ -120,7 +121,7 @@ export class OidcService {
       code,
       grant_type: "authorization_code",
       redirect_uri: redirectUri,
-      code_verifier: stateRecord.code_verifier,
+      code_verifier: codeVerifier,
     });
 
     const response = await fetch(config.tokenUrl, {
@@ -138,7 +139,28 @@ export class OidcService {
     }
 
     const tokens = (await response.json()) as TokenResponse;
+
+    // Validate nonce from ID token if present
+    if (tokens.id_token) {
+      const payload = this.parseIdToken(tokens.id_token);
+      if (payload.nonce && payload.nonce !== stateRecord.nonce) {
+        throw new Error("Nonce mismatch in ID token");
+      }
+    }
+
     return { tokens, stateRecord };
+  }
+
+  /** Parse ID token (JWT) without verification - we trust the provider's signature via TLS. */
+  private parseIdToken(idToken: string): { nonce?: string; [key: string]: unknown } {
+    try {
+      const parts = idToken.split(".");
+      if (parts.length !== 3) return {};
+      const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+      return payload as { nonce?: string; [key: string]: unknown };
+    } catch {
+      return {};
+    }
   }
 
   /** Fetch user info from provider. */

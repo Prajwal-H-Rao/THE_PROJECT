@@ -11,19 +11,23 @@ run the system.
 
 ## Status
 
-- Implemented: repo checks, service templates, database roles and schemas, the local
+- Implemented: repo checks, service templates, database roles and schemas (25 migrations), the local
   compose stack with Redis, RustFS and network guards, the shared service contracts,
-  and the api-gateway.
-- Not started: identity, policy, document parsing, agent runtime, model gateway, and
-  the domain services. Their trees hold placeholders only.
+  the api-gateway, the identity service (OIDC PKCE, sessions, TOTP), the policy/approval engine
+  (grants, bulk decisions, metrics, versioning), the audit service (persistent hash chain),
+  the event envelope with record-once consumers, backup/restore with age encryption.
+- Not started: document parsing, agent runtime, model gateway, domain services (inbox, calendar, tasks,
+  notes, finance, trips, jobs, employer registry), chat channels (Telegram, WhatsApp).
+  Their trees hold placeholders only.
 
 ## The services
 
 | Service | Role | Status | Guide |
 |---|---|---|---|
 | `api-gateway` (Next.js 16) | session, validation, rate limit, CSRF, trace IDs | implemented | `nova/services/api-gateway/README.md` |
-| `identity-service` | OIDC login, sessions, scopes | planned, phase P2 | — |
-| `policy-approval-service` | authorization and approval grants | planned, phase P2 | — |
+| `identity-service` (NestJS) | OIDC login (Google/GitHub), sessions, TOTP, account linking, revocation | implemented, phase P2 | `nova/services/identity-service/README.md` |
+| `policy-approval-service` (NestJS) | authorization, approval grants, bulk decisions, metrics, versioning | implemented, phase P2 | `nova/services/policy-approval-service/README.md` |
+| `audit-service` (NestJS) | audit recording, querying, persistent hash chain | implemented, phase P2 | `nova/services/audit-service/README.md` |
 | `document-service` (Flask) | PDF/DOCX/CSV parsing with provenance | planned, phase P3 | — |
 | `agent-orchestrator` (Flask) | typed plans, workflow state | planned, phase P5 | — |
 | `model-gateway` | provider allow-list, quotas, redaction | planned, phase P5 | — |
@@ -61,7 +65,7 @@ mypy nova
 
 CI runs the layout checks, the Python lint and typecheck, the template test suites,
 the contracts build and test, the api-gateway build and test, the compose isolation
-suites, the queue restart test, and the network guard test.
+suites, the queue restart test, the network guard test, and the backup/restore drill.
 
 ## Set up the data stack
 
@@ -125,6 +129,65 @@ fails closed: `NOVA_SERVICE_JWT_SECRET` empty keeps those routes closed, and a p
 secret must hold 32 bytes. Other settings: `NOVA_ALLOWED_ORIGINS`, `NOVA_RATE_LIMIT_MAX`,
 `NOVA_RATE_LIMIT_WINDOW_MS`, `NOVA_MAX_BODY_BYTES`, `NOVA_TRUST_PROXY`, `NOVA_HOST`,
 `NOVA_PORT`, `NOVA_SERVICE_TOKEN_ISSUER`, `NOVA_SERVICE_TOKEN_AUDIENCE`.
+
+### identity-service (implemented)
+
+```bash
+cd nova/services/identity-service
+npm ci
+npm run build
+npm test
+NOVA_SESSION_SECRET=<32+ bytes> NOVA_TOTP_ISSUER=NOVA npm start
+```
+
+Endpoints:
+- `GET /auth/login/google` — initiate Google OIDC with PKCE
+- `GET /auth/login/github` — initiate GitHub OIDC with PKCE
+- `GET /auth/callback/:provider` — OIDC callback, creates session cookies
+- `POST /auth/logout` — revoke session
+- `GET /totp/setup` — returns secret and QR URI
+- `POST /totp/enable` — enables TOTP with verified token, returns backup codes
+- `POST /totp/disable` — disables TOTP
+- `POST /totp/verify` — verifies TOTP or backup code (step-up auth)
+- `GET /health/live`, `GET /health/ready` — health checks
+
+### policy-approval-service (implemented)
+
+```bash
+cd nova/services/policy-approval-service
+npm ci
+npm run build
+npm test
+npm start
+```
+
+Endpoints:
+- `POST /policy/decide` — returns `allow`/`deny`/`needs_approval`
+- `POST /policy/decide/bulk` — bulk decision with escalation detection
+- `GET /policy/version` — current policy version
+- `POST /policy/version/bump` — increment policy version
+- `POST /policy/grants` — create approval grant
+- `GET /policy/grants/:nonce/card` — approval card preview
+- `POST /policy/grants/:nonce/approve` — approve grant
+- `POST /policy/grants/:nonce/reject` — reject grant
+- `POST /policy/grants/:nonce/expire` — expire grant
+- `POST /policy/grants/:nonce/edit` — edit grant (re-hashes)
+- `GET /policy/grants/metrics` — Prometheus metrics (wait time, counts)
+- `GET /health/live`, `GET /health/ready` — health checks
+
+### audit-service (implemented)
+
+```bash
+cd nova/services/audit-service
+npm ci
+npm run build
+npm start
+```
+
+Endpoints:
+- `POST /audit/record` — record audit event (hash-chained)
+- `GET /audit/records` — query audit events with filters
+- `GET /health/live`, `GET /health/ready` — health checks
 
 New services start from a template:
 
