@@ -47,11 +47,27 @@
     "./event-consumers.sql": {
       "types": "./dist/events/event-consumers.sql.d.ts",
       "default": "./dist/events/event-consumers.sql.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp/index.d.ts",
+      "default": "./dist/mcp/index.js"
+    },
+    "./mcp/tool": {
+      "types": "./dist/mcp/tool.d.ts",
+      "default": "./dist/mcp/tool.js"
+    },
+    "./mcp/call": {
+      "types": "./dist/mcp/call.d.ts",
+      "default": "./dist/mcp/call.js"
+    },
+    "./mcp/audit": {
+      "types": "./dist/mcp/audit.d.ts",
+      "default": "./dist/mcp/audit.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/grant-verification.test.js dist/audit-contracts.test.js dist/migrations/runner.test.js"
+    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/grant-verification.test.js dist/audit-contracts.test.js dist/migrations/runner.test.js dist/mcp/tool.test.js dist/mcp/call.test.js dist/mcp/audit.test.js"
   },
   "devDependencies": {
     "@types/node": "22.19.1",

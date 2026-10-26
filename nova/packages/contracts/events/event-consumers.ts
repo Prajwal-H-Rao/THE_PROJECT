@@ -9,14 +9,14 @@ export interface ReceiptsStore {
   readonly record: (eventId: string) => void;
 }
 
-/** Async version of ReceiptsStore for SQL adapters. */
+/** Async version of ReceiptsStore for concurrent access. */
 export interface AsyncReceiptsStore {
   readonly hold: (eventId: string) => Promise<boolean>;
   readonly record: (eventId: string) => Promise<void>;
-  readonly holdAndRecord: (eventId: string) => Promise<"processed" | "duplicate">
+  readonly holdAndRecord: (eventId: string) => Promise<"processed" | "duplicate">;
 }
 
-/** The in-memory receipts store. The tests use it; a store may hold rows later. */
+/** The in-memory receipts store (synchronous). The tests use it; a store may hold rows later. */
 export class InMemoryReceipts implements ReceiptsStore {
   private readonly seen = new Set<string>();
 
@@ -65,7 +65,7 @@ export function deliverOnce(envelope: EventEnvelope, receipts: ReceiptsStore): D
   return "processed";
 }
 
-/** Deliver one envelope at most once per id using async store. */
+/** Async version of deliverOnce. */
 export async function deliverOnceAsync(envelope: EventEnvelope, receipts: AsyncReceiptsStore): Promise<Delivery> {
   return receipts.holdAndRecord(envelope.eventId);
 }
@@ -86,7 +86,7 @@ export function deliverTokenOnce(token: string, receipts: ReceiptsStore): Delive
   return "processed";
 }
 
-/** Deliver one envelope keyed by its content address using async store. */
+/** Async version of deliverTokenOnce. */
 export async function deliverTokenOnceAsync(token: string, receipts: AsyncReceiptsStore): Promise<Delivery | "rejected"> {
   const parsed = decodeEnvelope(token);
   if (parsed === null) {

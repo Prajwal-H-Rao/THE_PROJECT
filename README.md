@@ -12,8 +12,9 @@ run the system.
 ## Status
 
 - Implemented: repo checks, service templates, database roles and schemas (25 migrations), the local
-  compose stack with Redis, RustFS and network guards, the shared service contracts,
-  the api-gateway, the identity service (OIDC PKCE, sessions, TOTP), the policy/approval engine
+  compose stack with Redis, RustFS and network guards, the shared service contracts (including MCP
+  tool definitions, call/response wire contracts, and audit event contracts), the api-gateway, the
+  identity service (OIDC PKCE, sessions, TOTP), the policy/approval engine
   (grants, bulk decisions, metrics, versioning), the audit service (persistent hash chain),
   the event envelope with record-once consumers, backup/restore with age encryption.
 - Not started: document parsing, agent runtime, model gateway, domain services (inbox, calendar, tasks,

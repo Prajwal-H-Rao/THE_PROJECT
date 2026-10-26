@@ -30,6 +30,13 @@
     "migrations/runner.ts",
     "migrations/runner.test.ts",
     "migrations/25-approval-card.sql",
-    "events/event-consumers.sql.ts"
+    "events/event-consumers.sql.ts",
+    "mcp/index.ts",
+    "mcp/tool.ts",
+    "mcp/call.ts",
+    "mcp/audit.ts",
+    "mcp/tool.test.ts",
+    "mcp/call.test.ts",
+    "mcp/audit.test.ts"
   ]
 }
