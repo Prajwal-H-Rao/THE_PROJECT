@@ -8,10 +8,10 @@ import { PolicyRule } from "./policy-schema.js";
 describe("policy loader", () => {
   const config = loadFamilies();
 
-  it("loads all 7 families", () => {
+  it("loads all 7 canonical families", () => {
     assert.strictEqual(config.families.length, 7);
     const familyNames = config.families.map((f) => f.name).sort();
-    assert.deepStrictEqual(familyNames, ["calendar", "channels", "finance", "inbox", "jobs", "tasks", "trips"]);
+    assert.deepStrictEqual(familyNames, ["calendar_tasks", "finance", "inbox", "integrations", "notes_memory", "resume_jobs", "trips"]);
   });
 
   it("every family has at least one rule", () => {
@@ -85,7 +85,7 @@ describe("policy loader", () => {
     assert.strictEqual(rule?.riskTier, "tier3");
   });
 
-  it("finds matching rule for jobs apply (high sensitivity, external)", () => {
+  it("finds matching rule for resume_jobs apply (high sensitivity, external)", () => {
     const rule = findMatchingRule(config, {
       actor: "user",
       scope: "jobs:apply",
@@ -93,9 +93,83 @@ describe("policy loader", () => {
       target: "external_application",
     });
     assert.ok(rule);
-    assert.strictEqual(rule?.id, "jobs.apply");
+    assert.strictEqual(rule?.id, "resume_jobs.apply");
     assert.strictEqual(rule?.blastRadius, "external");
     assert.strictEqual(rule?.requiresStepUp, true);
+  });
+
+  it("finds matching rule for notes_memory search", () => {
+    const rule = findMatchingRule(config, {
+      actor: "user",
+      scope: "notes:search",
+      action: "search",
+      target: "own_notes",
+    });
+    assert.ok(rule);
+    assert.strictEqual(rule?.id, "notes_memory.search");
+    assert.strictEqual(rule?.defaultDecision, "allow");
+  });
+
+  it("finds matching rule for integrations link (step-up)", () => {
+    const rule = findMatchingRule(config, {
+      actor: "user",
+      scope: "integrations:link",
+      action: "link",
+      target: "external_identity",
+    });
+    assert.ok(rule);
+    assert.strictEqual(rule?.id, "integrations.link");
+    assert.strictEqual(rule?.requiresStepUp, true);
+    assert.strictEqual(rule?.riskTier, "tier3");
+  });
+
+  it("finds matching rule for calendar_tasks read", () => {
+    const rule = findMatchingRule(config, {
+      actor: "user",
+      scope: "calendar_tasks:read",
+      action: "read",
+      target: "own_events_tasks",
+    });
+    assert.ok(rule);
+    assert.strictEqual(rule?.id, "calendar_tasks.read");
+    assert.strictEqual(rule?.defaultDecision, "allow");
+  });
+
+  it("finds matching rule for calendar_tasks create_event (needs approval)", () => {
+    const rule = findMatchingRule(config, {
+      actor: "user",
+      scope: "calendar_tasks:write",
+      action: "create_event",
+      target: "own_calendar",
+    });
+    assert.ok(rule);
+    assert.strictEqual(rule?.id, "calendar_tasks.create_event");
+    assert.strictEqual(rule?.defaultDecision, "needs_approval");
+  });
+
+  it("finds matching rule for calendar_tasks create_task (allow)", () => {
+    const rule = findMatchingRule(config, {
+      actor: "user",
+      scope: "calendar_tasks:write",
+      action: "create_task",
+      target: "own_tasks",
+    });
+    assert.ok(rule);
+    assert.strictEqual(rule?.id, "calendar_tasks.create_task");
+    assert.strictEqual(rule?.defaultDecision, "allow");
+  });
+
+  it("finds matching rule for calendar_tasks invite (step-up)", () => {
+    const rule = findMatchingRule(config, {
+      actor: "user",
+      scope: "calendar_tasks:invite",
+      action: "invite",
+      target: "external_attendees",
+    });
+    assert.ok(rule);
+    assert.strictEqual(rule?.id, "calendar_tasks.invite");
+    assert.strictEqual(rule?.requiresStepUp, true);
+    assert.strictEqual(rule?.riskTier, "tier3");
   });
 
   it("returns undefined for no matching rule", () => {
@@ -108,32 +182,32 @@ describe("policy loader", () => {
     assert.strictEqual(rule, undefined);
   });
 
-  it("tasks family defaults to allow for read/write", () => {
+  it("calendar_tasks family defaults to allow for read/create_task", () => {
     const readRule = findMatchingRule(config, {
       actor: "user",
-      scope: "tasks:read",
+      scope: "calendar_tasks:read",
       action: "read",
-      target: "own_tasks",
+      target: "own_events_tasks",
     });
     assert.strictEqual(readRule?.defaultDecision, "allow");
 
-    const writeRule = findMatchingRule(config, {
+    const createTaskRule = findMatchingRule(config, {
       actor: "user",
-      scope: "tasks:write",
-      action: "write",
+      scope: "calendar_tasks:write",
+      action: "create_task",
       target: "own_tasks",
     });
-    assert.strictEqual(writeRule?.defaultDecision, "allow");
+    assert.strictEqual(createTaskRule?.defaultDecision, "allow");
   });
 
-  it("calendar invite requires step-up", () => {
+  it("calendar_tasks invite requires step-up", () => {
     const rule = findMatchingRule(config, {
       actor: "user",
-      scope: "calendar:invite",
+      scope: "calendar_tasks:invite",
       action: "invite",
       target: "external_attendees",
     });
-    assert.strictEqual(rule?.id, "calendar.invite");
+    assert.strictEqual(rule?.id, "calendar_tasks.invite");
     assert.strictEqual(rule?.requiresStepUp, true);
     assert.strictEqual(rule?.riskTier, "tier3");
   });

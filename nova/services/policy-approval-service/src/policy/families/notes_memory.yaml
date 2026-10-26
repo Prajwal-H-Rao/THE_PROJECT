@@ -1,0 +1,61 @@
+# Notes Memory family - Search, create, update, export, delete user-owned notes and remembered facts
+name: "notes_memory"
+description: "Notes and memory: search, create, update, export, delete explicitly user-owned notes and remembered facts"
+defaultSensitivity: "low"
+defaultBlastRadius: "self"
+defaultRiskTier: "tier1"
+defaultDecision: "allow"
+rules:
+  - id: "notes_memory.search"
+    actor: "user"
+    scope: "notes:search"
+    sensitivity: "low"
+    target: "own_notes"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["search"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "notes_memory.create"
+    actor: "user"
+    scope: "notes:write"
+    sensitivity: "low"
+    target: "own_notes"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["create"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "notes_memory.update"
+    actor: "user"
+    scope: "notes:write"
+    sensitivity: "low"
+    target: "own_notes"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["update"]
+    version: 1
+  - id: "notes_memory.export"
+    actor: "user"
+    scope: "notes:read"
+    sensitivity: "low"
+    target: "own_notes"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["export"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "notes_memory.delete"
+    actor: "user"
+    scope: "notes:write"
+    sensitivity: "medium"
+    target: "own_notes"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["delete"]
+    version: 1

@@ -12,8 +12,8 @@ test("bulk: all allow actions returns allow", () => {
   const request: any = {
     items: [
       { actor: "user", scope: "inbox:read", action: "read", target: "own_messages" },
-      { actor: "user", scope: "tasks:read", action: "read", target: "own_tasks" },
-      { actor: "user", scope: "calendar:read", action: "read", target: "own_events" },
+      { actor: "user", scope: "calendar_tasks:read", action: "read", target: "own_events_tasks" },
+      { actor: "user", scope: "calendar_tasks:write", action: "create_task", target: "own_tasks" },
     ],
   };
   const decision = service.decideBulk(request);
@@ -31,7 +31,7 @@ test("bulk: any deny returns deny", () => {
     items: [
       { actor: "user", scope: "inbox:read", action: "read", target: "own_messages" },
       { actor: "user", scope: "unknown:scope", action: "action", target: "target" },
-      { actor: "user", scope: "tasks:read", action: "read", target: "own_tasks" },
+      { actor: "user", scope: "calendar_tasks:read", action: "read", target: "own_events_tasks" },
     ],
   };
   const decision = service.decideBulk(request);
@@ -60,7 +60,7 @@ test("bulk: any needs_approval returns needs_approval", () => {
 
 test("bulk: escalation action in batch forces needs_approval", () => {
   const service = new PolicyDecisionService();
-  // jobs.apply is an escalation (tier3, requiresStepUp)
+  // resume_jobs.apply is an escalation (tier3, requiresStepUp)
   const request: any = {
     items: [
       { actor: "user", scope: "jobs:search", action: "search", target: "job_listings" },
@@ -88,18 +88,19 @@ test("bulk: finance.import escalation forces needs_approval", () => {
   assert.ok(decision.reason?.includes("escalation"));
 });
 
-test("bulk: channels.link escalation forces needs_approval", () => {
+test("bulk: integrations.link escalation forces needs_approval", () => {
   const service = new PolicyDecisionService();
-  // channels.link is an escalation (tier3, requiresStepUp)
+  // integrations.link is an escalation (tier3, requiresStepUp)
   const request: any = {
     items: [
-      { actor: "user", scope: "channels:send", action: "send", target: "external_recipient", payloadHash: "hash1" },
-      { actor: "user", scope: "channels:link", action: "link", target: "external_identity", payloadHash: "hash2" },
+      { actor: "user", scope: "integrations:send", action: "send", target: "external_recipient", payloadHash: "hash1" },
+      { actor: "user", scope: "integrations:link", action: "link", target: "external_identity", payloadHash: "hash2" },
     ],
   };
   const decision = service.decideBulk(request);
   assert.strictEqual(decision.hasEscalation, true);
   assert.strictEqual(decision.decision, "needs_approval");
+  assert.ok(decision.reason?.includes("escalation"));
 });
 
 test("bulk: inbox.send escalation forces needs_approval", () => {

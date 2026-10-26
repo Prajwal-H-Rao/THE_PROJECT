@@ -1,0 +1,41 @@
+# Inbox family - Email operations: read, draft, send, search
+name: "inbox"
+description: "Email operations: read, draft, send, search"
+defaultSensitivity: "medium"
+defaultBlastRadius: "self"
+defaultRiskTier: "tier2"
+defaultDecision: "needs_approval"
+rules:
+  - id: "inbox.read"
+    actor: "user"
+    scope: "inbox:read"
+    sensitivity: "low"
+    target: "own_messages"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["read"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "inbox.draft"
+    actor: "user"
+    scope: "inbox:draft"
+    sensitivity: "medium"
+    target: "own_drafts"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["draft"]
+    version: 1
+  - id: "inbox.send"
+    actor: "user"
+    scope: "inbox:send"
+    sensitivity: "high"
+    target: "external_recipients"
+    blastRadius: "external"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["send"]
+    requiresStepUp: true
+    isEscalation: true
+    version: 1

@@ -1,8 +1,8 @@
 /** The audit service contracts. Shared types for recording audit events. */
 
 export type ActorType = "user" | "service" | "system";
-export type PolicyResult = "allowed" | "denied" | "step_up" | "error";
-export type ExecutionStatus = "pending" | "succeeded" | "failed" | "compensated";
+export type PolicyResult = "allowed" | "denied" | "step_up" | "error" | "not_evaluated" | "approval_required";
+export type ExecutionStatus = "pending" | "succeeded" | "failed" | "compensated" | "planned" | "awaiting_approval" | "approved" | "executing" | "cancelled" | "needs_manual_action";
 export type VerificationType = "none" | "signature" | "receipt" | "external" | "human";
 
 /** Input for recording an audit event. */
@@ -19,6 +19,7 @@ export interface AuditRecordInput {
   readonly verificationType?: VerificationType;
   readonly evidenceRef?: string;
   readonly payload?: Record<string, unknown>;
+  readonly dedupeKey?: string;
 }
 
 /** The stored audit record. */
@@ -37,6 +38,7 @@ export interface AuditRecord {
   readonly payload: Record<string, unknown>;
   readonly previousHash?: string;
   readonly rowHash: string;
+  readonly dedupeKey?: string;
 }
 
 /** HTTP response for audit recording. */

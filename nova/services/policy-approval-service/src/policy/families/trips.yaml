@@ -1,0 +1,40 @@
+# Trips family - Trip planning and itinerary management
+name: "trips"
+description: "Trip planning: compare routes, stops, travel options from approved providers; purchases and bookings are user-led handoffs"
+defaultSensitivity: "medium"
+defaultBlastRadius: "self"
+defaultRiskTier: "tier2"
+defaultDecision: "needs_approval"
+rules:
+  - id: "trips.read"
+    actor: "user"
+    scope: "trips:read"
+    sensitivity: "low"
+    target: "own_trips"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["read"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "trips.write"
+    actor: "user"
+    scope: "trips:write"
+    sensitivity: "medium"
+    target: "own_trips"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["write"]
+    version: 1
+  - id: "trips.compare"
+    actor: "user"
+    scope: "trips:read"
+    sensitivity: "low"
+    target: "external_provider"
+    blastRadius: "external"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["compare"]
+    chatApprovalAllowed: true
+    version: 1

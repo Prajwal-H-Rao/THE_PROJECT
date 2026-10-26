@@ -1,0 +1,62 @@
+# Resume Jobs family - Resume parsing, job search, matching, application
+name: "resume_jobs"
+description: "Resume and jobs: parse user's resume, search configured sources, rank/explain matches, draft truthful applications, track status, submit through permitted integration after approval"
+defaultSensitivity: "medium"
+defaultBlastRadius: "self"
+defaultRiskTier: "tier2"
+defaultDecision: "needs_approval"
+rules:
+  - id: "resume_jobs.search"
+    actor: "user"
+    scope: "jobs:search"
+    sensitivity: "low"
+    target: "job_listings"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["search"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "resume_jobs.match"
+    actor: "user"
+    scope: "jobs:match"
+    sensitivity: "medium"
+    target: "profile_match"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["match"]
+    version: 1
+  - id: "resume_jobs.apply"
+    actor: "user"
+    scope: "jobs:apply"
+    sensitivity: "high"
+    target: "external_application"
+    blastRadius: "external"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["apply"]
+    requiresStepUp: true
+    isEscalation: true
+    version: 1
+  - id: "resume_jobs.draft"
+    actor: "user"
+    scope: "jobs:draft"
+    sensitivity: "medium"
+    target: "own_application"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["draft"]
+    version: 1
+  - id: "resume_jobs.track"
+    actor: "user"
+    scope: "jobs:read"
+    sensitivity: "low"
+    target: "own_applications"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["track"]
+    chatApprovalAllowed: true
+    version: 1

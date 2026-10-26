@@ -1,0 +1,102 @@
+# Nova Model Registry
+# Path: spec:961 - models/model-registry.yaml
+# This file is the single source of truth for model configuration.
+# The model gateway (P5) and the router (P5) both read this file.
+
+# Model rows: each row describes one runnable model variant.
+# Fields: id, provider, tags, digest, status, quant, licence, num_ctx, router_role
+# router_role: "classifier_only" | "planner" - used by the router to enforce tier rules
+# status: "pinned" | "pending_pin" - pinned means digest is verified; pending_pin means not yet pulled/verified
+
+models:
+  - id: "qwen3.5:0.8b"
+    provider: "ollama"
+    tags: ["vision", "tools", "thinking"]
+    digest: "6a061203ed02"  # 12-hex prefix from ollama.com tag page
+    status: "pending_pin"
+    quant: "Q4_K_M"
+    licence: "Apache-2.0"
+    num_ctx: 4096
+    router_role: "classifier_only"
+
+  - id: "qwen3.5:2b"
+    provider: "ollama"
+    tags: ["vision", "tools", "thinking"]
+    digest: "0b28bbb3449d"  # 12-hex prefix from ollama.com tag page
+    status: "pending_pin"
+    quant: "Q4_K_M"
+    licence: "Apache-2.0"
+    num_ctx: 4096
+    router_role: "planner"
+
+  - id: "qwen3.5:4b"
+    provider: "ollama"
+    tags: ["vision", "tools", "thinking"]
+    digest: "492e37dc6907"  # 12-hex prefix from ollama.com tag page
+    status: "pending_pin"
+    quant: "Q4_K_M"
+    licence: "Apache-2.0"
+    num_ctx: 4096
+    router_role: "planner"
+
+  - id: "qwen3.5:9b"
+    provider: "ollama"
+    tags: ["vision", "tools", "thinking"]
+    digest: "fdf5fd4cd409"  # 12-hex prefix from ollama.com tag page (same as latest)
+    status: "pending_pin"
+    quant: "Q4_K_M"
+    licence: "Apache-2.0"
+    num_ctx: 4096
+    router_role: "planner"
+
+  - id: "bge-small-en-v1.5"
+    provider: "ollama"
+    tags: ["embeddings"]
+    digest: "pending_pin"
+    status: "pending_pin"
+    quant: "N/A"
+    licence: "MIT"
+    num_ctx: 512
+    router_role: "classifier_only"
+
+  - id: "multilingual-e5-small"
+    provider: "ollama"
+    tags: ["embeddings", "multilingual"]
+    digest: "pending_pin"
+    status: "pending_pin"
+    quant: "N/A"
+    licence: "MIT"
+    num_ctx: 512
+    router_role: "classifier_only"
+
+# Routing policy: maps each canonical task family to the model tier it uses.
+# Tier names correspond to router_role values in model rows.
+# Rule: families that write, handle finance, qualifications, or submission MUST NOT use classifier_only models.
+routing_policy:
+  family_tiers:
+    inbox: "planner"
+    calendar: "planner"
+    tasks: "planner"
+    finance: "planner"
+    trips: "planner"
+    resume_jobs: "planner"
+    integrations: "planner"
+  # Explicit classifier-only restriction
+  classifier_only_allowed_for:
+    - "notes_memory"
+  # Default tier for any family not listed above
+  default_tier: "planner"
+
+# CI fake model row (used by module 05 task 14 and module 03 task 15)
+# This row exists only for CI; the gateway loads it when NOVA_ENV=test
+fake_model:
+  id: "nova-fake-model"
+  provider: "fake"
+  tags: ["test"]
+  digest: "fake-digest-for-ci"
+  status: "pinned"
+  quant: "N/A"
+  licence: "NOVA-internal"
+  num_ctx: 4096
+  router_role: "planner"
+  ci_only: true

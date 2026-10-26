@@ -10,6 +10,7 @@ import {
   AuditQuery,
   PolicyResult,
   ActorType,
+  ExecutionStatus,
 } from "@nova/contracts/audit-contracts";
 
 @Injectable()
@@ -21,27 +22,64 @@ export class SqlAuditRepository implements AuditRepository {
     try {
       await client.query("BEGIN");
 
-      const result = await client.query(
-        `INSERT INTO audit_activity_service.audit_log
-           (actor_type, actor_id, action, resource_type, resource_id,
-            policy_result, execution_status, verification_type, evidence_ref, payload)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-         RETURNING audit_id, row_hash`,
-        [
-          input.actorType,
-          input.actorId,
-          input.action,
-          input.resourceType,
-          input.resourceId ?? null,
-          input.policyResult,
-          input.executionStatus ?? "succeeded",
-          input.verificationType ?? "none",
-          input.evidenceRef ?? null,
-          JSON.stringify(input.payload ?? {}),
-        ]
-      );
+      // Handle dedupe key for idempotent inserts
+      let result;
+      if (input.dedupeKey) {
+        result = await client.query(
+          `INSERT INTO audit_activity_service.audit_log
+             (actor_type, actor_id, action, resource_type, resource_id,
+              policy_result, execution_status, verification_type, evidence_ref, payload, dedupe_key)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+           ON CONFLICT (dedupe_key) DO NOTHING
+           RETURNING audit_id, row_hash`,
+          [
+            input.actorType,
+            input.actorId,
+            input.action,
+            input.resourceType,
+            input.resourceId ?? null,
+            input.policyResult,
+            input.executionStatus ?? "pending",
+            input.verificationType ?? "none",
+            input.evidenceRef ?? null,
+            JSON.stringify(input.payload ?? {}),
+            input.dedupeKey,
+          ]
+        );
+      } else {
+        result = await client.query(
+          `INSERT INTO audit_activity_service.audit_log
+             (actor_type, actor_id, action, resource_type, resource_id,
+              policy_result, execution_status, verification_type, evidence_ref, payload)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+           RETURNING audit_id, row_hash`,
+          [
+            input.actorType,
+            input.actorId,
+            input.action,
+            input.resourceType,
+            input.resourceId ?? null,
+            input.policyResult,
+            input.executionStatus ?? "pending",
+            input.verificationType ?? "none",
+            input.evidenceRef ?? null,
+            JSON.stringify(input.payload ?? {}),
+          ]
+        );
+      }
 
       await client.query("COMMIT");
+
+      // If ON CONFLICT DO NOTHING resulted in zero rows, fetch the existing row
+      if (result.rows.length === 0 && input.dedupeKey) {
+        const existing = await client.query(
+          `SELECT audit_id, row_hash FROM audit_activity_service.audit_log WHERE dedupe_key = $1`,
+          [input.dedupeKey]
+        );
+        if (existing.rows.length > 0) {
+          return { ok: true, auditId: existing.rows[0].audit_id, rowHash: existing.rows[0].row_hash };
+        }
+      }
 
       const row = result.rows[0];
       return { ok: true, auditId: row.audit_id, rowHash: row.row_hash };
@@ -97,11 +135,11 @@ export class SqlAuditRepository implements AuditRepository {
     const result = await this.pool.query(
       `SELECT audit_id, occurred_at, actor_type, actor_id, action, resource_type,
               resource_id, policy_result, execution_status, verification_type,
-              evidence_ref, payload, previous_hash, row_hash
-       FROM audit_activity_service.audit_log
-       ${whereClause}
-       ORDER BY occurred_at DESC, audit_id DESC
-       LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+              evidence_ref, payload, previous_hash, row_hash, dedupe_key
+         FROM audit_activity_service.audit_log
+         ${whereClause}
+         ORDER BY occurred_at DESC, audit_id DESC
+         LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
       params
     );
 
@@ -114,12 +152,13 @@ export class SqlAuditRepository implements AuditRepository {
       resourceType: r.resource_type,
       resourceId: r.resource_id ?? undefined,
       policyResult: r.policy_result as PolicyResult,
-      executionStatus: r.execution_status as "pending" | "succeeded" | "failed" | "compensated",
+      executionStatus: r.execution_status as ExecutionStatus,
       verificationType: r.verification_type as "none" | "signature" | "receipt" | "external" | "human",
       evidenceRef: r.evidence_ref ?? undefined,
       payload: r.payload,
       previousHash: r.previous_hash ?? undefined,
       rowHash: r.row_hash,
+      dedupeKey: r.dedupe_key ?? undefined,
     }));
   }
 

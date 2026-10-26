@@ -40,8 +40,8 @@ export const SCHEMAS: Readonly<Record<string, JsonSchema>> = {
       resumeId: { type: "string" },
     },
   },
-  // Channel linking.
-  "channels/link": {
+  // Integrations linking.
+  "integrations/link": {
     type: "object", additionalProperties: false, required: ["provider", "externalId"],
     properties: {
       provider: { type: "string", enum: ["telegram", "whatsapp", "email"] },
@@ -64,7 +64,7 @@ export const SCHEMAS: Readonly<Record<string, JsonSchema>> = {
 const PATH_TO_SCHEMA: Readonly<Record<string, string>> = {
   "/api/internal/echo": "internal/echo",
   "/api/v1/tasks": "tasks/create", "/api/v1/jobs/apply": "jobs/apply",
-  "/api/v1/channels/link": "channels/link", "/api/v1/finance/import": "finance/import",
+  "/api/v1/integrations/link": "integrations/link", "/api/v1/finance/import": "finance/import",
 };
 
 /** Result of one validation run. */

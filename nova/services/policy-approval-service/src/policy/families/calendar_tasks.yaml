@@ -1,0 +1,94 @@
+# Calendar Tasks family - Calendar, tasks and reminders: list/create/update/cancel user's own records
+name: "calendar_tasks"
+description: "Calendar, tasks and reminders: list/create/update/cancel the user's own records according to per-operation policy and approval requirements"
+defaultSensitivity: "medium"
+defaultBlastRadius: "self"
+defaultRiskTier: "tier2"
+defaultDecision: "needs_approval"
+rules:
+  - id: "calendar_tasks.read"
+    actor: "user"
+    scope: "calendar_tasks:read"
+    sensitivity: "low"
+    target: "own_events_tasks"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["read"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "calendar_tasks.create_event"
+    actor: "user"
+    scope: "calendar_tasks:write"
+    sensitivity: "medium"
+    target: "own_calendar"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["create_event"]
+    version: 1
+  - id: "calendar_tasks.create_task"
+    actor: "user"
+    scope: "calendar_tasks:write"
+    sensitivity: "low"
+    target: "own_tasks"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["create_task"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "calendar_tasks.invite"
+    actor: "user"
+    scope: "calendar_tasks:invite"
+    sensitivity: "high"
+    target: "external_attendees"
+    blastRadius: "external"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["invite"]
+    requiresStepUp: true
+    isEscalation: true
+    version: 1
+  - id: "calendar_tasks.update_event"
+    actor: "user"
+    scope: "calendar_tasks:write"
+    sensitivity: "medium"
+    target: "own_calendar"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["update_event"]
+    version: 1
+  - id: "calendar_tasks.update_task"
+    actor: "user"
+    scope: "calendar_tasks:write"
+    sensitivity: "low"
+    target: "own_tasks"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["update_task"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "calendar_tasks.cancel_event"
+    actor: "user"
+    scope: "calendar_tasks:write"
+    sensitivity: "medium"
+    target: "own_calendar"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["cancel_event"]
+    version: 1
+  - id: "calendar_tasks.cancel_task"
+    actor: "user"
+    scope: "calendar_tasks:write"
+    sensitivity: "low"
+    target: "own_tasks"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["cancel_task"]
+    chatApprovalAllowed: true
+    version: 1

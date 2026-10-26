@@ -42,36 +42,36 @@ describe("policy decision service", () => {
     assert.strictEqual(decision.approvalRequired?.nonce.length, 16);
   });
 
-  it("requires approval for calendar invite with step-up", () => {
+  it("requires approval for calendar_tasks invite with step-up", () => {
     const request: PolicyDecisionRequest = {
       actor: "user",
-      scope: "calendar:invite",
+      scope: "calendar_tasks:invite",
       action: "invite",
       target: "external_attendees",
       payloadHash: "def456",
     };
     const decision = service.decide(request);
     assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "calendar.invite");
+    assert.strictEqual(decision.ruleId, "calendar_tasks.invite");
     assert.ok(decision.approvalRequired);
   });
 
-  it("allows tasks read and write", () => {
+  it("allows calendar_tasks read and create_task", () => {
     const readRequest: PolicyDecisionRequest = {
       actor: "user",
-      scope: "tasks:read",
+      scope: "calendar_tasks:read",
       action: "read",
-      target: "own_tasks",
+      target: "own_events_tasks",
     };
     assert.strictEqual(service.decide(readRequest).decision, "allow");
 
-    const writeRequest: PolicyDecisionRequest = {
+    const createTaskRequest: PolicyDecisionRequest = {
       actor: "user",
-      scope: "tasks:write",
-      action: "write",
+      scope: "calendar_tasks:write",
+      action: "create_task",
       target: "own_tasks",
     };
-    assert.strictEqual(service.decide(writeRequest).decision, "allow");
+    assert.strictEqual(service.decide(createTaskRequest).decision, "allow");
   });
 
   it("requires approval for finance import", () => {
@@ -97,7 +97,7 @@ describe("policy decision service", () => {
     };
     const decision = service.decide(request);
     assert.strictEqual(decision.decision, "allow");
-    assert.strictEqual(decision.ruleId, "jobs.search");
+    assert.strictEqual(decision.ruleId, "resume_jobs.search");
   });
 
   it("requires approval for jobs apply", () => {
@@ -110,20 +110,20 @@ describe("policy decision service", () => {
     };
     const decision = service.decide(request);
     assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "jobs.apply");
+    assert.strictEqual(decision.ruleId, "resume_jobs.apply");
   });
 
-  it("requires approval for channel link", () => {
+  it("requires approval for integrations link", () => {
     const request: PolicyDecisionRequest = {
       actor: "user",
-      scope: "channels:link",
+      scope: "integrations:link",
       action: "link",
       target: "external_identity",
       payloadHash: "chan789",
     };
     const decision = service.decide(request);
     assert.strictEqual(decision.decision, "needs_approval");
-    assert.strictEqual(decision.ruleId, "channels.link");
+    assert.strictEqual(decision.ruleId, "integrations.link");
   });
 
   it("denies unknown scope", () => {
@@ -171,8 +171,8 @@ describe("policy decision service", () => {
   it("getAllRules returns all rules", () => {
     const rules = service.getAllRules();
     assert.ok(rules.length > 0);
-    // 7 families with varying rules: inbox(3) + calendar(3) + tasks(2) + finance(3) + trips(2) + jobs(3) + channels(2) = 18
-    assert.strictEqual(rules.length, 18);
+    // 7 canonical families: inbox(3) + calendar_tasks(8) + finance(5) + trips(3) + resume_jobs(5) + notes_memory(5) + integrations(5) = 34
+    assert.strictEqual(rules.length, 34);
   });
 
   it("getRule finds existing rule", () => {
@@ -186,9 +186,11 @@ describe("policy decision service", () => {
     assert.strictEqual(rule, undefined);
   });
 
-  it("getFamilies returns all 7 families", () => {
+  it("getFamilies returns all 7 canonical families", () => {
     const families = service.getFamilies();
     assert.strictEqual(families.length, 7);
+    const names = families.map(f => f.name).sort();
+    assert.deepStrictEqual(names, ["calendar_tasks", "finance", "inbox", "integrations", "notes_memory", "resume_jobs", "trips"]);
   });
 
   it("validateFamilies returns valid", () => {

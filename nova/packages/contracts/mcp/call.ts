@@ -1,94 +1,8 @@
 /** MCP call and response wire contracts. */
 
-export type MCPErrorCode =
-  | "unauthenticated"
-  | "unauthorized"
-  | "forbidden"
-  | "invalid_token"
-  | "token_expired"
-  | "wrong_audience"
-  | "tool_not_found"
-  | "invalid_arguments"
-  | "invalid_idempotency_key"
-  | "idempotency_conflict"
-  | "tool_timeout"
-  | "tool_execution_failed"
-  | "approval_required"
-  | "approval_expired"
-  | "approval_revoked"
-  | "policy_denied"
-  | "rate_limited"
-  | "quota_exceeded"
-  | "internal_error"
-  | "service_unavailable"
-  | "validation_failed"
-  | "schema_mismatch"
-  | "circuit_open"
-  | "dependency_failed";
+import { MCPError, MCPErrorCode, MCPErrorCodeValues } from "./errors.js";
 
-export const MCPErrorCodeValues: readonly MCPErrorCode[] = [
-  "unauthenticated",
-  "unauthorized",
-  "forbidden",
-  "invalid_token",
-  "token_expired",
-  "wrong_audience",
-  "tool_not_found",
-  "invalid_arguments",
-  "invalid_idempotency_key",
-  "idempotency_conflict",
-  "tool_timeout",
-  "tool_execution_failed",
-  "approval_required",
-  "approval_expired",
-  "approval_revoked",
-  "policy_denied",
-  "rate_limited",
-  "quota_exceeded",
-  "internal_error",
-  "service_unavailable",
-  "validation_failed",
-  "schema_mismatch",
-  "circuit_open",
-  "dependency_failed",
-] as const;
-
-export interface MCPError {
-  code: MCPErrorCode;
-  message: string;
-  details?: Record<string, unknown>;
-  correlation_id?: string;
-}
-
-export interface MCPCall {
-  call_id: string;
-  tool: string;
-  arguments: Record<string, unknown>;
-  idempotency_key?: string;
-  service_jwt?: string;
-  user_id?: string;
-  correlation_id?: string;
-  created_at: string;
-}
-
-export interface MCPResponse {
-  call_id: string;
-  ok: boolean;
-  result?: Record<string, unknown>;
-  error?: MCPError;
-  completed_at: string;
-  correlation_id?: string;
-  protocol_version: string;
-}
-
-export interface MCPCallContext {
-  call: MCPCall;
-  tool_definition: import("./tool.js").ToolDefinition;
-  user_id: string;
-  roles: string[];
-  scopes: string[];
-  approval_grant?: string;
-}
+export { MCPError, MCPErrorCode, MCPErrorCodeValues } from "./errors.js";
 
 // UUID regex accepting all RFC 4122 versions (v1-v5, v7)
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -145,6 +59,36 @@ function validateMCPError(error: unknown): asserts error is MCPError {
   if (err.correlation_id !== undefined && typeof err.correlation_id !== "string") {
     throw new Error("error.correlation_id must be a string if provided");
   }
+}
+
+export interface MCPCall {
+  call_id: string;
+  tool: string;
+  arguments: Record<string, unknown>;
+  idempotency_key?: string;
+  service_jwt?: string;
+  user_id?: string;
+  correlation_id?: string;
+  created_at: string;
+}
+
+export interface MCPResponse {
+  call_id: string;
+  ok: boolean;
+  result?: Record<string, unknown>;
+  error?: MCPError;
+  completed_at: string;
+  correlation_id?: string;
+  protocol_version: string;
+}
+
+export interface MCPCallContext {
+  call: MCPCall;
+  tool_definition: import("./tool.js").ToolDefinition;
+  user_id: string;
+  roles: string[];
+  scopes: string[];
+  approval_grant?: string;
 }
 
 export function validate_mcp_call(call: Record<string, unknown>): MCPCall {

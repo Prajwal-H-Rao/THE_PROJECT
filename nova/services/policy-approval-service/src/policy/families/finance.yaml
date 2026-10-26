@@ -1,0 +1,62 @@
+# Finance family - Financial operations: import, categorize, transactions
+name: "finance"
+description: "Financial operations: import, normalize, categorize, budget, summarize spending; no movement of money"
+defaultSensitivity: "high"
+defaultBlastRadius: "self"
+defaultRiskTier: "tier3"
+defaultDecision: "needs_approval"
+rules:
+  - id: "finance.read"
+    actor: "user"
+    scope: "finance:read"
+    sensitivity: "medium"
+    target: "own_finances"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "allow"
+    allowedActions: ["read"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "finance.import"
+    actor: "user"
+    scope: "finance:import"
+    sensitivity: "high"
+    target: "external_data"
+    blastRadius: "external"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["import"]
+    requiresStepUp: true
+    isEscalation: true
+    version: 1
+  - id: "finance.categorize"
+    actor: "user"
+    scope: "finance:write"
+    sensitivity: "medium"
+    target: "own_finances"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["categorize"]
+    version: 1
+  - id: "finance.budget"
+    actor: "user"
+    scope: "finance:write"
+    sensitivity: "medium"
+    target: "own_finances"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["budget"]
+    version: 1
+  - id: "finance.summarize"
+    actor: "user"
+    scope: "finance:read"
+    sensitivity: "low"
+    target: "own_finances"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["summarize"]
+    chatApprovalAllowed: true
+    version: 1

@@ -1,0 +1,65 @@
+# Integrations family - Configure providers, run schedules, link channels, inspect audit, manage security/session settings
+name: "integrations"
+description: "Integrations, automations, notifications, security: configure supported providers, run predefined schedules, link channels, inspect audit history, manage user's own security/session settings under step-up authentication"
+defaultSensitivity: "high"
+defaultBlastRadius: "external"
+defaultRiskTier: "tier3"
+defaultDecision: "needs_approval"
+rules:
+  - id: "integrations.link"
+    actor: "user"
+    scope: "integrations:link"
+    sensitivity: "high"
+    target: "external_identity"
+    blastRadius: "external"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["link"]
+    requiresStepUp: true
+    isEscalation: true
+    version: 1
+  - id: "integrations.send"
+    actor: "user"
+    scope: "integrations:send"
+    sensitivity: "high"
+    target: "external_recipient"
+    blastRadius: "external"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["send"]
+    requiresStepUp: true
+    version: 1
+  - id: "integrations.configure"
+    actor: "user"
+    scope: "integrations:write"
+    sensitivity: "high"
+    target: "own_integrations"
+    blastRadius: "self"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["configure"]
+    requiresStepUp: true
+    version: 1
+  - id: "integrations.audit"
+    actor: "user"
+    scope: "integrations:read"
+    sensitivity: "low"
+    target: "own_audit"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["audit"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "integrations.security"
+    actor: "user"
+    scope: "integrations:security"
+    sensitivity: "high"
+    target: "own_security"
+    blastRadius: "self"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["security"]
+    requiresStepUp: true
+    isEscalation: true
+    version: 1

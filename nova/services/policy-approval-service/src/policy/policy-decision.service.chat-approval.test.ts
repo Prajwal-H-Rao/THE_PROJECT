@@ -26,10 +26,10 @@ describe("chat-approval policy (Task 10)", () => {
     assert.strictEqual(decision.chatApprovalReason, "chat_approval_not_allowed");
   });
 
-  it("high-risk rule (tier4) returns chat_approval_not_allowed", () => {
+  it("high-risk rule (tier3) returns chat_approval_not_allowed for integrations send", () => {
     const request: PolicyDecisionRequest = {
       actor: "user",
-      scope: "channels:send",
+      scope: "integrations:send",
       action: "send",
       target: "external_recipient",
       payloadHash: "hash456",
