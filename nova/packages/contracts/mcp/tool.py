@@ -11,6 +11,27 @@ TOOL_RISK_TIER_VALUES: tuple[ToolRiskTier, ...] = ("tier1", "tier2", "tier3", "t
 TOOL_IDEMPOTENCY_VALUES: tuple[ToolIdempotency, ...] = ("none", "idempotency_key", "natural")
 TOOL_CLASSIFICATION_VALUES: tuple[ToolClassification, ...] = ("read", "write")
 
+# Canonical families
+CanonicalFamily = Literal[
+    "inbox",
+    "calendar_tasks",
+    "notes_memory",
+    "finance",
+    "trips",
+    "resume_jobs",
+    "integrations",
+]
+
+CANONICAL_FAMILY_VALUES: tuple[CanonicalFamily, ...] = (
+    "inbox",
+    "calendar_tasks",
+    "notes_memory",
+    "finance",
+    "trips",
+    "resume_jobs",
+    "integrations",
+)
+
 
 @dataclass
 class ToolArgumentSchema:
@@ -32,12 +53,12 @@ class ToolDefinition:
     version: int = 1
     provider_allowlist: Optional[list[str]] = None
     quota: Optional[str] = None
-    verifier: Optional[str] = None
-    family: Optional[str] = None
-    operation_id: Optional[str] = None
-    owning_service: Optional[str] = None
-    mcp_server: Optional[str] = None
-    resource_scope: Optional[str] = None
+    verifier: str = ""
+    family: CanonicalFamily = "inbox"
+    operation_id: str = ""
+    owning_service: str = ""
+    mcp_server: str = ""
+    resource_scope: str = ""
 
 
 @dataclass
@@ -72,27 +93,53 @@ def validate_tool_definition(def_dict: Dict[str, Any]) -> ToolDefinition:
     # Create a shallow copy to avoid mutating caller's object
     validated = dict(def_dict)
     
+    # Unknown-field rejection (spec:167)
+    known_fields = {
+        "name", "description", "arguments", "output", "allowed_roles", "allowed_scopes",
+        "classification", "risk_tier", "idempotency", "timeout", "version",
+        "provider_allowlist", "quota", "verifier", "family", "operation_id",
+        "owning_service", "mcp_server", "resource_scope"
+    }
+    for key in validated:
+        if key not in known_fields:
+            raise ValueError(f"Unknown field in tool definition: {key}")
+    
     # Required fields
-    required_fields = ["name", "description", "arguments", "output", "classification"]
+    required_fields = ["name", "description", "arguments", "output", "classification",
+                       "verifier", "family", "operation_id", "owning_service",
+                       "mcp_server", "resource_scope"]
     for field in required_fields:
         if field not in validated:
             raise ValueError(f"{field} is required")
+    
+    # Validate name
+    name = validated["name"]
+    if not isinstance(name, str) or not name:
+        raise ValueError("Tool name is required")
+    import re
+    if not re.match(r'^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$', name):
+        raise ValueError("Tool name must be in 'family.action' format")
+    
+    # Validate description
+    description = validated["description"]
+    if not isinstance(description, str) or not description:
+        raise ValueError("Tool description is required")
+    
+    # Validate arguments and output
+    validate_schema_object(validated["arguments"], "arguments")
+    validate_schema_object(validated["output"], "output")
     
     # Validate classification
     classification = validated["classification"]
     if classification not in TOOL_CLASSIFICATION_VALUES:
         raise ValueError(f"classification must be one of {TOOL_CLASSIFICATION_VALUES}")
     
-    # Validate arguments schema
-    validate_schema_object(validated["arguments"], "arguments")
-    validate_schema_object(validated["output"], "output")
-    
-    # Validate risk_tier
+    # Default risk_tier based on classification if not provided
     risk_tier = validated.get("risk_tier", "tier1" if classification == "read" else "tier2")
     if risk_tier not in TOOL_RISK_TIER_VALUES:
         raise ValueError(f"risk_tier must be one of {TOOL_RISK_TIER_VALUES}")
     
-    # Validate idempotency
+    # Default idempotency if not provided
     idempotency = validated.get("idempotency", "none")
     if idempotency not in TOOL_IDEMPOTENCY_VALUES:
         raise ValueError(f"idempotency must be one of {TOOL_IDEMPOTENCY_VALUES}")
@@ -123,41 +170,32 @@ def validate_tool_definition(def_dict: Dict[str, Any]) -> ToolDefinition:
     if quota is not None and not isinstance(quota, str):
         raise ValueError("quota must be a string if provided")
     
+    # New required fields (v4) - two-step validation for verifier
+    if "verifier" in validated and validated["verifier"] is not None and not isinstance(validated["verifier"], str):
+        raise ValueError("verifier must be a string")
     verifier = validated.get("verifier")
-    if verifier is not None and not isinstance(verifier, str):
-        raise ValueError("verifier must be a string if provided")
+    if not verifier or not isinstance(verifier, str):
+        raise ValueError("Verifier is required and must be a string")
     
-    # New required fields (v4)
     family = validated.get("family")
-    if family is not None and not isinstance(family, str):
-        raise ValueError("family must be a string if provided")
+    if not family or not isinstance(family, str) or family not in CANONICAL_FAMILY_VALUES:
+        raise ValueError(f"Family is required and must be one of: {CANONICAL_FAMILY_VALUES}")
     
     operation_id = validated.get("operation_id")
-    if operation_id is not None and not isinstance(operation_id, str):
-        raise ValueError("operation_id must be a string if provided")
+    if not operation_id or not isinstance(operation_id, str):
+        raise ValueError("Operation ID is required and must be a string")
     
     owning_service = validated.get("owning_service")
-    if owning_service is not None and not isinstance(owning_service, str):
-        raise ValueError("owning_service must be a string if provided")
+    if not owning_service or not isinstance(owning_service, str):
+        raise ValueError("Owning service is required and must be a string")
     
     mcp_server = validated.get("mcp_server")
-    if mcp_server is not None and not isinstance(mcp_server, str):
-        raise ValueError("mcp_server must be a string if provided")
+    if not mcp_server or not isinstance(mcp_server, str):
+        raise ValueError("MCP server is required and must be a string")
     
     resource_scope = validated.get("resource_scope")
-    if resource_scope is not None and not isinstance(resource_scope, str):
-        raise ValueError("resource_scope must be a string if provided")
-    
-    # Check for unknown fields
-    known_fields = {
-        "name", "description", "arguments", "output", "allowed_roles", "allowed_scopes",
-        "classification", "risk_tier", "idempotency", "timeout", "version",
-        "provider_allowlist", "quota", "verifier", "family", "operation_id",
-        "owning_service", "mcp_server", "resource_scope"
-    }
-    for key in validated:
-        if key not in known_fields:
-            raise ValueError(f"Unknown field in tool definition: {key}")
+    if not resource_scope or not isinstance(resource_scope, str):
+        raise ValueError("Resource scope is required and must be a string")
     
     return ToolDefinition(
         name=validated["name"],
@@ -171,7 +209,7 @@ def validate_tool_definition(def_dict: Dict[str, Any]) -> ToolDefinition:
         idempotency=idempotency,
         timeout=timeout,
         version=version,
-        provider_allowlist=provider_allowlist,
+        provider_allowlist=validated.get("provider_allowlist"),
         quota=quota,
         verifier=verifier,
         family=family,

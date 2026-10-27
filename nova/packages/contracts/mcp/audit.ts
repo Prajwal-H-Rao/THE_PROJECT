@@ -5,9 +5,26 @@ import {
   MCPAuditEventType,
   MCPAuditEventTypeValues,
   MCPAuditContext,
+  MCPPolicyResult,
+  MCPPolicyResultValues,
+  MCPExecutionStatus,
+  MCPExecutionStatusValues,
+  MCPVerificationType,
+  MCPVerificationTypeValues,
 } from "./audit-types.js";
 
-export { MCPAuditEvent, MCPAuditEventType, MCPAuditEventTypeValues, MCPAuditContext } from "./audit-types.js";
+export {
+  MCPAuditEvent,
+  MCPAuditEventType,
+  MCPAuditEventTypeValues,
+  MCPAuditContext,
+  MCPPolicyResult,
+  MCPPolicyResultValues,
+  MCPExecutionStatus,
+  MCPExecutionStatusValues,
+  MCPVerificationType,
+  MCPVerificationTypeValues,
+} from "./audit-types.js";
 
 // UUID regex accepting all RFC 4122 versions (v1-v5, v7)
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -100,9 +117,39 @@ function checkForSecrets(obj: unknown, path: string = "", visited = new WeakSet<
   }
 }
 
+const KNOWN_MCP_AUDIT_EVENT_FIELDS = new Set([
+  "event_id",
+  "event_type",
+  "schema_version",
+  "occurred_at",
+  "producer",
+  "correlation_id",
+  "causation_id",
+  "actor_type",
+  "actor_id",
+  "action",
+  "resource_type",
+  "resource_id",
+  "policy_result",
+  "policy_version",
+  "execution_status",
+  "verification_type",
+  "evidence_ref",
+  "payload",
+  "previous_hash",
+  "row_hash",
+]);
+
 export function validate_mcp_audit_event(event: Record<string, unknown>): MCPAuditEvent {
   // Create a shallow copy to avoid mutating caller's object
   const validated = { ...event } as Record<string, unknown>;
+
+  // Unknown-field rejection (spec:167)
+  for (const key of Object.keys(validated)) {
+    if (!KNOWN_MCP_AUDIT_EVENT_FIELDS.has(key)) {
+      throw new Error(`Unknown field in MCP audit event: ${key}`);
+    }
+  }
 
   if (!validated.event_id || typeof validated.event_id !== "string") {
     throw new Error("event_id is required");
@@ -131,17 +178,17 @@ export function validate_mcp_audit_event(event: Record<string, unknown>): MCPAud
   if (!validated.resource_type || typeof validated.resource_type !== "string") {
     throw new Error("resource_type is required");
   }
-  if (!validated.policy_result || !["allowed", "denied", "step_up", "error"].includes(validated.policy_result as string)) {
-    throw new Error("policy_result must be 'allowed', 'denied', 'step_up', or 'error'");
+  if (!validated.policy_result || !MCPPolicyResultValues.includes(validated.policy_result as MCPPolicyResult)) {
+    throw new Error(`policy_result must be one of: ${MCPPolicyResultValues.join(", ")}`);
   }
   if (typeof validated.policy_version !== "number" || validated.policy_version < 1) {
     throw new Error("policy_version must be a positive integer");
   }
-  if (!validated.execution_status || !["pending", "succeeded", "failed", "compensated"].includes(validated.execution_status as string)) {
-    throw new Error("execution_status must be 'pending', 'succeeded', 'failed', or 'compensated'");
+  if (!validated.execution_status || !MCPExecutionStatusValues.includes(validated.execution_status as MCPExecutionStatus)) {
+    throw new Error(`execution_status must be one of: ${MCPExecutionStatusValues.join(", ")}`);
   }
-  if (!validated.verification_type || !["none", "signature", "receipt", "external", "human"].includes(validated.verification_type as string)) {
-    throw new Error("verification_type must be 'none', 'signature', 'receipt', 'external', or 'human'");
+  if (!validated.verification_type || !MCPVerificationTypeValues.includes(validated.verification_type as MCPVerificationType)) {
+    throw new Error(`verification_type must be one of: ${MCPVerificationTypeValues.join(", ")}`);
   }
   if (!validated.occurred_at || typeof validated.occurred_at !== "string") {
     throw new Error("occurred_at is required");
@@ -185,10 +232,10 @@ export function validate_mcp_audit_event(event: Record<string, unknown>): MCPAud
     action: validated.action as string,
     resource_type: validated.resource_type as string,
     resource_id: validateOptionalString(validated.resource_id, "resource_id"),
-    policy_result: validated.policy_result as "allowed" | "denied" | "step_up" | "error",
+    policy_result: validated.policy_result as MCPPolicyResult,
     policy_version: validated.policy_version as number,
-    execution_status: validated.execution_status as "pending" | "succeeded" | "failed" | "compensated",
-    verification_type: validated.verification_type as "none" | "signature" | "receipt" | "external" | "human",
+    execution_status: validated.execution_status as MCPExecutionStatus,
+    verification_type: validated.verification_type as MCPVerificationType,
     evidence_ref: validateOptionalString(validated.evidence_ref, "evidence_ref"),
     payload: validated.payload as Record<string, unknown>,
     previous_hash: validateOptionalString(validated.previous_hash, "previous_hash"),

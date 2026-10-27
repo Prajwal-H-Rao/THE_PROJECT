@@ -11,6 +11,8 @@ export {
   ToolRiskTier,
   ToolIdempotency,
   ToolClassification,
+  CanonicalFamily,
+  CanonicalFamilyValues,
   validate_tool_definition,
 } from "./tool.js";
 

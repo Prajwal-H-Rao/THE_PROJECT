@@ -8,6 +8,26 @@ export const ToolRiskTierValues: readonly ToolRiskTier[] = ["tier1", "tier2", "t
 export const ToolIdempotencyValues: readonly ToolIdempotency[] = ["none", "idempotency_key", "natural"] as const;
 export const ToolClassificationValues: readonly ToolClassification[] = ["read", "write"] as const;
 
+// Canonical task families (spec §183-193)
+export type CanonicalFamily =
+  | "inbox"
+  | "calendar_tasks"
+  | "notes_memory"
+  | "finance"
+  | "trips"
+  | "resume_jobs"
+  | "integrations";
+
+export const CanonicalFamilyValues: readonly CanonicalFamily[] = [
+  "inbox",
+  "calendar_tasks",
+  "notes_memory",
+  "finance",
+  "trips",
+  "resume_jobs",
+  "integrations",
+] as const;
+
 export interface ToolArgumentSchema {
   schema: Record<string, unknown>;
 }
@@ -26,7 +46,12 @@ export interface ToolDefinition {
   version: number;
   provider_allowlist?: string[];
   quota?: string;
-  verifier?: string;
+  verifier: string;                    // Required per spec:195
+  family: CanonicalFamily;             // Required per spec:503
+  operation_id: string;                // Required per spec:195
+  owning_service: string;              // Required per spec:503
+  mcp_server: string;                  // Required per spec:503
+  resource_scope: string;              // Required per spec:195
 }
 
 export interface ToolOutputSchema {
@@ -44,6 +69,28 @@ export interface ToolResult {
   data?: Record<string, unknown>;
   error?: ToolError;
 }
+
+const KNOWN_TOOL_DEFINITION_FIELDS = new Set([
+  "name",
+  "description",
+  "arguments",
+  "output",
+  "allowed_roles",
+  "allowed_scopes",
+  "classification",
+  "risk_tier",
+  "idempotency",
+  "timeout",
+  "version",
+  "provider_allowlist",
+  "quota",
+  "verifier",
+  "family",
+  "operation_id",
+  "owning_service",
+  "mcp_server",
+  "resource_scope",
+]);
 
 function validateSchemaObject(obj: unknown, fieldName: string): void {
   if (!obj || typeof obj !== "object") {
@@ -100,6 +147,13 @@ function validateOptionalString(val: unknown, fieldName: string): string | undef
 export function validate_tool_definition(def: Record<string, unknown>): ToolDefinition {
   // Create a shallow copy to avoid mutating caller's object
   const validated = { ...def } as Record<string, unknown>;
+
+  // Unknown-field rejection (spec:167)
+  for (const key of Object.keys(validated)) {
+    if (!KNOWN_TOOL_DEFINITION_FIELDS.has(key)) {
+      throw new Error(`Unknown field in tool definition: ${key}`);
+    }
+  }
 
   if (!validated.name || typeof validated.name !== "string") {
     throw new Error("Tool name is required");
@@ -166,8 +220,27 @@ export function validate_tool_definition(def: Record<string, unknown>): ToolDefi
   if (validated.quota && !/^\d+\/(s|m|h|hour|d)$/i.test(validated.quota as string)) {
     throw new Error("Quota must be in format 'N/s', 'N/m', 'N/h', 'N/hour', or 'N/d'");
   }
-  if (validated.verifier) {
-    validateOptionalString(validated.verifier, "verifier");
+  // New required fields (v4)
+  if (validated.verifier !== undefined && typeof validated.verifier !== "string") {
+    throw new Error("verifier must be a string");
+  }
+  if (!validated.verifier || typeof validated.verifier !== "string") {
+    throw new Error("Verifier is required and must be a string");
+  }
+  if (!validated.family || !CanonicalFamilyValues.includes(validated.family as CanonicalFamily)) {
+    throw new Error(`Family is required and must be one of: ${CanonicalFamilyValues.join(", ")}`);
+  }
+  if (!validated.operation_id || typeof validated.operation_id !== "string") {
+    throw new Error("Operation ID is required and must be a string");
+  }
+  if (!validated.owning_service || typeof validated.owning_service !== "string") {
+    throw new Error("Owning service is required and must be a string");
+  }
+  if (!validated.mcp_server || typeof validated.mcp_server !== "string") {
+    throw new Error("MCP server is required and must be a string");
+  }
+  if (!validated.resource_scope || typeof validated.resource_scope !== "string") {
+    throw new Error("Resource scope is required and must be a string");
   }
   validatePositiveInteger(validated.version, "version");
 
@@ -186,6 +259,11 @@ export function validate_tool_definition(def: Record<string, unknown>): ToolDefi
     version: validated.version as number,
     provider_allowlist: validated.provider_allowlist as string[] | undefined,
     quota: validated.quota as string | undefined,
-    verifier: validateOptionalString(validated.verifier, "verifier"),
+    verifier: validated.verifier as string,
+    family: validated.family as CanonicalFamily,
+    operation_id: validated.operation_id as string,
+    owning_service: validated.owning_service as string,
+    mcp_server: validated.mcp_server as string,
+    resource_scope: validated.resource_scope as string,
   };
 }

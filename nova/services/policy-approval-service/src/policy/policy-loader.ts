@@ -5,13 +5,27 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as yaml from "js-yaml";
 import { PolicyRule, validatePolicyRule, Sensitivity, BlastRadius, RiskTier, Decision } from "./policy-schema.js";
+import { checkToolNameDenied, checkArgumentsForDenied, DeniedOperation } from "./deny-list.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(__filename, "..");
 const FAMILIES_DIR = resolve(__dirname, "families");
 
+/** Canonical family names per spec §183-193. */
+export const CANONICAL_FAMILIES = [
+  "inbox",
+  "calendar_tasks",
+  "notes_memory",
+  "finance",
+  "trips",
+  "resume_jobs",
+  "integrations",
+] as const;
+
+export type CanonicalFamily = (typeof CANONICAL_FAMILIES)[number];
+
 export interface FamilyDefinition {
-  readonly name: string;
+  readonly name: CanonicalFamily;
   readonly description: string;
   readonly defaultSensitivity: Sensitivity;
   readonly defaultBlastRadius: BlastRadius;
@@ -24,7 +38,8 @@ export interface FamiliesConfig {
   readonly families: readonly FamilyDefinition[];
 }
 
-/** Load the families configuration from all YAML files in the families directory. */
+/** Load the families configuration from all YAML files in the families directory.
+ *  Fails closed: unknown family names, missing files, or deny-list violations cause immediate failure. */
 export function loadFamilies(configPath?: string): FamiliesConfig {
   const dir = configPath ?? FAMILIES_DIR;
   const files = readdirSync(dir).filter((f) => f.endsWith(".yaml") || f.endsWith(".yml"));
@@ -43,15 +58,45 @@ export function loadFamilies(configPath?: string): FamiliesConfig {
     if (!parsed || !parsed.name) {
       throw new Error(`${file} must contain a family definition with a 'name'`);
     }
+
+    // Fail closed: unknown family name
+    if (!CANONICAL_FAMILIES.includes(parsed.name)) {
+      throw new Error(`Unknown family '${parsed.name}' in ${file}. Must be one of: ${CANONICAL_FAMILIES.join(", ")}`);
+    }
+
     if (!Array.isArray(parsed.rules) || parsed.rules.length === 0) {
       throw new Error(`Family ${parsed.name} in ${file} must have at least one rule`);
     }
+    
     for (const rule of parsed.rules) {
       if (!validatePolicyRule(rule)) {
         throw new Error(`Invalid policy rule in family ${parsed.name} (${file}): ${JSON.stringify(rule)}`);
       }
+      
+      // Deny-list guard: reject rules that reference denied operations
+      const denied = checkToolNameDenied(rule.id);
+      if (denied) {
+        throw new Error(`Rule '${rule.id}' in family ${parsed.name} references denied operation: ${denied}`);
+      }
+      
+      if (rule.allowedActions) {
+        for (const action of rule.allowedActions) {
+          const denied = checkToolNameDenied(action);
+          if (denied) {
+            throw new Error(`Rule '${rule.id}' in family ${parsed.name} allows denied action: ${denied}`);
+          }
+        }
+      }
     }
     families.push(parsed);
+  }
+
+  // Verify all canonical families are present
+  const loadedFamilies = new Set(families.map(f => f.name));
+  for (const canonical of CANONICAL_FAMILIES) {
+    if (!loadedFamilies.has(canonical)) {
+      throw new Error(`Missing required family: ${canonical}`);
+    }
   }
 
   return { families };

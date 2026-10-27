@@ -1,0 +1,39 @@
+{
+  "family": "notes_memory",
+  "operations": [
+    {
+      "operation_id": "notes_memory.search",
+      "name": "notes_memory.search",
+      "description": "Search notes",
+      "arguments": {"schema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}}, "required": []}},
+      "output": {"schema": {"type": "object", "properties": {"notes": {"type": "array"}}, "required": []}},
+      "classification": "read",
+      "risk_tier": "tier1",
+      "idempotency": "none",
+      "verifier": "verify_notes_search",
+      "family": "notes_memory",
+      "owning_service": "notes-service",
+      "mcp_server": "notes-mcp",
+      "resource_scope": "own_notes",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["notes:search"]
+    },
+    {
+      "operation_id": "notes_memory.create",
+      "name": "notes_memory.create",
+      "description": "Create a note",
+      "arguments": {"schema": {"type": "object", "properties": {"title": {"type": "string"}, "content": {"type": "string"}}, "required": ["title", "content"]}},
+      "output": {"schema": {"type": "object", "properties": {"note_id": {"type": "string"}}, "required": ["note_id"]}},
+      "classification": "write",
+      "risk_tier": "tier1",
+      "idempotency": "none",
+      "verifier": "verify_notes_create",
+      "family": "notes_memory",
+      "owning_service": "notes-service",
+      "mcp_server": "notes-mcp",
+      "resource_scope": "own_notes",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["notes:write"]
+    }
+  ]
+}

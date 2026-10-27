@@ -1,0 +1,73 @@
+{
+  "family": "calendar_tasks",
+  "operations": [
+    {
+      "operation_id": "calendar_tasks.read",
+      "name": "calendar_tasks.read",
+      "description": "Read calendar events and tasks",
+      "arguments": {"schema": {"type": "object", "properties": {"start": {"type": "string", "format": "date-time"}, "end": {"type": "string", "format": "date-time"}}, "required": ["start", "end"]}},
+      "output": {"schema": {"type": "object", "properties": {"events": {"type": "array"}, "tasks": {"type": "array"}}, "required": []}},
+      "classification": "read",
+      "risk_tier": "tier1",
+      "idempotency": "none",
+      "verifier": "verify_calendar_tasks_read",
+      "family": "calendar_tasks",
+      "owning_service": "calendar-service",
+      "mcp_server": "calendar-mcp",
+      "resource_scope": "own_events_tasks",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["calendar_tasks:read"]
+    },
+    {
+      "operation_id": "calendar_tasks.create_event",
+      "name": "calendar_tasks.create_event",
+      "description": "Create a calendar event",
+      "arguments": {"schema": {"type": "object", "properties": {"title": {"type": "string"}, "start": {"type": "string", "format": "date-time"}, "duration_minutes": {"type": "integer"}}, "required": ["title", "start", "duration_minutes"]}},
+      "output": {"schema": {"type": "object", "properties": {"event_id": {"type": "string"}}, "required": ["event_id"]}},
+      "classification": "write",
+      "risk_tier": "tier2",
+      "idempotency": "idempotency_key",
+      "verifier": "verify_calendar_event",
+      "family": "calendar_tasks",
+      "owning_service": "calendar-service",
+      "mcp_server": "calendar-mcp",
+      "resource_scope": "own_calendar",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["calendar_tasks:write"]
+    },
+    {
+      "operation_id": "calendar_tasks.create_task",
+      "name": "calendar_tasks.create_task",
+      "description": "Create a task",
+      "arguments": {"schema": {"type": "object", "properties": {"title": {"type": "string"}, "due_date": {"type": "string", "format": "date-time"}}, "required": ["title", "due_date"]}},
+      "output": {"schema": {"type": "object", "properties": {"task_id": {"type": "string"}}, "required": ["task_id"]}},
+      "classification": "write",
+      "risk_tier": "tier1",
+      "idempotency": "none",
+      "verifier": "verify_calendar_task",
+      "family": "calendar_tasks",
+      "owning_service": "calendar-service",
+      "mcp_server": "calendar-mcp",
+      "resource_scope": "own_tasks",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["calendar_tasks:write"]
+    },
+    {
+      "operation_id": "calendar_tasks.invite",
+      "name": "calendar_tasks.invite",
+      "description": "Invite attendees to an event",
+      "arguments": {"schema": {"type": "object", "properties": {"event_id": {"type": "string"}, "attendees": {"type": "array", "items": {"type": "string"}}}, "required": ["event_id", "attendees"]}},
+      "output": {"schema": {"type": "object", "properties": {"invitations_sent": {"type": "integer"}}, "required": ["invitations_sent"]}},
+      "classification": "write",
+      "risk_tier": "tier3",
+      "idempotency": "idempotency_key",
+      "verifier": "verify_calendar_invite",
+      "family": "calendar_tasks",
+      "owning_service": "calendar-service",
+      "mcp_server": "calendar-mcp",
+      "resource_scope": "external_attendees",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["calendar_tasks:invite"]
+    }
+  ]
+}

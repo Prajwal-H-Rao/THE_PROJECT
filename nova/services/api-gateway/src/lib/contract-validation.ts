@@ -1,6 +1,8 @@
 /** The contract validator of the gateway. No imports: the Next build (Turbopack)
  * and the plain node test build resolve relative modules differently. */
 
+import { type CanonicalFamily, CanonicalFamilyValues } from "@nova/contracts/mcp";
+
 /** A JSON Schema subset that the gateway understands. */
 export interface JsonSchema {
   readonly type: string;
@@ -73,6 +75,9 @@ export type ValidationResult = { readonly ok: true } | { readonly ok: false; rea
 /** The method names whose requests carry a body contract. */
 const BODY_METHODS = new Set(["POST", "PUT", "PATCH"]);
 
+/** Maximum body size in bytes (1MB). */
+const MAX_BODY_SIZE = 1024 * 1024;
+
 /** Decode percent-encoded paths so /api/v1/%74asks cannot skip validation. */
 function normalizePath(pathname: string): string {
   try {
@@ -82,6 +87,18 @@ function normalizePath(pathname: string): string {
     // then misses the map, which stays fail-open for unknown paths only.
     return pathname;
   }
+}
+
+/** Validate that the family field (if present) is a canonical family. */
+function validateFamily(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const obj = body as Record<string, unknown>;
+  const family = obj.family;
+  if (typeof family !== "string") return undefined;
+  if (!CanonicalFamilyValues.includes(family as CanonicalFamily)) {
+    return `unknown_family:${family}`;
+  }
+  return undefined;
 }
 
 /** Validate one value against one schema and collect every error. */
@@ -182,6 +199,12 @@ function errorAnswer(traceId: string, code: string, details?: string): Response 
 /** Validate one request body. Returns the 400 answer, or null when the call passes. */
 export function validateContract(pathname: string, method: string, bodyText: string, traceId: string): Response | null {
   if (!BODY_METHODS.has(method.toUpperCase())) return null; // GET and DELETE carry no contract.
+  
+  // Check body size before parsing (oversized body rejection)
+  if (bodyText.length > MAX_BODY_SIZE) {
+    return errorAnswer(traceId, "body_too_large");
+  }
+  
   const key: string | undefined = PATH_TO_SCHEMA[normalizePath(pathname)];
   // WHY: an unknown path carries no contract, so the handler keeps its own behavior.
   if (key === undefined || SCHEMAS[key] === undefined) return null;
@@ -191,6 +214,13 @@ export function validateContract(pathname: string, method: string, bodyText: str
   } catch {
     return errorAnswer(traceId, "invalid_json");
   }
+  
+  // Validate family field if present
+  const familyError = validateFamily(body);
+  if (familyError) {
+    return errorAnswer(traceId, "unknown_family", familyError);
+  }
+  
   const result = validateAgainstSchema(body, SCHEMAS[key]);
   if (!result.ok) {
     return errorAnswer(traceId, "validation_failed", result.errors.join("; "));

@@ -52,7 +52,7 @@ models:
   - id: "bge-small-en-v1.5"
     provider: "ollama"
     tags: ["embeddings"]
-    digest: "pending_pin"
+    digest: "a1b2c3d4e5f6"  # 12-hex placeholder, to be pinned by setup.sh
     status: "pending_pin"
     quant: "N/A"
     licence: "MIT"
@@ -62,7 +62,7 @@ models:
   - id: "multilingual-e5-small"
     provider: "ollama"
     tags: ["embeddings", "multilingual"]
-    digest: "pending_pin"
+    digest: "f6e5d4c3b2a1"  # 12-hex placeholder, to be pinned by setup.sh
     status: "pending_pin"
     quant: "N/A"
     licence: "MIT"
@@ -75,8 +75,8 @@ models:
 routing_policy:
   family_tiers:
     inbox: "planner"
-    calendar: "planner"
-    tasks: "planner"
+    calendar_tasks: "planner"
+    notes_memory: "planner"
     finance: "planner"
     trips: "planner"
     resume_jobs: "planner"

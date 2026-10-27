@@ -61,6 +61,27 @@ function validateMCPError(error: unknown): asserts error is MCPError {
   }
 }
 
+const KNOWN_MCP_CALL_FIELDS = new Set([
+  "call_id",
+  "tool",
+  "arguments",
+  "idempotency_key",
+  "service_jwt",
+  "user_id",
+  "correlation_id",
+  "created_at",
+]);
+
+const KNOWN_MCP_RESPONSE_FIELDS = new Set([
+  "call_id",
+  "ok",
+  "result",
+  "error",
+  "completed_at",
+  "correlation_id",
+  "protocol_version",
+]);
+
 export interface MCPCall {
   call_id: string;
   tool: string;
@@ -94,6 +115,13 @@ export interface MCPCallContext {
 export function validate_mcp_call(call: Record<string, unknown>): MCPCall {
   // Create a shallow copy to avoid mutating caller's object
   const validated = { ...call } as Record<string, unknown>;
+
+  // Unknown-field rejection (spec:167)
+  for (const key of Object.keys(validated)) {
+    if (!KNOWN_MCP_CALL_FIELDS.has(key)) {
+      throw new Error(`Unknown field in MCP call: ${key}`);
+    }
+  }
 
   if (!validated.call_id || typeof validated.call_id !== "string") {
     throw new Error("call_id is required");
@@ -133,6 +161,13 @@ export function validate_mcp_call(call: Record<string, unknown>): MCPCall {
 export function validate_mcp_response(response: Record<string, unknown>): MCPResponse {
   // Create a shallow copy to avoid mutating caller's object
   const validated = { ...response } as Record<string, unknown>;
+
+  // Unknown-field rejection (spec:167)
+  for (const key of Object.keys(validated)) {
+    if (!KNOWN_MCP_RESPONSE_FIELDS.has(key)) {
+      throw new Error(`Unknown field in MCP response: ${key}`);
+    }
+  }
 
   if (!validated.call_id || typeof validated.call_id !== "string") {
     throw new Error("call_id is required");

@@ -2,8 +2,9 @@
 
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { loadFamilies, findMatchingRule, getAllRules, findRuleById } from "./policy-loader.js";
+import { loadFamilies, findMatchingRule, getAllRules, findRuleById, CANONICAL_FAMILIES } from "./policy-loader.js";
 import { PolicyRule } from "./policy-schema.js";
+import { checkToolNameDenied, checkArgumentsForDenied, DENIED_OPERATIONS } from "./deny-list.js";
 
 describe("policy loader", () => {
   const config = loadFamilies();
@@ -210,5 +211,80 @@ describe("policy loader", () => {
     assert.strictEqual(rule?.id, "calendar_tasks.invite");
     assert.strictEqual(rule?.requiresStepUp, true);
     assert.strictEqual(rule?.riskTier, "tier3");
+  });
+});
+
+describe("deny-list guard", () => {
+  it("contains all spec §212 denied operations", () => {
+    const expected = [
+      "shell_execution",
+      "code_execution",
+      "arbitrary_sql",
+      "unrestricted_browser",
+      "unrestricted_fetch",
+      "filesystem_browsing",
+      "credential_extraction",
+      "secret_listing",
+      "policy_modification",
+      "container_socket_access",
+      "kubernetes_administration",
+      "plugin_installation",
+      "port_scanning",
+      "exploit_execution",
+      "anti_bot_bypass",
+      "captcha_bypass",
+      "arbitrary_file_read",
+      "arbitrary_file_write",
+      "image_deployment",
+      "pod_deployment",
+      "arbitrary_messaging",
+    ];
+    assert.deepStrictEqual([...DENIED_OPERATIONS].sort(), expected.sort());
+  });
+
+  it("checkToolNameDenied catches exact denied operation names", () => {
+    assert.strictEqual(checkToolNameDenied("shell_execution"), "shell_execution");
+    assert.strictEqual(checkToolNameDenied("arbitrary_sql"), "arbitrary_sql");
+    assert.strictEqual(checkToolNameDenied("credential_extraction"), "credential_extraction");
+  });
+
+  it("checkToolNameDenied catches compound tool names matching denied patterns", () => {
+    assert.strictEqual(checkToolNameDenied("shell.execution"), "shell_execution");
+    assert.strictEqual(checkToolNameDenied("arbitrary.sql"), "arbitrary_sql");
+    assert.strictEqual(checkToolNameDenied("code.execution"), "code_execution");
+    assert.strictEqual(checkToolNameDenied("unrestricted.browser"), "unrestricted_browser");
+    assert.strictEqual(checkToolNameDenied("unrestricted.fetch"), "unrestricted_fetch");
+  });
+
+  it("checkToolNameDenied returns undefined for allowed tool names", () => {
+    assert.strictEqual(checkToolNameDenied("inbox.read"), undefined);
+    assert.strictEqual(checkToolNameDenied("calendar_tasks.create_event"), undefined);
+    assert.strictEqual(checkToolNameDenied("finance.import"), undefined);
+  });
+
+  it("checkArgumentsForDenied catches denied operations in arguments", () => {
+    const args = { command: "shell_execution", data: "test" };
+    assert.strictEqual(checkArgumentsForDenied(args), "shell_execution");
+  });
+
+  it("checkArgumentsForDenied catches nested denied operations", () => {
+    const args = { payload: { query: "arbitrary_sql query" } };
+    assert.strictEqual(checkArgumentsForDenied(args), "arbitrary_sql");
+  });
+
+  it("checkArgumentsForDenied returns undefined for clean arguments", () => {
+    const args = { query: "unread", limit: 10 };
+    assert.strictEqual(checkArgumentsForDenied(args), undefined);
+  });
+
+  it("CANONICAL_FAMILIES includes all 7 spec families", () => {
+    assert.strictEqual(CANONICAL_FAMILIES.length, 7);
+    assert.ok(CANONICAL_FAMILIES.includes("inbox"));
+    assert.ok(CANONICAL_FAMILIES.includes("calendar_tasks"));
+    assert.ok(CANONICAL_FAMILIES.includes("notes_memory"));
+    assert.ok(CANONICAL_FAMILIES.includes("finance"));
+    assert.ok(CANONICAL_FAMILIES.includes("trips"));
+    assert.ok(CANONICAL_FAMILIES.includes("resume_jobs"));
+    assert.ok(CANONICAL_FAMILIES.includes("integrations"));
   });
 });

@@ -27,20 +27,21 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 2 | Register 8 read-only tools: list inbox, read event, list tasks, search notes, list transactions, list openings, get profile, get audit | MCP tool catalogue | The catalogue rejects an unregistered tool |
 | 3 | Register 6 write tools: draft email, create event, create task, create note, import statement, draft application. Enumerate the full operation set for each of the 7 families per spec:195 | MCP tool catalogue | Each write tool carries a risk tier, and every family has an enumerated operation set |
 | 4 | Register 3 consequential tools: send email, submit application, connect account | MCP tool catalogue | Each forces an approval |
-| 5 | Build the deterministic router from natural language to a task-family enum, then to the model tier of that family | `orchestrator/router/` | Out-of-scope text returns a fixed refusal, and the router never names a tier that the registry forbids |
+| 5 | Build the deterministic router from natural language to a task-family enum, then to the model tier of that family | `services/agent-orchestrator/orchestrator/router/` | Out-of-scope text returns a fixed refusal, and the router never names a tier that the registry forbids |
 | 6 | Build the model gateway: provider allow-list, request shaping, redaction, timeout, quota, and the model of the tier | `services/model-gateway/` | Timeout, quota and `num_ctx` truncation-marker tests pass |
 | 7 | Add Ollama as the default provider with a pinned digest | gateway config | Gateway rejects an unlisted model |
-| 8 | Implement the LangGraph state machine with a checkpointer | `orchestrator/workflows/` | Pause and resume restore exact state |
+| 8 | Implement the LangGraph state machine with a checkpointer | `services/agent-orchestrator/orchestrator/workflows/` | Pause and resume restore exact state |
 | 9 | Put `interrupt()` before every consequential step | workflow code | No side effect runs before approval |
 | 10 | Add the step bounds and the overall deadline | workflow config | A 7-step plan is rejected |
 | 11 | Implement one repair attempt on malformed output, then stop | orchestrator | Two failures end the run safely |
-| 12 | Build the verifier layer that checks provider IDs and persisted state | `orchestrator/verify/` | Fabricated receipt is rejected |
-| 13 | Return-value validation: reject unknown enums, out-of-scope IDs, stale jobs | validators | Each rejection case has a test |
+| 12 | Build the verifier layer that checks provider IDs and persisted state | `services/agent-orchestrator/orchestrator/verify/__init__.py` | Fabricated receipt is rejected |
+| 13 | Return-value validation: reject unknown enums, out-of-scope IDs, stale jobs | `services/agent-orchestrator/orchestrator/validators/__init__.py` | Each rejection case has a test |
 | 14 | Emit audit events at every state change | orchestrator | Every transition has one audit row |
 | 15 | Wire the deterministic fake model that `05-model-strategy` added in P3, and add the scenario fixtures the workflow needs | `tests/fixtures/` | Full workflow runs with no LLM |
 | 16 | Implement cancellation where safe | orchestrator | Cancelled run leaves no partial write |
 | 17 | Add per-user quotas and cost accounting | gateway | Quota exceeded returns a typed error |
 | 18 | Deliver curriculum lab 4: LangGraph stub workflow with an injected hallucination | `labs/lab04/` | The validator catches the injected lie |
+| 19 | Build the Flask API boundary for plan/cancel/resume | `services/agent-orchestrator/api/app.py`, `services/agent-orchestrator/requirements.txt` | Service token verification on all routes |
 ## Build order
 
 Work these steps in order. A step names tasks from the table above.

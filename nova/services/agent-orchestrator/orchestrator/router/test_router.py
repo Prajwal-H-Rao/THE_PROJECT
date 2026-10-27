@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""Tests for the deterministic router."""
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from router import DeterministicRouter, RouterResult
+from pathlib import Path
+
+
+def test_inbox_read():
+    router = DeterministicRouter()
+    result = router.route("read my unread emails")
+    assert result.family == "inbox"
+    assert result.action_type == "read"
+    assert result.tier == "planner"
+    print("✓ inbox read test passed")
+
+
+def test_inbox_send():
+    router = DeterministicRouter()
+    result = router.route("send email to john@example.com")
+    assert result.family == "inbox"
+    assert result.action_type == "consequential"
+    assert result.tier == "planner"
+    print("✓ inbox send test passed")
+
+
+def test_calendar_read():
+    router = DeterministicRouter()
+    result = router.route("show my calendar for this week")
+    assert result.family == "calendar_tasks"
+    assert result.action_type == "read"
+    print("✓ calendar read test passed")
+
+
+def test_calendar_create_event():
+    router = DeterministicRouter()
+    result = router.route("create a meeting with the team tomorrow at 10am")
+    assert result.family == "calendar_tasks"
+    assert result.action_type == "write"
+    print("✓ calendar create event test passed")
+
+
+def test_notes_search():
+    router = DeterministicRouter()
+    result = router.route("search my notes for project alpha")
+    assert result.family == "notes_memory"
+    assert result.action_type == "read"
+    print("✓ notes search test passed")
+
+
+def test_finance_import():
+    router = DeterministicRouter()
+    result = router.route("import my bank statement from CSV")
+    assert result.family == "finance"
+    assert result.action_type == "write"
+    print("✓ finance import test passed")
+
+
+def test_trips_compare():
+    router = DeterministicRouter()
+    result = router.route("compare routes from NYC to Boston")
+    assert result.family == "trips"
+    assert result.action_type == "read"
+    print("✓ trips compare test passed")
+
+
+def test_jobs_apply():
+    router = DeterministicRouter()
+    result = router.route("submit my application for the Python developer role")
+    assert result.family == "resume_jobs"
+    assert result.action_type == "consequential"
+    assert result.tier == "planner"
+    print("✓ jobs apply test passed")
+
+
+def test_integrations_link():
+    router = DeterministicRouter()
+    result = router.route("connect my telegram account")
+    assert result.family == "integrations"
+    assert result.action_type == "consequential"
+    assert result.tier == "planner"
+    print("✓ integrations link test passed")
+
+
+def test_ambiguous_request():
+    router = DeterministicRouter()
+    # Test that clear requests to a single family are not marked ambiguous
+    # (calendar and tasks are merged into calendar_tasks per spec)
+    result = router.route("create a task for next week")
+    assert result.family == "calendar_tasks"
+    assert result.action_type == "write"
+    print("✓ single-family request test passed")
+
+
+def test_out_of_scope():
+    router = DeterministicRouter()
+    result = router.route("hack into the mainframe")
+    assert result.action_type == "refusal"
+    assert result.refusal_reason is not None
+    print("✓ out of scope test passed")
+
+
+def test_empty_request():
+    router = DeterministicRouter()
+    result = router.route("")
+    assert result.action_type == "refusal"
+    print("✓ empty request test passed")
+
+
+def test_tier_mapping():
+    router = DeterministicRouter()
+    # All families should map to planner tier in the default registry
+    for family in ["inbox", "calendar_tasks", "notes_memory", "finance", "trips", "resume_jobs", "integrations"]:
+        # We can't easily test without mocking registry, but verify structure
+        assert family in router.routing_policy
+    print("✓ tier mapping structure test passed")
+
+
+def run_all():
+    test_inbox_read()
+    test_inbox_send()
+    test_calendar_read()
+    test_calendar_create_event()
+    test_notes_search()
+    test_finance_import()
+    test_trips_compare()
+    test_jobs_apply()
+    test_integrations_link()
+    test_ambiguous_request()
+    test_out_of_scope()
+    test_empty_request()
+    test_tier_mapping()
+    print("\n✓ All router tests passed!")
+
+
+if __name__ == "__main__":
+    run_all()
