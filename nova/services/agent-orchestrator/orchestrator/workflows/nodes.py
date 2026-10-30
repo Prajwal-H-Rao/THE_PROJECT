@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Workflow nodes for NOVA agent orchestrator."""
+"""Workflow nodes for NOVA agent orchestrator (DEPRECATED).
+
+This module is DEPRECATED. Use agent_workflow.py for the LangGraph-based
+workflow implementation with Layer 6 payload labelling (Module 04 Task 8).
+
+This legacy module is retained only for backward compatibility with
+test_orchestrator.py which has not yet been migrated.
+"""
 
 import os
 import sys

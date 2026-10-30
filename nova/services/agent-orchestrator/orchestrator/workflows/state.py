@@ -39,16 +39,46 @@ class StepStatus(str, Enum):
 
 
 @dataclass
+class UntrustedPayload:
+    """Wrapper for external payloads that must be treated as untrusted (Module 04 Layer 6).
+    
+    Every external payload (MCP tool results, email bodies, document content, etc.)
+    is wrapped to enforce that it cannot change policy (spec:216).
+    """
+    data: Any
+    source_tool: str
+    trusted: bool = False
+    received_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "data": self.data,
+            "source_tool": self.source_tool,
+            "trusted": self.trusted,
+            "received_at": self.received_at,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "UntrustedPayload":
+        return cls(
+            data=data["data"],
+            source_tool=data["source_tool"],
+            trusted=data.get("trusted", False),
+            received_at=data.get("received_at", datetime.utcnow().isoformat()),
+        )
+
+
+@dataclass
 class Step:
     """A single step in the plan."""
     index: int
     tool: str
     arguments: Dict[str, Any]
+    status: "StepStatus" = StepStatus.PENDING
+    result: Optional["UntrustedPayload"] = None
     idempotency_key: Optional[str] = None
     requires_approval: bool = False
     approval_grant: Optional[str] = None
-    status: "StepStatus" = StepStatus.PENDING
-    result: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
     repair_attempts: int = 0
     policy_decision: Optional[Dict[str, Any]] = None
@@ -61,7 +91,6 @@ class WorkflowStateData:
     """Complete workflow state."""
     plan_id: str
     user_id: str
-    state: "WorkflowState" = "planned"
     steps: List[Step] = field(default_factory=list)
     current_step_index: int = 0
     turn_count: int = 0
@@ -73,6 +102,7 @@ class WorkflowStateData:
     cancellation_requested: bool = False
     last_error: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+    state: "WorkflowState" = "planned"
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -94,7 +124,21 @@ class WorkflowStateData:
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "WorkflowStateData":
-        steps = [Step(**s) for s in data.get("steps", [])]
+        steps = []
+        for s in data.get("steps", []):
+            result = s.get("result")
+            if result is not None and isinstance(result, dict):
+                # Reconstruct UntrustedPayload if it was serialized
+                if "data" in result and "source_tool" in result:
+                    s["result"] = UntrustedPayload.from_dict(result)
+                else:
+                    # Legacy format: plain dict, wrap it
+                    s["result"] = UntrustedPayload(
+                        data=result,
+                        source_tool="unknown",
+                        trusted=False,
+                    )
+            steps.append(Step(**s))
         state_val = data.get("state", "planned")
         last_error = data.get("last_error")
         if isinstance(state_val, str):

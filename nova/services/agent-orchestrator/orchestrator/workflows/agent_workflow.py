@@ -34,112 +34,23 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / "pack
 from tool import validate_tool_definition, ToolDefinition
 from call import validate_mcp_call, MCPCall
 
+# Import shared state definitions
+from .state import (
+    WorkflowState,
+    StepStatus,
+    Step,
+    WorkflowStateData,
+    UntrustedPayload,
+    MAX_STEPS,
+    MAX_TURNS,
+    PER_CALL_TIMEOUT,
+    DEFAULT_OVERALL_BUDGET,
+    REPAIR_ATTEMPTS,
+)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Constants
-MAX_STEPS = 6
-MAX_TURNS = 5
-PER_CALL_TIMEOUT = 30  # seconds
-DEFAULT_OVERALL_BUDGET = 300  # seconds (5 minutes)
-REPAIR_ATTEMPTS = 1
-
-# State definitions
-class WorkflowState(str, Enum):
-    PLANNED = "planned"
-    AWAITING_APPROVAL = "awaiting_approval"
-    APPROVED = "approved"
-    EXECUTING = "executing"
-    SUCCEEDED = "succeeded"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-    NEEDS_MANUAL_ACTION = "needs_manual_action"
-
-class StepStatus(str, Enum):
-    PENDING = "pending"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    SKIPPED = "skipped"
-
-# Type definitions
-ToolCall = Dict[str, Any]  # {tool, arguments, idempotency_key, requires_approval, approval_grant}
-PolicyDecision = Dict[str, Any]  # {decision, ruleId, policyVersion, approvalRequired, chatApprovalAllowed}
-AuditEvent = Dict[str, Any]
-
-@dataclass
-class Step:
-    """A single step in the plan."""
-    index: int
-    tool: str
-    arguments: Dict[str, Any]
-    idempotency_key: Optional[str] = None
-    requires_approval: bool = False
-    approval_grant: Optional[str] = None
-    status: StepStatus = StepStatus.PENDING
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
-    repair_attempts: int = 0
-    policy_decision: Optional[PolicyDecision] = None
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
-
-@dataclass
-class WorkflowStateData:
-    """Complete workflow state."""
-    plan_id: str
-    user_id: str
-    state: WorkflowState = WorkflowState.PLANNED
-    steps: List[Step] = field(default_factory=list)
-    current_step_index: int = 0
-    turn_count: int = 0
-    overall_budget_seconds: int = DEFAULT_OVERALL_BUDGET
-    budget_consumed_seconds: float = 0.0
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-    completed_at: Optional[str] = None
-    cancellation_requested: bool = False
-    last_error: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "plan_id": self.plan_id,
-            "user_id": self.user_id,
-            "state": self.state.value,
-            "steps": [asdict(s) for s in self.steps],
-            "current_step_index": self.current_step_index,
-            "turn_count": self.turn_count,
-            "overall_budget_seconds": self.overall_budget_seconds,
-            "budget_consumed_seconds": self.budget_consumed_seconds,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
-            "completed_at": self.completed_at,
-            "cancellation_requested": self.cancellation_requested,
-            "last_error": self.last_error,
-            "metadata": self.metadata,
-        }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "WorkflowStateData":
-        steps = [Step(**s) for s in data.get("steps", [])]
-        return cls(
-            plan_id=data["plan_id"],
-            user_id=data["user_id"],
-            state=WorkflowState(data["state"]),
-            steps=steps,
-            current_step_index=data.get("current_step_index", 0),
-            turn_count=data.get("turn_count", 0),
-            overall_budget_seconds=data.get("overall_budget_seconds", DEFAULT_OVERALL_BUDGET),
-            budget_consumed_seconds=data.get("budget_consumed_seconds", 0.0),
-            created_at=data.get("created_at", datetime.utcnow().isoformat()),
-            updated_at=data.get("updated_at", datetime.utcnow().isoformat()),
-            completed_at=data.get("completed_at"),
-            cancellation_requested=data.get("cancellation_requested", False),
-            last_error=data.get("last_error"),
-            metadata=data.get("metadata", {}),
-        )
 
 # Checkpointer setup
 CHECKPOINT_DB = os.getenv("NOVA_CHECKPOINT_DB", "/tmp/nova_checkpoints.sqlite")
@@ -509,7 +420,7 @@ def create_workflow_graph(
         
         try:
             # Call tool via MCP
-            result = mcp_client.call_tool(
+            mcp_response = mcp_client.call_tool(
                 tool=step.tool,
                 arguments=step.arguments,
                 idempotency_key=step.idempotency_key,
@@ -520,19 +431,30 @@ def create_workflow_graph(
             elapsed = time.time() - start_time
             workflow.budget_consumed_seconds += elapsed
             
-            if result.get("ok"):
-                step.result = result.get("result")
-                step.status = StepStatus.COMPLETED
+            # Layer 6: Label every external payload untrusted (Module 04 Task 8).
+            # Wrap the MCP tool result in UntrustedPayload to enforce that
+            # external payloads cannot change policy (spec:216).
+            tool_output = mcp_response.get("result", {})
+            step.result = UntrustedPayload(
+                data=tool_output,
+                source_tool=step.tool,
+                trusted=False,
+            )
+            
+            if mcp_response.get("ok"):
+                # Unwrap for verification and validation (Layer 6: labelling only;
+                # policy enforcement on untrusted data is Layer 7)
+                tool_output_for_verification = step.result.data
                 
                 # Verify result
-                if not verifier.verify(step.tool, step.result, {}):
+                if not verifier.verify(step.tool, tool_output_for_verification, {}):
                     step.status = StepStatus.FAILED
                     step.error = "Verification failed"
                     workflow.state = WorkflowState.FAILED
                     workflow.last_error = "Tool result verification failed"
                 else:
                     # Validate result
-                    if not validators.validate_enum(step.result.get("status"), ["ok", "success"], "status"):
+                    if not validators.validate_enum(tool_output_for_verification.get("status"), ["ok", "success"], "status"):
                         step.status = StepStatus.FAILED
                         step.error = "Invalid result status"
                         workflow.state = WorkflowState.FAILED
@@ -542,7 +464,7 @@ def create_workflow_graph(
                 workflow.current_step_index += 1
                 
             else:
-                step.error = result.get("error", {}).get("message", "Tool execution failed")
+                step.error = mcp_response.get("error", {}).get("message", "Tool execution failed")
                 step.status = StepStatus.FAILED
                 step.repair_attempts += 1
                 

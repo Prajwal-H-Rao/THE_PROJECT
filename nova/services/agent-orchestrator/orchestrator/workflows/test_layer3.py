@@ -11,7 +11,7 @@ sys.path.insert(0, str(WORKFLOWS.parent.parent))  # nova/services/agent-orchestr
 
 from orchestrator.workflows.tool_catalogue import load_tool_catalogue, CatalogueError, load_catalogue_families
 from orchestrator.workflows.plan_validation import validate_plan, validate_step
-from orchestrator.workflows.state import WorkflowStateData
+from orchestrator.workflows.state import WorkflowStateData, UntrustedPayload
 from orchestrator.workflows.graph import route_after_plan
 from orchestrator.workflows import nodes
 
@@ -185,6 +185,110 @@ def test_catalogue_family_join_complete():
     print("✓ catalogue family join complete")
 
 
+def test_untrusted_payload_wrapping():
+    """Layer 6: MCP tool results are wrapped in UntrustedPayload with trusted=False."""
+    payload = UntrustedPayload(
+        data={"messages": [{"body": "test"}]},
+        source_tool="inbox.read",
+    )
+    assert payload.data == {"messages": [{"body": "test"}]}
+    assert payload.source_tool == "inbox.read"
+    assert payload.trusted is False
+    assert payload.received_at is not None
+    
+    # Test serialization round-trip
+    d = payload.to_dict()
+    restored = UntrustedPayload.from_dict(d)
+    assert restored.data == payload.data
+    assert restored.source_tool == payload.source_tool
+    assert restored.trusted is False
+    print("✓ UntrustedPayload wrapping and serialization works")
+
+
+def test_untrusted_payload_from_dict_legacy():
+    """WorkflowStateData.from_dict reconstructs UntrustedPayload from plain dict."""
+    data = {
+        "plan_id": "p",
+        "user_id": "u",
+        "state": "planned",
+        "steps": [{
+            "index": 0,
+            "tool": "inbox.read",
+            "arguments": {"query": "unread"},
+            "idempotency_key": None,
+            "requires_approval": False,
+            "approval_grant": None,
+            "status": "pending",
+            "result": {"data": {"messages": []}, "source_tool": "inbox.read", "trusted": False, "received_at": "2026-01-01T00:00:00"},
+            "error": None,
+            "repair_attempts": 0,
+            "policy_decision": None,
+            "started_at": None,
+            "completed_at": None,
+        }],
+        "current_step_index": 0,
+        "turn_count": 0,
+        "overall_budget_seconds": 300,
+        "budget_consumed_seconds": 0.0,
+        "created_at": "2026-01-01T00:00:00",
+        "updated_at": "2026-01-01T00:00:00",
+        "completed_at": None,
+        "cancellation_requested": False,
+        "last_error": None,
+        "metadata": {},
+    }
+    workflow = WorkflowStateData.from_dict(data)
+    step = workflow.steps[0]
+    assert step.result is not None
+    assert isinstance(step.result, UntrustedPayload)
+    assert step.result.source_tool == "inbox.read"
+    assert step.result.trusted is False
+    assert step.result.data == {"messages": []}
+    print("✓ from_dict reconstructs UntrustedPayload from dict")
+
+
+def test_untrusted_payload_legacy_format():
+    """WorkflowStateData.from_dict handles legacy plain dict result."""
+    data = {
+        "plan_id": "p",
+        "user_id": "u",
+        "state": "planned",
+        "steps": [{
+            "index": 0,
+            "tool": "inbox.read",
+            "arguments": {"query": "unread"},
+            "idempotency_key": None,
+            "requires_approval": False,
+            "approval_grant": None,
+            "status": "pending",
+            "result": {"messages": [{"body": "hello"}]},  # Legacy plain dict
+            "error": None,
+            "repair_attempts": 0,
+            "policy_decision": None,
+            "started_at": None,
+            "completed_at": None,
+        }],
+        "current_step_index": 0,
+        "turn_count": 0,
+        "overall_budget_seconds": 300,
+        "budget_consumed_seconds": 0.0,
+        "created_at": "2026-01-01T00:00:00",
+        "updated_at": "2026-01-01T00:00:00",
+        "completed_at": None,
+        "cancellation_requested": False,
+        "last_error": None,
+        "metadata": {},
+    }
+    workflow = WorkflowStateData.from_dict(data)
+    step = workflow.steps[0]
+    assert step.result is not None
+    assert isinstance(step.result, UntrustedPayload)
+    assert step.result.source_tool == "unknown"  # Legacy format gets "unknown"
+    assert step.result.trusted is False
+    assert step.result.data == {"messages": [{"body": "hello"}]}
+    print("✓ legacy plain dict result wrapped as UntrustedPayload")
+
+
 def run_all():
     test_happy_path_passes()
     test_unenumerated_tool_denied()
@@ -202,6 +306,9 @@ def run_all():
     test_plan_node_scenario_plumbing()
     test_plan_node_happy_path_survives()
     test_catalogue_family_join_complete()
+    test_untrusted_payload_wrapping()
+    test_untrusted_payload_from_dict_legacy()
+    test_untrusted_payload_legacy_format()
     print("\n✓ All layer 3 tests passed!")
 
 
