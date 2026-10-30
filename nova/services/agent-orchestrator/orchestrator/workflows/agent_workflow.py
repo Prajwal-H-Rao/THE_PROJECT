@@ -421,7 +421,7 @@ def create_workflow_graph(
         policy_request = {
             "actor": "user",
             "scope": f"{step.tool.split('.')[0]}:{'read' if step.requires_approval is False else 'write'}",
-            "action": step.tool.split('.')[-1],
+            "action": step.tool,  # full operation_id e.g., "inbox.send"
             "target": step.arguments.get("target", "own"),
             "payloadHash": step.idempotency_key or "",
         }

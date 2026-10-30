@@ -19,6 +19,8 @@ import {
   computeApprovalHash,
 } from "./grant-verification-types.js";
 
+export { VerifyGrantOptions };
+
 /**
  * Client for verifying and consuming approval grants.
  * Domain services use this to enforce approval policies.

@@ -27,7 +27,7 @@ function grantInput(overrides: Partial<CreateGrantInput> = {}): CreateGrantInput
   return {
     userId: UUID,
     service: "inbox-service",
-    action: "send",
+    action: "inbox.send",
     target: "message:draft-1",
     payload: { body: "hello", to: "x@example.com" },
     ttlSeconds: 300,
@@ -40,6 +40,7 @@ function verifyInput(overrides: Partial<GrantVerifyAttempt> = {}): GrantVerifyAt
   return {
     userId: UUID,
     service: "inbox-service",
+    action: "inbox.send",
     target: "message:draft-1",
     payload: { body: "hello", to: "x@example.com" },
     policyVersion: "1",
@@ -48,49 +49,49 @@ function verifyInput(overrides: Partial<GrantVerifyAttempt> = {}): GrantVerifyAt
   };
 }
 
-test("create and verify the same payload succeeds", () => {
+test("create and verify the same payload succeeds", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   assert.equal(record.nonce.length, 32);
   assert.equal(record.payloadHash.length, 64);
   assert.equal(grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: NOW + 1000 })).ok, true);
 });
 
-test("canonical retransmission stays valid across key order and whitespace", () => {
+test("canonical retransmission stays valid across key order and whitespace", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   const reordered = verifyInput({ payload: { to: "x@example.com", body: "hello" }, nowMs: NOW + 1000 });
   assert.equal(grantsService.verifyGrant(record.nonce, reordered).ok, true);
 });
 
-test("one material value change invalidates the grant", () => {
+test("one material value change invalidates the grant", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   const altered = verifyInput({ payload: { body: "hello ", to: "x@example.com" }, nowMs: NOW + 1000 });
   const verdict = grantsService.verifyGrant(record.nonce, altered);
   assert.deepEqual(verdict, { ok: false, reason: "payload_hash_mismatch" });
 });
 
-test("a non-UUID user is rejected at creation and at verification", () => {
+test("a non-UUID user is rejected at creation and at verification", async () => {
   const { grantsService } = service();
-  assert.throws(() => grantsService.createGrant(grantInput({ userId: "alice" })), GrantValidationError);
-  assert.throws(() => grantsService.createGrant(grantInput({ userId: "not a uuid" })), GrantValidationError);
-  const record = grantsService.createGrant(grantInput());
+  await assert.rejects(async () => await grantsService.createGrant(grantInput({ userId: "alice" })));
+  await assert.rejects(async () => await grantsService.createGrant(grantInput({ userId: "not a uuid" })), GrantValidationError);
+  const record = await grantsService.createGrant(grantInput());
   // WHY: record.userId is a UUID, so the attempt never matches a non-UUID form.
   const verdict = grantsService.verifyGrant(record.nonce, verifyInput({ userId: "alice", nowMs: NOW + 1000 }));
   assert.deepEqual(verdict, { ok: false, reason: "invalid_user" });
 });
 
-test("cross-user verification is denied", () => {
+test("cross-user verification is denied", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   const verdict = grantsService.verifyGrant(record.nonce, verifyInput({ userId: OTHER_UUID, nowMs: NOW + 1000 }));
   assert.deepEqual(verdict, { ok: false, reason: "user_mismatch" });
 });
 
-test("cross-service and cross-target verification are denied", () => {
+test("cross-service and cross-target verification are denied", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   assert.deepEqual(
     grantsService.verifyGrant(record.nonce, verifyInput({ service: "calendar-service", nowMs: NOW + 1000 })),
     { ok: false, reason: "service_mismatch" },
@@ -101,9 +102,9 @@ test("cross-service and cross-target verification are denied", () => {
   );
 });
 
-test("an expired grant is denied", () => {
+test("an expired grant is denied", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput({ ttlSeconds: 60 }));
+  const record = await grantsService.createGrant(grantInput({ ttlSeconds: 60 }));
   assert.equal(grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: NOW + 59_000 })).ok, true);
   assert.deepEqual(
     grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: NOW + 60_000 })),
@@ -111,9 +112,9 @@ test("an expired grant is denied", () => {
   );
 });
 
-test("a policy version change is denied", () => {
+test("a policy version change is denied", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   assert.deepEqual(
     grantsService.verifyGrant(record.nonce, verifyInput({ policyVersion: 2, nowMs: NOW + 1000 })),
     { ok: false, reason: "policy_version_mismatch" },
@@ -122,7 +123,7 @@ test("a policy version change is denied", () => {
   assert.equal(grantsService.verifyGrant(record.nonce, verifyInput({ policyVersion: 1, nowMs: NOW + 1000 })).ok, true);
 });
 
-test("an unknown nonce is denied cleanly", () => {
+test("an unknown nonce is denied cleanly", async () => {
   const { grantsService } = service();
   assert.deepEqual(
     grantsService.verifyGrant("ab".repeat(16), verifyInput()),
@@ -130,13 +131,13 @@ test("an unknown nonce is denied cleanly", () => {
   );
 });
 
-test("the wired verify path judges expiry with the server clock, not a caller clock", () => {
+test("the wired verify path judges expiry with the server clock, not a caller clock", async () => {
   const { grantsService } = service();
   // WHY: create the grant already expired relative to the real clock, then
   // forge a caller clock that claims the action is still in time. Only a
   // server-side clock denies; a caller-controlled clock would verify.
   const hourAgo = Date.now() - 3_600_000;
-  const record = grantsService.createGrant(grantInput({ ttlSeconds: 60, nowMs: hourAgo }));
+  const record = await grantsService.createGrant(grantInput({ ttlSeconds: 60, nowMs: hourAgo }));
   assert.deepEqual(
     grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: hourAgo + 60_000 })),
     { ok: false, reason: "expired" },
@@ -147,15 +148,15 @@ test("the wired verify path judges expiry with the server clock, not a caller cl
   assert.deepEqual(verdict, { ok: false, reason: "expired" });
 });
 
-test("invalid creation inputs all throw with a reason code", () => {
+test("invalid creation inputs all throw with a reason code", async () => {
   const { grantsService } = service();
-  assert.throws(() => grantsService.createGrant(grantInput({ ttlSeconds: 0 })), GrantValidationError);
-  assert.throws(() => grantsService.createGrant(grantInput({ ttlSeconds: -5 })), GrantValidationError);
-  assert.throws(() => grantsService.createGrant(grantInput({ service: "" })), GrantValidationError);
-  assert.throws(() => grantsService.createGrant(grantInput({ action: "" })), GrantValidationError);
-  assert.throws(() => grantsService.createGrant(grantInput({ target: "" })), GrantValidationError);
+  await assert.rejects(async () => await grantsService.createGrant(grantInput({ ttlSeconds: 0 })), GrantValidationError);
+  await assert.rejects(async () => await grantsService.createGrant(grantInput({ ttlSeconds: -5 })), GrantValidationError);
+  await assert.rejects(async () => await grantsService.createGrant(grantInput({ service: "" })), GrantValidationError);
+  await assert.rejects(async () => await grantsService.createGrant(grantInput({ action: "" })), GrantValidationError);
+  await assert.rejects(async () => await grantsService.createGrant(grantInput({ target: "" })), GrantValidationError);
   try {
-    grantsService.createGrant(grantInput({ payload: { body: NaN } }));
+    await grantsService.createGrant(grantInput({ payload: { body: NaN } }));
     assert.fail("expected throw");
   } catch (error) {
     assert.ok(error instanceof GrantValidationError);
@@ -301,7 +302,7 @@ class RaceTestRepository implements GrantRepository {
 test("consume is single-use: concurrent consume calls on same nonce yield exactly one success", async () => {
   const raceRepo = new RaceTestRepository();
   const grantsService = new GrantsService(raceRepo);
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   // Two concurrent consume calls on the same nonce.
   const [result1, result2] = await Promise.all([
     grantsService.consumeGrant(record.nonce),
@@ -313,9 +314,9 @@ test("consume is single-use: concurrent consume calls on same nonce yield exactl
   assert.deepEqual(failure, { ok: false, reason: "already_used" });
 });
 
-test("verifyBinding returns ok on consumed grant (binding valid, just spent)", () => {
+test("verifyBinding returns ok on consumed grant (binding valid, just spent)", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   // Consume via service directly (bypassing race repo for this check).
   grantsService.consumeGrant(record.nonce);
   // Binding is still valid; consumption is separate from binding.
@@ -330,7 +331,7 @@ test("consume with malformed nonce throws validation error", async () => {
 
 test("revoke succeeds on active grant", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   const verdict = await grantsService.revokeGrant(record.nonce);
   assert.equal(verdict.ok, true);
   assert.ok(typeof verdict.revokedAtMs === "number");
@@ -342,7 +343,7 @@ test("revoke succeeds on active grant", async () => {
 
 test("revoke on consumed grant fails with already_used", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   await grantsService.consumeGrant(record.nonce);
   const verdict = await grantsService.revokeGrant(record.nonce);
   assert.deepEqual(verdict, { ok: false, reason: "already_used" });
@@ -350,7 +351,7 @@ test("revoke on consumed grant fails with already_used", async () => {
 
 test("consume on revoked grant fails with already_revoked", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   await grantsService.revokeGrant(record.nonce);
   const verdict = await grantsService.consumeGrant(record.nonce);
   assert.deepEqual(verdict, { ok: false, reason: "already_revoked" });
@@ -358,7 +359,7 @@ test("consume on revoked grant fails with already_revoked", async () => {
 
 test("verify denies revoked grant before expiry check", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput({ ttlSeconds: 300 }));
+  const record = await grantsService.createGrant(grantInput({ ttlSeconds: 300 }));
   await grantsService.revokeGrant(record.nonce);
   // Grant is revoked but not expired — verifyBinding should deny as "revoked"
   const verdict = grantsService.verifyGrant(record.nonce, verifyInput({ nowMs: NOW + 1000 }));
@@ -374,7 +375,7 @@ test("revoke with malformed nonce throws validation error", async () => {
 test("concurrent revoke calls on same nonce are idempotent (both succeed with same timestamp)", async () => {
   const raceRepo = new RaceTestRepository();
   const grantsService = new GrantsService(raceRepo);
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   // Two concurrent revoke calls on the same nonce.
   const [result1, result2] = await Promise.all([
     grantsService.revokeGrant(record.nonce),
@@ -388,7 +389,7 @@ test("concurrent revoke calls on same nonce are idempotent (both succeed with sa
 test("concurrent consume vs revoke on same nonce: exactly one succeeds", async () => {
   const raceRepo = new RaceTestRepository();
   const grantsService = new GrantsService(raceRepo);
-  const record = grantsService.createGrant(grantInput());
+  const record = await grantsService.createGrant(grantInput());
   // Two concurrent calls: one consume, one revoke.
   const [consumeResult, revokeResult] = await Promise.all([
     grantsService.consumeGrant(record.nonce),
@@ -411,7 +412,7 @@ function grantWithDetailsInput(overrides: Partial<CreateGrantWithDetailsInput> =
   return {
     userId: UUID,
     service: "inbox-service",
-    action: "send",
+    action: "inbox.send",
     target: "message:draft-1",
     payload: { body: "hello", to: "x@example.com" },
     ttlSeconds: 300,
@@ -423,7 +424,7 @@ function grantWithDetailsInput(overrides: Partial<CreateGrantWithDetailsInput> =
 test("create grant with details and get card verifies hash", async () => {
   const { grantsService } = service();
   const preview = { body: "hello", to: "x@example.com" };
-  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({ preview }));
+  const record = await grantsService.createGrantWithDetails(grantWithDetailsInput({ preview }));
   assert.ok(record.cardHash);
   assert.equal(record.cardHash.length, 64);
   const card = await grantsService.getGrantCard(record.nonce, "inbox-service");
@@ -438,7 +439,7 @@ test("create grant with details and get card verifies hash", async () => {
 test("edit preview locally causes hash mismatch", async () => {
   const { grantsService } = service();
   const preview = { body: "hello", to: "x@example.com" };
-  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({ preview }));
+  const record = await grantsService.createGrantWithDetails(grantWithDetailsInput({ preview }));
   const card = await grantsService.getGrantCard(record.nonce, "inbox-service");
   assert.ok(card);
   const originalHash = computeApprovalHash(card.preview!);
@@ -451,7 +452,7 @@ test("edit preview locally causes hash mismatch", async () => {
 
 test("card endpoint returns 404 for wrong service", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({ preview: { body: "hello" } }));
+  const record = await grantsService.createGrantWithDetails(grantWithDetailsInput({ preview: { body: "hello" } }));
   const card = await grantsService.getGrantCard(record.nonce, "calendar-service");
   assert.equal(card, null);
 });
@@ -464,21 +465,21 @@ test("card endpoint returns 404 for unknown nonce", async () => {
 
 test("card endpoint returns null for grant without preview", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput()); // no preview
+  const record = await grantsService.createGrant(grantInput()); // no preview
   const card = await grantsService.getGrantCard(record.nonce, "inbox-service");
   assert.equal(card, null);
 });
 
-test("create grant with details validates preview size limit", () => {
+test("create grant with details validates preview size limit", async () => {
   const { grantsService } = service();
   const largePreview = { data: "x".repeat(MAX_PREVIEW_BYTES + 1) };
-  assert.throws(() => grantsService.createGrantWithDetails(grantWithDetailsInput({ preview: largePreview })), GrantValidationError);
+  await assert.rejects(async () => await grantsService.createGrantWithDetails(grantWithDetailsInput({ preview: largePreview })), GrantValidationError);
 });
 
-test("create grant with details stores provided permissions and consequence", () => {
+test("create grant with details stores provided permissions and consequence", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrantWithDetails(grantWithDetailsInput({
-    action: "send",
+  const record = await grantsService.createGrantWithDetails(grantWithDetailsInput({
+    action: "inbox.send",
     preview: { body: "hello" },
     ruleId: "test-rule",
     permissions: ["send"],
@@ -492,26 +493,18 @@ test("create grant with details stores provided permissions and consequence", ()
   assert.equal(record.consequence, "Medium risk: may modify own data");
 });
 
-test("rejects free-text payload at grant creation (Task 11)", () => {
+test("rejects free-text payload at grant creation (Task 11)", async () => {
   const { grantsService } = service();
   const freeTexts = ["yes", "approve", "ok", "okay", "confirm", "agree", "allow", "sure", "y", "yep", "yeah"];
   for (const text of freeTexts) {
-    assert.throws(
-      () => grantsService.createGrant(grantInput({ payload: text })),
-      GrantValidationError,
-      `free text "${text}" should be rejected`
-    );
-    assert.throws(
-      () => grantsService.createGrantWithDetails(grantWithDetailsInput({ payload: text })),
-      GrantValidationError,
-      `free text "${text}" should be rejected in with-details`
-    );
+    await assert.rejects(async () => await grantsService.createGrant(grantInput({ payload: text })));
+    await assert.rejects(async () => await grantsService.createGrantWithDetails(grantWithDetailsInput({ payload: text })));
   }
 });
 
-test("rejects free-text payload at verification (Task 11)", () => {
+test("rejects free-text payload at verification (Task 11)", async () => {
   const { grantsService } = service();
-  const record = grantsService.createGrant(grantInput({ payload: { body: "hello" } }));
+  const record = await grantsService.createGrant(grantInput({ payload: { body: "hello" } }));
   const freeTexts = ["yes", "approve", "ok", "okay", "confirm", "agree", "allow", "sure", "y", "yep", "yeah"];
   for (const text of freeTexts) {
     const verdict = grantsService.verifyGrant(record.nonce, verifyInput({ payload: text }));

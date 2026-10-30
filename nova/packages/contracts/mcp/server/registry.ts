@@ -4,7 +4,7 @@ import { ToolDefinition, validate_tool_definition, CanonicalFamily } from "../to
 import { validate_mcp_call, MCPCall, MCPCallContext } from "../call.js";
 import { validate_mcp_audit_event, MCPAuditEvent } from "../audit.js";
 import { verifyToken, VerifyOptions, ServiceClaims } from "../../service-token.js";
-import { verifyGrant } from "../../grant-verification.js";
+import { GrantVerificationClient, VerifyGrantOptions } from "../../grant-verification.js";
 
 /** Loaded tool catalogue. */
 export interface ToolCatalogue {
@@ -12,18 +12,28 @@ export interface ToolCatalogue {
   readonly byFamily: Map<CanonicalFamily, ToolDefinition[]>;
 }
 
-/** Load and validate the tool catalogue from JSON files. */
-export function loadCatalogue(catalogueDir: string): ToolCatalogue {
-  const fs = require("fs");
-  const path = require("path");
+/** Load and validate the tool catalogue from JSON files.
+ *  Returns empty catalogue on ENOENT (allows services without catalogue dir to start). */
+export async function loadCatalogue(catalogueDir: string): Promise<ToolCatalogue> {
+  const { readdirSync, readFileSync } = await import("fs");
+  const { join } = await import("path");
   
   const tools = new Map<string, ToolDefinition>();
   const byFamily = new Map<CanonicalFamily, ToolDefinition[]>();
   
-  const files = fs.readdirSync(catalogueDir).filter(f => f.endsWith(".json"));
+  let files: string[];
+  try {
+    files = readdirSync(catalogueDir).filter((f: string) => f.endsWith(".json"));
+  } catch (err) {
+    const e = err as NodeJS.ErrnoException;
+    if (e && e.code === "ENOENT") {
+      return { tools, byFamily };
+    }
+    throw err;
+  }
   
   for (const file of files) {
-    const content = fs.readFileSync(path.join(catalogueDir, file), "utf8");
+    const content = readFileSync(join(catalogueDir, file), "utf8");
     const familyData = JSON.parse(content);
     
     for (const op of familyData.operations) {
@@ -72,12 +82,13 @@ export function authorizeCall(
 }
 
 /** Validate and authorize an MCP call. */
-export function validateAndAuthorizeCall(
+export async function validateAndAuthorizeCall(
   rawCall: Record<string, unknown>,
   catalogue: ToolCatalogue,
   serviceJWT: string,
-  audience: string
-): { ok: true; context: MCPCallContext } | { ok: false; error: string; code: string } {
+  audience: string,
+  grantClient: GrantVerificationClient
+): Promise<{ ok: true; context: MCPCallContext } | { ok: false; error: string; code: string }> {
   // Validate call structure
   let mcpCall: MCPCall;
   try {
@@ -115,12 +126,16 @@ export function validateAndAuthorizeCall(
       return { ok: false, error: "Approval grant required", code: "approval_required" };
     }
     
-    // Verify the grant
-    const grantResult = verifyGrant(mcpCall.approval_grant, {
-      tool: tool.name,
+    // Verify the grant using the grant client
+    const grantOptions: VerifyGrantOptions = {
       userId: mcpCall.user_id!,
-      payloadHash: mcpCall.arguments, // Simplified - should hash the actual payload
-    });
+      target: mcpCall.arguments.target as string ?? "own",
+      action: tool.name, // full operation_id e.g., "inbox.send"
+      payload: mcpCall.arguments,
+      policyVersion: "1", // TODO: get from context
+    };
+    
+    const grantResult = await grantClient.verifyGrant(mcpCall.approval_grant!, grantOptions);
     
     if (!grantResult.ok) {
       return { ok: false, error: "Invalid or expired approval grant", code: "approval_revoked" };

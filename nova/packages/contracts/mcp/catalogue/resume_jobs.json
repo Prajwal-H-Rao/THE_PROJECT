@@ -5,8 +5,34 @@
       "operation_id": "resume_jobs.search",
       "name": "resume_jobs.search",
       "description": "Search job listings",
-      "arguments": {"schema": {"type": "object", "properties": {"query": {"type": "string"}, "location": {"type": "string"}}, "required": ["query", "location"]}},
-      "output": {"schema": {"type": "object", "properties": {"jobs": {"type": "array"}}, "required": []}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "query",
+            "location"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "jobs": {
+              "type": "array"
+            }
+          },
+          "required": []
+        }
+      },
       "classification": "read",
       "risk_tier": "tier1",
       "idempotency": "none",
@@ -15,15 +41,48 @@
       "owning_service": "jobs-service",
       "mcp_server": "jobs-mcp",
       "resource_scope": "job_listings",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["jobs:search"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "jobs:search"
+      ],
+      "version": 1
     },
     {
       "operation_id": "resume_jobs.apply",
       "name": "resume_jobs.apply",
       "description": "Apply to a job",
-      "arguments": {"schema": {"type": "object", "properties": {"job_id": {"type": "string"}, "cover_letter": {"type": "string"}}, "required": ["job_id", "cover_letter"]}},
-      "output": {"schema": {"type": "object", "properties": {"application_id": {"type": "string"}}, "required": ["application_id"]}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string"
+            },
+            "cover_letter": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "job_id",
+            "cover_letter"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "application_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "application_id"
+          ]
+        }
+      },
       "classification": "write",
       "risk_tier": "tier3",
       "idempotency": "idempotency_key",
@@ -32,8 +91,14 @@
       "owning_service": "jobs-service",
       "mcp_server": "jobs-mcp",
       "resource_scope": "external_application",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["jobs:apply"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "jobs:apply"
+      ],
+      "version": 1
     }
-  ]
+  ],
+  "version": 1
 }

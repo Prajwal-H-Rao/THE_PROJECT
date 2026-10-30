@@ -31,6 +31,13 @@ export interface PolicyDecisionRequest {
   readonly target: string;
   readonly sensitivity?: Sensitivity;
   readonly payloadHash?: string;
+  // Optional fields supplied by the verified service plane (never chat/body):
+  // userId: authenticated user from the service plane (session-derived)
+  // resourceOwnerId: concrete target owner when provided by resource service
+  // grantNonce: optional grant reference by nonce (state-only check)
+  readonly userId?: string;
+  readonly resourceOwnerId?: string;
+  readonly grantNonce?: string;
 }
 
 export interface PolicyDecisionResponse {
@@ -146,6 +153,13 @@ export function validateDecisionRequest(req: unknown): req is PolicyDecisionRequ
     typeof r.payloadHash !== "string"
   ) {
     return false;
+  }
+  // Optional fields from the verified service plane:
+  const optionalStringFields = ["userId", "resourceOwnerId", "grantNonce"];
+  for (const field of optionalStringFields) {
+    if (field in r && r[field] !== undefined && typeof r[field] !== "string") {
+      return false;
+    }
   }
   return true;
 }

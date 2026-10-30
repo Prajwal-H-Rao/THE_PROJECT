@@ -39,6 +39,7 @@ test("GrantVerificationClient: verifyGrant success", async () => {
   const result = await client.verifyGrant("abc123", {
     userId: "user-123",
     target: "message:draft-1",
+    action: "inbox.send",
     payload: { body: "hello" },
     policyVersion: "1",
   });
@@ -64,6 +65,7 @@ test("GrantVerificationClient: verifyGrant failure with reason", async () => {
   const result = await client.verifyGrant("abc123", {
     userId: "user-123",
     target: "message:draft-1",
+    action: "inbox.send",
     payload: { body: "different" },
     policyVersion: "1",
   });
@@ -176,6 +178,7 @@ test("GrantVerificationClient: verifyAndConsume flow", async () => {
   const result = await client.verifyAndConsume("abc123", {
     userId: "user-123",
     target: "message:draft-1",
+    action: "inbox.send",
     payload: { body: "hello" },
     policyVersion: "1",
   });
@@ -201,6 +204,7 @@ test("GrantVerificationClient: verifyAndConsume fails fast on verify failure", a
   const result = await client.verifyAndConsume("abc123", {
     userId: "user-123",
     target: "message:draft-1",
+    action: "inbox.send",
     payload: { body: "hello" },
     policyVersion: "1",
   });
@@ -229,6 +233,7 @@ test("GrantVerificationClient: error handling for non-OK responses", async () =>
     await client.verifyGrant("invalid", {
       userId: "user-123",
       target: "message:draft-1",
+      action: "inbox.send",
       payload: { body: "hello" },
       policyVersion: "1",
     });

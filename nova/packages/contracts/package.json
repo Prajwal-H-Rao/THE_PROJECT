@@ -63,10 +63,14 @@
     "./mcp/audit": {
       "types": "./dist/mcp/audit.d.ts",
       "default": "./dist/mcp/audit.js"
+    },
+    "./mcp/server": {
+      "types": "./dist/mcp/server/index.d.ts",
+      "default": "./dist/mcp/server/index.js"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && cp -r mcp/catalogue dist/mcp/",
     "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/grant-verification.test.js dist/audit-contracts.test.js dist/migrations/runner.test.js dist/mcp/tool.test.js dist/mcp/call.test.js dist/mcp/audit.test.js"
   },
   "devDependencies": {

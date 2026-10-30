@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { PolicyDecisionService } from "./policy-decision.service.js";
 import { BulkDecisionRequest } from "./policy-bulk-schema.js";
 import { resetPolicyVersion } from "./policy-version.js";
+import { CallerContext } from "./authorization.js";
 
 test("bulk: all allow actions returns allow", () => {
   resetPolicyVersion();
@@ -16,7 +17,8 @@ test("bulk: all allow actions returns allow", () => {
       { actor: "user", scope: "calendar_tasks:write", action: "create_task", target: "own_tasks" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.decision, "allow");
   assert.strictEqual(decision.hasEscalation, false);
   assert.strictEqual(decision.items.length, 3);
@@ -34,7 +36,8 @@ test("bulk: any deny returns deny", () => {
       { actor: "user", scope: "calendar_tasks:read", action: "read", target: "own_events_tasks" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.decision, "deny");
   assert.strictEqual(decision.reason, "Batch contains denied action");
   const deniedItem = decision.items.find((i: { decision: string }) => i.decision === "deny");
@@ -51,7 +54,8 @@ test("bulk: any needs_approval returns needs_approval", () => {
       { actor: "user", scope: "inbox:draft", action: "draft", target: "own_drafts", payloadHash: "hash123" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.decision, "needs_approval");
   assert.strictEqual(decision.reason, "Batch contains action requiring approval");
   const needsApprovalItem = decision.items.find((i: { decision: string }) => i.decision === "needs_approval");
@@ -67,7 +71,8 @@ test("bulk: escalation action in batch forces needs_approval", () => {
       { actor: "user", scope: "jobs:apply", action: "apply", target: "external_application", payloadHash: "hash123" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.hasEscalation, true);
   assert.strictEqual(decision.decision, "needs_approval");
   assert.ok(decision.reason?.includes("escalation"));
@@ -82,7 +87,8 @@ test("bulk: finance.import escalation forces needs_approval", () => {
       { actor: "user", scope: "finance:import", action: "import", target: "external_data", payloadHash: "hash456" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.hasEscalation, true);
   assert.strictEqual(decision.decision, "needs_approval");
   assert.ok(decision.reason?.includes("escalation"));
@@ -97,7 +103,8 @@ test("bulk: integrations.link escalation forces needs_approval", () => {
       { actor: "user", scope: "integrations:link", action: "link", target: "external_identity", payloadHash: "hash2" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.hasEscalation, true);
   assert.strictEqual(decision.decision, "needs_approval");
   assert.ok(decision.reason?.includes("escalation"));
@@ -112,7 +119,8 @@ test("bulk: inbox.send escalation forces needs_approval", () => {
       { actor: "user", scope: "inbox:send", action: "send", target: "external_recipients", payloadHash: "hash123" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.hasEscalation, true);
   assert.strictEqual(decision.decision, "needs_approval");
 });
@@ -120,7 +128,8 @@ test("bulk: inbox.send escalation forces needs_approval", () => {
 test("bulk: empty items array is rejected", () => {
   const service = new PolicyDecisionService();
   const request: any = { items: [] };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.decision, "deny");
   assert.strictEqual(decision.reason, "Invalid bulk decision request format");
 });
@@ -133,7 +142,8 @@ test("bulk: invalid item in batch is rejected", () => {
       { actor: "user" }, // missing required fields
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.decision, "deny");
   assert.strictEqual(decision.reason, "Invalid bulk decision request format");
 });
@@ -146,7 +156,8 @@ test("bulk: item results contain correct metadata", () => {
       { actor: "user", scope: "inbox:send", action: "send", target: "external_recipients", payloadHash: "hash2" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.items.length, 2);
   const item0 = decision.items[0];
   const item1 = decision.items[1];
@@ -169,7 +180,8 @@ test("bulk: chat approval metadata preserved in results", () => {
       { actor: "user", scope: "inbox:read", action: "read", target: "own_messages", payloadHash: "hash1" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   const item = decision.items[0];
   assert.ok(item);
   assert.strictEqual(item.chatApprovalAllowed, true);
@@ -183,7 +195,8 @@ test("bulk: high-risk action without payloadHash returns deny with chat_approval
       { actor: "user", scope: "inbox:send", action: "send", target: "external_recipients" }, // no payloadHash
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.decision, "needs_approval");
   const item = decision.items[0];
   assert.ok(item);
@@ -199,7 +212,8 @@ test("bulk: response includes policyVersion and hasEscalation", () => {
       { actor: "user", scope: "jobs:apply", action: "apply", target: "external_application", payloadHash: "hash123" },
     ],
   };
-  const decision = service.decideBulk(request);
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
+  const decision = service.decideBulk(request, caller);
   assert.strictEqual(decision.policyVersion, 1);
   assert.strictEqual(decision.hasEscalation, true);
   assert.ok(decision.reason);

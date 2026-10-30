@@ -68,15 +68,15 @@ export class GrantsService {
   constructor(private readonly repository: GrantRepository) {}
 
   /** Create one grant bound to payload hash, user, target, expiry and nonce. */
-  createGrant(input: CreateGrantInput): GrantRecord {
-    const record = createGrant(this.repository, input);
+  async createGrant(input: CreateGrantInput): Promise<GrantRecord> {
+    const record = await createGrant(this.repository, input);
     approvalMetrics.recordCreated(record);
     return record;
   }
 
   /** Create a grant with approval card details (Task 8). */
-  createGrantWithDetails(input: CreateGrantWithDetailsInput): GrantRecord {
-    const record = createGrantWithDetails(this.repository, input);
+  async createGrantWithDetails(input: CreateGrantWithDetailsInput): Promise<GrantRecord> {
+    const record = await createGrantWithDetails(this.repository, input);
     approvalMetrics.recordCreated(record);
     return record;
   }

@@ -10,6 +10,7 @@ import { PolicyDecisionService } from "./policy-decision.service.js";
 import { findMatchingRule } from "./policy-loader.js";
 import { getPolicyVersion } from "./policy-version.js";
 import type { PolicyDecisionRequest, PolicyRule } from "./policy-schema.js";
+import { CallerContext } from "./authorization.js";
 
 /** Check if an action is an escalation (adds new source or submits application).
  *  WHY: Task 14 - bulk actions cannot silently enable new sources or submit applications.
@@ -38,7 +39,8 @@ export function isEscalationAction(rule: PolicyRule): boolean {
 export function decideBulk(
   request: BulkDecisionRequest,
   policyDecisionService: PolicyDecisionService,
-  config: ReturnType<typeof import("./policy-loader.js").loadFamilies>
+  config: ReturnType<typeof import("./policy-loader.js").loadFamilies>,
+  caller: CallerContext
 ): BulkDecisionResponse {
   if (!validateBulkDecisionRequest(request)) {
     return {
@@ -57,7 +59,7 @@ export function decideBulk(
 
   for (let i = 0; i < request.items.length; i++) {
     const item = request.items[i] as PolicyDecisionRequest;
-    const decision = policyDecisionService.decide(item);
+    const decision = policyDecisionService.decide(item, caller);
 
     // Check for escalation
     const rule = findMatchingRule(config, item);

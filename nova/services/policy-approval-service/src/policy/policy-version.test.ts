@@ -19,7 +19,7 @@ function createGrantInput(overrides: Partial<CreateGrantInput> = {}): CreateGran
   return {
     userId: "8f2dc4e0-3f2a-4b8e-9d11-5a9b7c2e6f01",
     service: "inbox-service",
-    action: "send",
+    action: "inbox.send",
     target: "message:draft-1",
     payload: { body: "hello", to: "x@example.com" },
     ttlSeconds: 300,
@@ -92,20 +92,20 @@ test("policy version: decision service reflects version bump", () => {
   assert.strictEqual(service.decide(request).policyVersion, 3);
 });
 
-test("policy version: grant pins current policy version", () => {
+test("policy version: grant pins current policy version", async () => {
   resetPolicyVersion();
   const grantsService = new GrantsService(new InMemoryGrantRepository());
-  const record = grantsService.createGrant(createGrantInput());
+  const record = await grantsService.createGrant(createGrantInput());
   assert.strictEqual(record.policyVersion, "1");
   bumpPolicyVersion();
-  const record2 = grantsService.createGrant(createGrantInput());
+  const record2 = await grantsService.createGrant(createGrantInput());
   assert.strictEqual(record2.policyVersion, "2");
 });
 
-test("policy version: verifyBinding rejects grant with old policy version", () => {
+test("policy version: verifyBinding rejects grant with old policy version", async () => {
   resetPolicyVersion();
   const grantsService = new GrantsService(new InMemoryGrantRepository());
-  const record = grantsService.createGrant(createGrantInput({ nowMs: 1_700_000_000_000 }));
+  const record = await grantsService.createGrant(createGrantInput({ nowMs: 1_700_000_000_000 }));
   const nonce = record.nonce;
   assert.strictEqual(record.policyVersion, "1");
 
@@ -116,6 +116,7 @@ test("policy version: verifyBinding rejects grant with old policy version", () =
   const verdict = grantsService.verifyGrant(nonce, {
     userId: "8f2dc4e0-3f2a-4b8e-9d11-5a9b7c2e6f01",
     service: "inbox-service",
+    action: "inbox.send",
     target: "message:draft-1",
     payload: { body: "hello", to: "x@example.com" },
     policyVersion: "2", // current version - mismatch with grant's version 1
@@ -124,11 +125,11 @@ test("policy version: verifyBinding rejects grant with old policy version", () =
   assert.deepStrictEqual(verdict, { ok: false, reason: "policy_version_mismatch" });
 });
 
-test("policy version: verifyBinding accepts grant with current policy version", () => {
+test("policy version: verifyBinding accepts grant with current policy version", async () => {
   resetPolicyVersion();
   const grantsService = new GrantsService(new InMemoryGrantRepository());
   bumpPolicyVersion(); // version = 2
-  const record = grantsService.createGrant(createGrantInput({ nowMs: 1_700_000_000_000 }));
+  const record = await grantsService.createGrant(createGrantInput({ nowMs: 1_700_000_000_000 }));
   const nonce = record.nonce;
   assert.strictEqual(record.policyVersion, "2");
 
@@ -136,6 +137,7 @@ test("policy version: verifyBinding accepts grant with current policy version", 
   const verdict = grantsService.verifyGrant(nonce, {
     userId: "8f2dc4e0-3f2a-4b8e-9d11-5a9b7c2e6f01",
     service: "inbox-service",
+    action: "inbox.send",
     target: "message:draft-1",
     payload: { body: "hello", to: "x@example.com" },
     policyVersion: "2", // current version matches grant's version
@@ -146,24 +148,38 @@ test("policy version: verifyBinding accepts grant with current policy version", 
 
 test("policy version: controller get version returns current", async () => {
   resetPolicyVersion();
+  const secret = process.env.NOVA_SERVICE_JWT_SECRET ?? "test-secret-key-32-bytes-minimum!!";
   const { PolicyController } = await import("./policy.controller.js");
   const { PolicyDecisionService } = await import("./policy-decision.service.js");
+  const { issueToken } = await import("@nova/contracts");
   const decisionService = new PolicyDecisionService();
   const controller = new PolicyController(decisionService);
-  const response = await controller.getVersion();
+  const adminToken = issueToken(
+    { iss: "test-issuer", aud: "policy-service", sub: "admin-user", scope: "policy:admin", ttlSeconds: 300 },
+    secret,
+  );
+  const authHeader = `Bearer ${adminToken}`;
+  const response = await controller.getVersion(authHeader);
   assert.strictEqual(response.currentVersion, 1);
 });
 
 test("policy version: controller bump version increments and returns new", async () => {
   resetPolicyVersion();
+  const secret = process.env.NOVA_SERVICE_JWT_SECRET ?? "test-secret-key-32-bytes-minimum!!";
   const { PolicyController } = await import("./policy.controller.js");
   const { PolicyDecisionService } = await import("./policy-decision.service.js");
+  const { issueToken } = await import("@nova/contracts");
   const decisionService = new PolicyDecisionService();
   const controller = new PolicyController(decisionService);
+  const adminToken = issueToken(
+    { iss: "test-issuer", aud: "policy-service", sub: "admin-user", scope: "policy:admin", ttlSeconds: 300 },
+    secret,
+  );
+  const authHeader = `Bearer ${adminToken}`;
 
-  const response1 = await controller.bumpVersion();
+  const response1 = await controller.bumpVersion(authHeader);
   assert.strictEqual(response1.currentVersion, 2);
 
-  const response2 = await controller.bumpVersion();
+  const response2 = await controller.bumpVersion(authHeader);
   assert.strictEqual(response2.currentVersion, 3);
 });

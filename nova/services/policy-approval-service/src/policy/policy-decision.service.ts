@@ -13,6 +13,7 @@ import type { BulkDecisionRequest, BulkDecisionResponse } from "./policy-bulk-sc
 import { createHash } from "node:crypto";
 import { getPolicyVersion } from "./policy-version.js";
 import { decideBulk } from "./policy-bulk-decision.js";
+import { authorize, AuthDecision, CallerContext, resetQuotaForTests } from "./authorization.js";
 
 /** Chat approval policy result for the decision flow. */
 interface ChatApprovalPolicy {
@@ -41,8 +42,31 @@ function evaluateChatApproval(rule: PolicyRule): ChatApprovalPolicy {
 export class PolicyDecisionService {
   private readonly config = loadFamilies();
 
-  /** Make a policy decision for the given request. */
-  decide(request: PolicyDecisionRequest): PolicyDecisionResponse {
+  /** Make a policy decision for the given request with caller context.
+   *
+   * The caller context (service, scopes, userId, resourceOwnerId, grantNonce)
+   * is derived by the controller from the verified service JWT — never from
+   * the request body (spec:785). This method is the single gate for:
+   * - identity_required (userId absent on user-plane rules)
+   * - ownership_mismatch (resourceOwnerId != userId)
+   * - quota_exceeded (per-user daily budget guard)
+   * - no_matching_rule / invalid_request (existing)
+   */
+  decide(
+    request: PolicyDecisionRequest,
+    caller: CallerContext = { service: "unknown", scopes: [], userId: undefined, resourceOwnerId: undefined }
+  ): PolicyDecisionResponse {
+    // Layer 4 authorization gate (Module 04 Task 6)
+    const auth = authorize(request, caller);
+    if (!auth.allowed) {
+      return {
+        decision: "deny",
+        ruleId: auth.denyCode ?? "authorization_failed",
+        policyVersion: getPolicyVersion(),
+        reason: auth.denyDetail ?? "Authorization failed",
+      };
+    }
+
     if (!validateDecisionRequest(request)) {
       return {
         decision: "deny",
@@ -73,7 +97,6 @@ export class PolicyDecisionService {
     let chatApprovalReason: string | undefined;
     const isHighRisk = rule.riskTier === "tier3" || rule.riskTier === "tier4";
     if (isHighRisk) {
-      // High-risk rules never allow chat approval
       chatApprovalAllowed = false;
       chatApprovalReason = "chat_approval_not_allowed";
     } else if (request.payloadHash) {
@@ -83,7 +106,6 @@ export class PolicyDecisionService {
     }
 
     if (decision === "needs_approval" && request.payloadHash) {
-      // Generate approval requirements bound to the payload hash
       const nonce = createHash("sha256")
         .update(request.payloadHash + Date.now().toString())
         .digest("hex")
@@ -115,8 +137,8 @@ export class PolicyDecisionService {
   }
 
   /** Make a bulk policy decision for multiple requests (Task 14). */
-  decideBulk(request: BulkDecisionRequest): BulkDecisionResponse {
-    return decideBulk(request, this, this.config);
+  decideBulk(request: BulkDecisionRequest, caller: CallerContext): BulkDecisionResponse {
+    return decideBulk(request, this, this.config, caller);
   }
 
   /** Get all policy rules for inspection. */

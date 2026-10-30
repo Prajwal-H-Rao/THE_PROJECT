@@ -5,8 +5,41 @@
       "operation_id": "integrations.link",
       "name": "integrations.link",
       "description": "Link an external integration",
-      "arguments": {"schema": {"type": "object", "properties": {"provider": {"type": "string", "enum": ["telegram", "whatsapp", "email"]}, "external_id": {"type": "string"}}, "required": ["provider", "external_id"]}},
-      "output": {"schema": {"type": "object", "properties": {"integration_id": {"type": "string"}}, "required": ["integration_id"]}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": [
+                "telegram",
+                "whatsapp",
+                "email"
+              ]
+            },
+            "external_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "provider",
+            "external_id"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "integration_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "integration_id"
+          ]
+        }
+      },
       "classification": "write",
       "risk_tier": "tier3",
       "idempotency": "idempotency_key",
@@ -15,15 +48,57 @@
       "owning_service": "integrations-service",
       "mcp_server": "integrations-mcp",
       "resource_scope": "external_identity",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["integrations:link"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "integrations:link"
+      ],
+      "version": 1
     },
     {
       "operation_id": "integrations.send",
       "name": "integrations.send",
       "description": "Send a message via integration",
-      "arguments": {"schema": {"type": "object", "properties": {"provider": {"type": "string", "enum": ["telegram", "whatsapp", "email"]}, "recipient": {"type": "string"}, "message": {"type": "string"}}, "required": ["provider", "recipient", "message"]}},
-      "output": {"schema": {"type": "object", "properties": {"sent": {"type": "boolean"}}, "required": ["sent"]}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": [
+                "telegram",
+                "whatsapp",
+                "email"
+              ]
+            },
+            "recipient": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "provider",
+            "recipient",
+            "message"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "sent": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "sent"
+          ]
+        }
+      },
       "classification": "write",
       "risk_tier": "tier3",
       "idempotency": "idempotency_key",
@@ -32,8 +107,14 @@
       "owning_service": "integrations-service",
       "mcp_server": "integrations-mcp",
       "resource_scope": "external_recipient",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["integrations:send"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "integrations:send"
+      ],
+      "version": 1
     }
-  ]
+  ],
+  "version": 1
 }

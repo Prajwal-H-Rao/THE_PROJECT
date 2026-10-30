@@ -5,8 +5,34 @@
       "operation_id": "inbox.read",
       "name": "inbox.read",
       "description": "Read inbox messages",
-      "arguments": {"schema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}}, "required": []}},
-      "output": {"schema": {"type": "object", "properties": {"messages": {"type": "array"}, "total": {"type": "integer"}}, "required": []}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer"
+            }
+          },
+          "required": []
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "messages": {
+              "type": "array"
+            },
+            "total": {
+              "type": "integer"
+            }
+          },
+          "required": []
+        }
+      },
       "classification": "read",
       "risk_tier": "tier1",
       "idempotency": "none",
@@ -15,15 +41,52 @@
       "owning_service": "inbox-service",
       "mcp_server": "inbox-mcp",
       "resource_scope": "own_messages",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["inbox:read"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "inbox:read"
+      ],
+      "version": 1
     },
     {
       "operation_id": "inbox.draft",
       "name": "inbox.draft",
       "description": "Draft an email response",
-      "arguments": {"schema": {"type": "object", "properties": {"to": {"type": "string"}, "subject": {"type": "string"}, "body": {"type": "string"}}, "required": ["to", "subject", "body"]}},
-      "output": {"schema": {"type": "object", "properties": {"draft_id": {"type": "string"}}, "required": ["draft_id"]}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "string"
+            },
+            "subject": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "to",
+            "subject",
+            "body"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "draft_id"
+          ]
+        }
+      },
       "classification": "write",
       "risk_tier": "tier2",
       "idempotency": "idempotency_key",
@@ -32,15 +95,44 @@
       "owning_service": "inbox-service",
       "mcp_server": "inbox-mcp",
       "resource_scope": "own_drafts",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["inbox:draft"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "inbox:draft"
+      ],
+      "version": 1
     },
     {
       "operation_id": "inbox.send",
       "name": "inbox.send",
       "description": "Send an email",
-      "arguments": {"schema": {"type": "object", "properties": {"draft_id": {"type": "string"}}, "required": ["draft_id"]}},
-      "output": {"schema": {"type": "object", "properties": {"message_id": {"type": "string"}}, "required": ["message_id"]}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "draft_id"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "message_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "message_id"
+          ]
+        }
+      },
       "classification": "write",
       "risk_tier": "tier3",
       "idempotency": "idempotency_key",
@@ -49,8 +141,14 @@
       "owning_service": "inbox-service",
       "mcp_server": "inbox-mcp",
       "resource_scope": "external_recipients",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["inbox:send"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "inbox:send"
+      ],
+      "version": 1
     }
-  ]
+  ],
+  "version": 1
 }

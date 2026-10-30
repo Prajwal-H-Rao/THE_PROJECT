@@ -19,9 +19,9 @@ export class GrantsController {
   @Post("grants")
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create an approval grant bound to a payload hash" })
-  create(@Body() input: CreateGrantInput): GrantRecord {
+  async create(@Body() input: CreateGrantInput): Promise<GrantRecord> {
     try {
-      return this.grantsService.createGrant(input);
+      return await this.grantsService.createGrant(input);
     } catch (error) {
       if (error instanceof GrantValidationError) {
         throw new BadRequestException({ error: error.code, message: error.message });
@@ -33,9 +33,9 @@ export class GrantsController {
   @Post("grants/with-details")
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create an approval grant with card preview details" })
-  createWithDetails(@Body() input: CreateGrantWithDetailsInput): GrantRecord {
+  async createWithDetails(@Body() input: CreateGrantWithDetailsInput): Promise<GrantRecord> {
     try {
-      return this.grantsService.createGrantWithDetails(input);
+      return await this.grantsService.createGrantWithDetails(input);
     } catch (error) {
       if (error instanceof GrantValidationError) {
         throw new BadRequestException({ error: error.code, message: error.message });

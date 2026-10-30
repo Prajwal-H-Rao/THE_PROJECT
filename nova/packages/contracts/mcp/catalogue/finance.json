@@ -5,8 +5,40 @@
       "operation_id": "finance.read",
       "name": "finance.read",
       "description": "Read financial transactions",
-      "arguments": {"schema": {"type": "object", "properties": {"account_id": {"type": "string"}, "start": {"type": "string", "format": "date"}, "end": {"type": "string", "format": "date"}}, "required": ["account_id", "start", "end"]}},
-      "output": {"schema": {"type": "object", "properties": {"transactions": {"type": "array"}}, "required": []}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "account_id": {
+              "type": "string"
+            },
+            "start": {
+              "type": "string",
+              "format": "date"
+            },
+            "end": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "account_id",
+            "start",
+            "end"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "transactions": {
+              "type": "array"
+            }
+          },
+          "required": []
+        }
+      },
       "classification": "read",
       "risk_tier": "tier2",
       "idempotency": "none",
@@ -15,15 +47,62 @@
       "owning_service": "finance-service",
       "mcp_server": "finance-mcp",
       "resource_scope": "own_finances",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["finance:read"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "finance:read"
+      ],
+      "version": 1
     },
     {
       "operation_id": "finance.import",
       "name": "finance.import",
       "description": "Import financial statements",
-      "arguments": {"schema": {"type": "object", "properties": {"source": {"type": "string", "enum": ["csv", "ofx", "qif", "json"]}, "data": {"type": "string"}, "account_id": {"type": "string"}}, "required": ["source", "data", "account_id"]}},
-      "output": {"schema": {"type": "object", "properties": {"imported": {"type": "integer"}, "skipped": {"type": "integer"}}, "required": ["imported", "skipped"]}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "csv",
+                "ofx",
+                "qif",
+                "json"
+              ]
+            },
+            "data": {
+              "type": "string"
+            },
+            "account_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "data",
+            "account_id"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "imported": {
+              "type": "integer"
+            },
+            "skipped": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "imported",
+            "skipped"
+          ]
+        }
+      },
       "classification": "write",
       "risk_tier": "tier3",
       "idempotency": "idempotency_key",
@@ -32,8 +111,14 @@
       "owning_service": "finance-service",
       "mcp_server": "finance-mcp",
       "resource_scope": "external_data",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["finance:import"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "finance:import"
+      ],
+      "version": 1
     }
-  ]
+  ],
+  "version": 1
 }

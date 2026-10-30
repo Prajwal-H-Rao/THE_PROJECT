@@ -7,6 +7,7 @@ import { PolicyDecisionRequest } from "./policy-schema.js";
 
 describe("chat-approval policy (Task 10)", () => {
   let service: PolicyDecisionService;
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
 
   before(() => {
     service = new PolicyDecisionService();
@@ -20,7 +21,7 @@ describe("chat-approval policy (Task 10)", () => {
       target: "external_recipients",
       payloadHash: "hash123",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.chatApprovalAllowed, false);
     assert.strictEqual(decision.chatApprovalReason, "chat_approval_not_allowed");
@@ -34,7 +35,7 @@ describe("chat-approval policy (Task 10)", () => {
       target: "external_recipient",
       payloadHash: "hash456",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.chatApprovalAllowed, false);
     assert.strictEqual(decision.chatApprovalReason, "chat_approval_not_allowed");
@@ -48,7 +49,7 @@ describe("chat-approval policy (Task 10)", () => {
       target: "own_messages",
       payloadHash: "hash789",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "allow");
     assert.strictEqual(decision.chatApprovalAllowed, true);
     assert.strictEqual(decision.chatApprovalReason, "Chat approval allowed by policy rule");
@@ -62,7 +63,7 @@ describe("chat-approval policy (Task 10)", () => {
       target: "own_drafts",
       payloadHash: "hash999",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.chatApprovalAllowed, false);
     assert.strictEqual(decision.chatApprovalReason, "chat_approval_requires_standard_flow");
@@ -75,7 +76,7 @@ describe("chat-approval policy (Task 10)", () => {
       action: "read",
       target: "own_messages",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "allow");
     assert.strictEqual(decision.chatApprovalAllowed, undefined);
     assert.strictEqual(decision.chatApprovalReason, undefined);

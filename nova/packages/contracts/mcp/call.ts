@@ -91,6 +91,7 @@ export interface MCPCall {
   user_id?: string;
   correlation_id?: string;
   created_at: string;
+  approval_grant?: string;
 }
 
 export interface MCPResponse {

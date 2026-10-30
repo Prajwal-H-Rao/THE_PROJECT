@@ -5,8 +5,34 @@
       "operation_id": "trips.read",
       "name": "trips.read",
       "description": "Read trip plans",
-      "arguments": {"schema": {"type": "object", "properties": {"origin": {"type": "string"}, "destination": {"type": "string"}}, "required": ["origin", "destination"]}},
-      "output": {"schema": {"type": "object", "properties": {"trips": {"type": "array"}}, "required": []}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "origin": {
+              "type": "string"
+            },
+            "destination": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "origin",
+            "destination"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "trips": {
+              "type": "array"
+            }
+          },
+          "required": []
+        }
+      },
       "classification": "read",
       "risk_tier": "tier1",
       "idempotency": "none",
@@ -15,15 +41,52 @@
       "owning_service": "trips-service",
       "mcp_server": "trips-mcp",
       "resource_scope": "own_trips",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["trips:read"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "trips:read"
+      ],
+      "version": 1
     },
     {
       "operation_id": "trips.write",
       "name": "trips.write",
       "description": "Create a trip plan",
-      "arguments": {"schema": {"type": "object", "properties": {"name": {"type": "string"}, "origin": {"type": "string"}, "destination": {"type": "string"}}, "required": ["name", "origin", "destination"]}},
-      "output": {"schema": {"type": "object", "properties": {"trip_id": {"type": "string"}}, "required": ["trip_id"]}},
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "origin": {
+              "type": "string"
+            },
+            "destination": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "origin",
+            "destination"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "trip_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "trip_id"
+          ]
+        }
+      },
       "classification": "write",
       "risk_tier": "tier2",
       "idempotency": "none",
@@ -32,8 +95,14 @@
       "owning_service": "trips-service",
       "mcp_server": "trips-mcp",
       "resource_scope": "own_trips",
-      "allowed_roles": ["user"],
-      "allowed_scopes": ["trips:write"]
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "trips:write"
+      ],
+      "version": 1
     }
-  ]
+  ],
+  "version": 1
 }

@@ -33,6 +33,7 @@ export interface GrantVerifyAttempt {
   readonly userId: string;
   readonly service: string;
   readonly target: string;
+  readonly action: string;
   readonly payload: unknown;
   readonly policyVersion: string | number;
   readonly nowMs?: number;
@@ -45,6 +46,7 @@ export type GrantDenyReason =
   | "user_mismatch"
   | "service_mismatch"
   | "target_mismatch"
+  | "action_mismatch"
   | "expired"
   | "revoked"
   | "policy_version_mismatch"
@@ -127,6 +129,10 @@ export function verifyBinding(record: GrantRecord, attempt: GrantVerifyAttempt):
   }
   if (attempt.service !== record.service) {
     return { ok: false, reason: "service_mismatch" };
+  }
+  // Action is part of the binding — a grant for "inbox.send" must not verify for "inbox.read".
+  if (attempt.action !== record.action) {
+    return { ok: false, reason: "action_mismatch" };
   }
   if (attempt.target !== record.target) {
     return { ok: false, reason: "target_mismatch" };

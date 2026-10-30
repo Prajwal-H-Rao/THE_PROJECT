@@ -37,6 +37,8 @@
     "mcp/audit.ts",
     "mcp/tool.test.ts",
     "mcp/call.test.ts",
-    "mcp/audit.test.ts"
+    "mcp/audit.test.ts",
+    "mcp/server/index.ts",
+    "mcp/server/registry.ts"
   ]
 }

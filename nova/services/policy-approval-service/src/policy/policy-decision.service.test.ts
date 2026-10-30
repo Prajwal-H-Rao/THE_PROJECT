@@ -7,6 +7,7 @@ import { PolicyDecisionRequest } from "./policy-schema.js";
 
 describe("policy decision service", () => {
   let service: PolicyDecisionService;
+  const caller = { service: "test", scopes: [], userId: "test-user", resourceOwnerId: undefined };
 
   before(() => {
     service = new PolicyDecisionService();
@@ -19,7 +20,7 @@ describe("policy decision service", () => {
       action: "read",
       target: "own_messages",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "allow");
     assert.strictEqual(decision.ruleId, "inbox.read");
     assert.strictEqual(decision.policyVersion, 1);
@@ -33,7 +34,7 @@ describe("policy decision service", () => {
       target: "external_recipients",
       payloadHash: "abc123",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.ruleId, "inbox.send");
     assert.ok(decision.approvalRequired);
@@ -50,7 +51,7 @@ describe("policy decision service", () => {
       target: "external_attendees",
       payloadHash: "def456",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.ruleId, "calendar_tasks.invite");
     assert.ok(decision.approvalRequired);
@@ -63,7 +64,7 @@ describe("policy decision service", () => {
       action: "read",
       target: "own_events_tasks",
     };
-    assert.strictEqual(service.decide(readRequest).decision, "allow");
+    assert.strictEqual(service.decide(readRequest, caller).decision, "allow");
 
     const createTaskRequest: PolicyDecisionRequest = {
       actor: "user",
@@ -71,7 +72,7 @@ describe("policy decision service", () => {
       action: "create_task",
       target: "own_tasks",
     };
-    assert.strictEqual(service.decide(createTaskRequest).decision, "allow");
+    assert.strictEqual(service.decide(createTaskRequest, caller).decision, "allow");
   });
 
   it("requires approval for finance import", () => {
@@ -82,7 +83,7 @@ describe("policy decision service", () => {
       target: "external_data",
       payloadHash: "fin123",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.ruleId, "finance.import");
     assert.ok(decision.approvalRequired);
@@ -95,7 +96,7 @@ describe("policy decision service", () => {
       action: "search",
       target: "job_listings",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "allow");
     assert.strictEqual(decision.ruleId, "resume_jobs.search");
   });
@@ -108,7 +109,7 @@ describe("policy decision service", () => {
       target: "external_application",
       payloadHash: "job456",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.ruleId, "resume_jobs.apply");
   });
@@ -121,7 +122,7 @@ describe("policy decision service", () => {
       target: "external_identity",
       payloadHash: "chan789",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "needs_approval");
     assert.strictEqual(decision.ruleId, "integrations.link");
   });
@@ -133,7 +134,7 @@ describe("policy decision service", () => {
       action: "action",
       target: "target",
     };
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "deny");
     assert.strictEqual(decision.ruleId, "no_matching_rule");
   });
@@ -143,9 +144,10 @@ describe("policy decision service", () => {
       actor: "user",
       // missing scope, action, target
     } as PolicyDecisionRequest;
-    const decision = service.decide(request);
+    const decision = service.decide(request, caller);
     assert.strictEqual(decision.decision, "deny");
-    assert.strictEqual(decision.ruleId, "invalid_request");
+    // Authorization gate runs first; no matching rule found for incomplete request
+    assert.strictEqual(decision.ruleId, "no_matching_rule");
   });
 
   it("generates different nonces for different payload hashes", () => {
@@ -163,8 +165,8 @@ describe("policy decision service", () => {
       target: "external_recipients",
       payloadHash: "hash2",
     };
-    const decision1 = service.decide(request1);
-    const decision2 = service.decide(request2);
+    const decision1 = service.decide(request1, caller);
+    const decision2 = service.decide(request2, caller);
     assert.notStrictEqual(decision1.approvalRequired?.nonce, decision2.approvalRequired?.nonce);
   });
 

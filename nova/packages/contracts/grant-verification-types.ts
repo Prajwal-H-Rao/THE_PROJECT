@@ -17,7 +17,7 @@ export interface GrantVerifyResult {
   ok: boolean;
   reason?: "payload_hash_mismatch" | "user_mismatch" | "service_mismatch"
     | "target_mismatch" | "expired" | "revoked" | "policy_version_mismatch"
-    | "invalid_user" | "unknown_nonce";
+    | "invalid_user" | "unknown_nonce" | "action_mismatch";
 }
 
 /** Result of consuming a grant. */
@@ -47,6 +47,8 @@ export interface VerifyGrantOptions {
   payload: unknown;
   /** The policy version at the time of grant creation. */
   policyVersion: string | number;
+  /** The full catalogue operation_id (e.g., "inbox.send"). Must match the grant's action. */
+  action: string;
 }
 
 /** Options for consuming a grant. */
