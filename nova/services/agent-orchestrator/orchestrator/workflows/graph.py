@@ -40,6 +40,15 @@ async def get_async_checkpointer():
     return await AsyncSqliteSaver.from_conn_string(CHECKPOINT_DB)
 
 
+def route_after_plan(state: Dict[str, Any]) -> str:
+    """Route after the plan node. Unknown values fail closed to finalize."""
+    workflow_state = state.get("state", "planned")
+    if workflow_state == "planned":
+        return "decide"
+    # "failed" (a denied plan) and any unexpected value stop before execution.
+    return "finalize"
+
+
 def route_after_decide(state: Dict[str, Any]) -> str:
     """Route after decide node."""
     workflow_state = state.get("state", "planned")
@@ -91,10 +100,14 @@ def create_workflow_graph(use_fake_model: bool = False) -> Any:
     graph.add_node("execute", lambda s: execute_node(s))
     graph.add_node("finalize", lambda s: finalize_node(s))
     
-    # Edges
     graph.add_edge(START, "plan")
-    graph.add_edge("plan", "decide")
-    
+
+    # Plan node emits only planned or failed: never execute a denied plan.
+    graph.add_conditional_edges("plan", route_after_plan, {
+        "decide": "decide",
+        "finalize": "finalize",
+    })
+
     # Conditional edges from decide
     graph.add_conditional_edges("decide", lambda s: s.get("state", "planned"), {
         "awaiting_approval": "interrupt",

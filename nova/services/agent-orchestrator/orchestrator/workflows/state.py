@@ -96,11 +96,15 @@ class WorkflowStateData:
     def from_dict(cls, data: Dict[str, Any]) -> "WorkflowStateData":
         steps = [Step(**s) for s in data.get("steps", [])]
         state_val = data.get("state", "planned")
+        last_error = data.get("last_error")
         if isinstance(state_val, str):
             try:
                 state_val = WorkflowState(state_val)
             except ValueError:
-                state_val = WorkflowState.PLANNED
+                # Fail closed: an unknown state string is not planned work.
+                # It must never resurrect as planned and re-enter execution.
+                state_val = WorkflowState.FAILED
+                last_error = last_error or f"unknown workflow state rehydrated: {data.get('state')}"
         return cls(
             plan_id=data["plan_id"],
             user_id=data["user_id"],
@@ -114,6 +118,6 @@ class WorkflowStateData:
             updated_at=data.get("updated_at", datetime.utcnow().isoformat()),
             completed_at=data.get("completed_at"),
             cancellation_requested=data.get("cancellation_requested", False),
-            last_error=data.get("last_error"),
+            last_error=last_error,
             metadata=data.get("metadata", {}),
         )

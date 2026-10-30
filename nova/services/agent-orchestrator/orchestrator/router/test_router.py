@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from router import DeterministicRouter, RouterResult
+from action_table import TASK_ACTIONS
 from pathlib import Path
 
 
@@ -110,6 +111,57 @@ def test_empty_request():
     print("✓ empty request test passed")
 
 
+def test_within_family_action_tie():
+    router = DeterministicRouter()
+    # "meeting" hints at create_event while "invite" names another action:
+    # the router must ask, not infer a privileged action (spec:200).
+    result = router.route("invite my team to the meeting")
+    assert result.action_type == "ambiguous"
+    assert result.family is None
+    assert result.tier is None
+    assert result.clarification is not None
+    print("✓ within-family action tie test passed")
+
+
+def test_keywordless_family_request():
+    router = DeterministicRouter()
+    # In-family but no action keywords: ask, never infer "read".
+    result = router.route("help me with my email situation")
+    assert result.action_type == "ambiguous"
+    assert result.family is None
+    assert result.tier is None
+    assert result.clarification is not None
+    print("✓ keywordless family request test passed")
+
+
+def test_unexpected_error_fails_closed():
+    router = DeterministicRouter()
+    # Simulate an internal crash: route() must return the fixed refusal.
+    def boom(_text):
+        raise RuntimeError("injected failure")
+    router._match_family = boom
+    result = router.route("read my unread emails")
+    assert result.action_type == "refusal"
+    assert result.family is None
+    assert result.refusal_reason == "This request could not be processed. Please rephrase it."
+    print("✓ fail-closed on unexpected error test passed")
+
+
+def test_action_table_matches_policy_yaml():
+    # Drift guard: the static action table must mirror the families YAML ids.
+    import yaml
+    families_dir = (Path(__file__).parents[3]
+                    / "policy-approval-service" / "src" / "policy" / "families")
+    for family, actions in TASK_ACTIONS.items():
+        with open(families_dir / f"{family}.yaml") as f:
+            data = yaml.safe_load(f)
+        yaml_ids = {rule["id"].split(".")[1] for rule in data["rules"]}
+        table_actions = set(actions.keys()) - {"_family"}
+        missing = table_actions - yaml_ids
+        assert not missing, f"table has actions missing from {family}.yaml: {missing}"
+    print("✓ action table / policy YAML drift test passed")
+
+
 def test_tier_mapping():
     router = DeterministicRouter()
     # All families should map to planner tier in the default registry
@@ -133,6 +185,10 @@ def run_all():
     test_out_of_scope()
     test_empty_request()
     test_tier_mapping()
+    test_within_family_action_tie()
+    test_keywordless_family_request()
+    test_unexpected_error_fails_closed()
+    test_action_table_matches_policy_yaml()
     print("\n✓ All router tests passed!")
 
 

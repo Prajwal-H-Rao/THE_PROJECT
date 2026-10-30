@@ -23,6 +23,7 @@ async def run_workflow(
     user_id: str,
     initial_action: str,
     use_fake_model: bool = True,
+    scenario: str = "happy_path",
     config: Optional[dict] = None,
 ) -> Dict[str, Any]:
     """Run a workflow to completion."""
@@ -43,7 +44,7 @@ async def run_workflow(
         "completed_at": None,
         "cancellation_requested": False,
         "last_error": None,
-        "metadata": {"initial_action": initial_action},
+        "metadata": {"initial_action": initial_action, "scenario": scenario},
     }
     
     config = config or {"configurable": {"thread_id": plan_id}}

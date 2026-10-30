@@ -178,9 +178,13 @@ class AuditEmitter:
 def plan_node(state: Dict[str, Any], use_fake_model: bool = False) -> Dict[str, Any]:
     """Generate initial plan using the model (or fake model)."""
     from .state import WorkflowStateData, Step, StepStatus, WorkflowState
-    
+    from .plan_validation import validate_plan
+
     workflow = WorkflowStateData.from_dict(state)
-    
+
+    metadata = state.get("metadata", {})
+    scenario = metadata.get("scenario", "happy_path")
+
     # Generate plan using fake model or real model
     if use_fake_model:
         sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / "tests" / "fixtures" / "fake-model"))
@@ -193,11 +197,11 @@ def plan_node(state: Dict[str, Any], use_fake_model: bool = False) -> Dict[str, 
             "injection": build_injection_response,
             "multi_turn": build_multi_turn_response,
         }
-        builder = builders.get("happy_path", builders["happy_path"])
+        builder = builders.get(scenario, builders["happy_path"])
         input_data = {
             "plan_id": state.get("plan_id", str(uuid.uuid4())),
             "user_id": state.get("user_id", "test-user"),
-            "action": state.get("metadata", {}).get("initial_action", "inbox.read"),
+            "action": metadata.get("initial_action", "inbox.read"),
         }
         response = builder(input_data)
         # ModelResponse is a dataclass with ToolCall steps
@@ -232,7 +236,26 @@ def plan_node(state: Dict[str, Any], use_fake_model: bool = False) -> Dict[str, 
         )
         for i, tc in enumerate(tool_calls)
     ]
-    
+
+    # Layer 3: constrain the proposal to enumerated tool IDs. spec:202.
+    # Family join is the operation-id prefix; the routed family comes from
+    # metadata (set at ingress) or the initial_action prefix as fallback.
+    routed_family = metadata.get("routed_family") or \
+        metadata.get("initial_action", "inbox.read").split(".")[0]
+    denial = validate_plan(tool_calls, routed_family)
+    if denial is not None:
+        workflow = WorkflowStateData(
+            plan_id=state.get("plan_id", str(uuid.uuid4())),
+            user_id=state.get("user_id", "test-user"),
+            state="failed",
+            current_step_index=0,
+            turn_count=0,
+            created_at=datetime.utcnow().isoformat(),
+            updated_at=datetime.utcnow().isoformat(),
+            last_error=f"{denial['code']}: {denial['detail']}",
+        )
+        return workflow.to_dict()
+
     # Create workflow object
     workflow = WorkflowStateData(
         plan_id=state.get("plan_id", str(uuid.uuid4())),
@@ -261,17 +284,24 @@ def plan_node(state: Dict[str, Any], use_fake_model: bool = False) -> Dict[str, 
 def decide_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """Get policy decision for the current step."""
     from .state import WorkflowStateData, WorkflowState
-    
+
     workflow = WorkflowStateData.from_dict(state)
-    
+
     if workflow.current_step_index >= len(workflow.steps):
         workflow.state = WorkflowState.SUCCEEDED
         workflow.completed_at = datetime.utcnow().isoformat()
         return workflow.to_dict()
     
     step = workflow.steps[workflow.current_step_index]
-    
+
+    # Fail closed: a terminal state (a denied plan, a completed run) must
+    # never be reset to approved by the policy simulation below.
+    if workflow.state in (WorkflowState.FAILED, WorkflowState.SUCCEEDED,
+                          WorkflowState.CANCELLED):
+        return workflow.to_dict()
+
     # TODO: Call real policy service
+
     # For now, simulate policy decision
     # In real implementation, call policy service
     requires_approval = step.requires_approval
