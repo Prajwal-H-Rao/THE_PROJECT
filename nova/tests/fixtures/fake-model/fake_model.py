@@ -32,6 +32,9 @@ class Scenario(Enum):
     OUT_OF_SCOPE = "out_of_scope"
     INJECTION = "injection"
     MCP_INJECTION = "mcp_injection"
+    VERIFICATION_PASS = "verification_pass"
+    VERIFICATION_FAIL = "verification_fail"
+    VERIFICATION_UNKNOWN = "verification_unknown"
     MULTI_TURN = "multi_turn"
 
 
@@ -226,6 +229,42 @@ def build_mcp_injection_response_for_mcp(input_data: Dict[str, Any]) -> Dict[str
     }
 
 
+def build_verification_pass_response(input_data: Dict[str, Any]) -> ModelResponse:
+    """Build a response where tool output matches evidence (verification passes)."""
+    return ModelResponse(
+        plan_id=input_data.get("plan_id", "plan-abc-123"),
+        user_id=input_data.get("user_id", "test-user-123"),
+        steps=[ToolCall(
+            tool="inbox.read",
+            arguments={"query": "unread", "limit": 10},
+        )],
+    )
+
+
+def build_verification_fail_response(input_data: Dict[str, Any]) -> ModelResponse:
+    """Build a response where tool output contradicts evidence (verification fails)."""
+    return ModelResponse(
+        plan_id=input_data.get("plan_id", "plan-abc-123"),
+        user_id=input_data.get("user_id", "test-user-123"),
+        steps=[ToolCall(
+            tool="inbox.read",
+            arguments={"query": "unread", "limit": 10},
+        )],
+    )
+
+
+def build_verification_unknown_response(input_data: Dict[str, Any]) -> ModelResponse:
+    """Build a response where tool output has no evidence (verification unknown)."""
+    return ModelResponse(
+        plan_id=input_data.get("plan_id", "plan-abc-123"),
+        user_id=input_data.get("user_id", "test-user-123"),
+        steps=[ToolCall(
+            tool="calendar_tasks.read",
+            arguments={"start": "2026-01-01T00:00:00Z", "end": "2026-01-31T23:59:59Z"},
+        )],
+    )
+
+
 def build_multi_turn_response(input_data: Dict[str, Any]) -> ModelResponse:
     """Build a response with multiple sequential tool calls."""
     return ModelResponse(
@@ -246,6 +285,9 @@ SCENARIO_BUILDERS = {
     Scenario.OUT_OF_SCOPE: build_out_of_scope_response,
     Scenario.INJECTION: build_injection_response,
     Scenario.MCP_INJECTION: build_mcp_injection_response,
+    Scenario.VERIFICATION_PASS: build_verification_pass_response,
+    Scenario.VERIFICATION_FAIL: build_verification_fail_response,
+    Scenario.VERIFICATION_UNKNOWN: build_verification_unknown_response,
     Scenario.MULTI_TURN: build_multi_turn_response,
 }
 

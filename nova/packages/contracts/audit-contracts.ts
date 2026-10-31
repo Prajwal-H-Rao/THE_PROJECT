@@ -5,6 +5,42 @@ export type PolicyResult = "allowed" | "denied" | "step_up" | "error" | "not_eva
 export type ExecutionStatus = "pending" | "succeeded" | "failed" | "compensated" | "planned" | "awaiting_approval" | "approved" | "executing" | "cancelled" | "needs_manual_action";
 export type VerificationType = "none" | "signature" | "receipt" | "external" | "human";
 
+/** Denial reason codes. Extensible for Layer 8+ sources. */
+export type DenialCode =
+  | "identity_required"
+  | "ownership_mismatch"
+  | "quota_exceeded"
+  | "no_matching_rule"
+  | "invalid_request"
+  | "chat_approval_not_allowed"
+  | "chat_approval_requires_standard_flow"
+  | "authorization_failed"
+  | "tool_not_found"
+  | "missing_scope"
+  | "approval_required"
+  | "approval_revoked"
+  | "validation_failed"
+  | "wrong_audience"
+  | "quota_exceeded"
+  | "internal_error"
+  | "service_unavailable"
+  | "circuit_open"
+  | "dependency_failed"
+  | "schema_mismatch"
+  | "action_mismatch"
+  | "insufficient_scope"
+  | "policy_version_mismatch"
+  | "already_used"
+  | "expired"
+  | "revoked"
+  | "free_text_not_allowed"
+  | "approval_revoked"
+  | "approval_required"
+  | "body_too_large"
+  | "unknown_family"
+  | "invalid_json"
+  | "validation_failed";
+
 /** Input for recording an audit event. */
 export interface AuditRecordInput {
   readonly actorType: ActorType;
@@ -20,6 +56,8 @@ export interface AuditRecordInput {
   readonly evidenceRef?: string;
   readonly payload?: Record<string, unknown>;
   readonly dedupeKey?: string;
+  /** Required when policyResult === "denied". The specific denial reason code. */
+  readonly denialCode?: DenialCode;
 }
 
 /** The stored audit record. */
@@ -32,6 +70,7 @@ export interface AuditRecord {
   readonly resourceType: string;
   readonly resourceId?: string;
   readonly policyResult: PolicyResult;
+  readonly denialCode?: DenialCode;
   readonly executionStatus: ExecutionStatus;
   readonly verificationType: VerificationType;
   readonly evidenceRef?: string;

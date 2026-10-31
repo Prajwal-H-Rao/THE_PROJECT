@@ -9,6 +9,7 @@ import {
   AuditQuery,
   PolicyResult,
   ActorType,
+  DenialCode,
 } from "@nova/contracts/audit-contracts";
 import type { AuditRepository } from "@nova/contracts/audit-contracts";
 import { InMemoryAuditRepository } from "./audit-repository.js";
@@ -46,7 +47,7 @@ export class AuditService {
     });
   }
 
-  /** Record a denied decision. */
+  /** Record a denied decision. The denialCode is required and the payload is sanitized to empty object. */
   async recordDeny(
     actorType: ActorType,
     actorId: string,
@@ -54,8 +55,8 @@ export class AuditService {
     resourceType: string,
     policyVersion: string | number,
     correlationId: string,
-    resourceId?: string,
-    payload?: Record<string, unknown>
+    denialCode: DenialCode,
+    resourceId?: string
   ): Promise<AuditRecordResponse> {
     return this.recordDecision({
       actorType,
@@ -66,7 +67,8 @@ export class AuditService {
       policyResult: "denied",
       policyVersion,
       correlationId,
-      payload,
+      denialCode,
+      payload: {}, // Layer 8: denial row carries a code, not content
     });
   }
 

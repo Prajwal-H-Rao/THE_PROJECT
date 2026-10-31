@@ -47,6 +47,7 @@ from .state import (
     DEFAULT_OVERALL_BUDGET,
     REPAIR_ATTEMPTS,
 )
+from .verify.verifier import Verifier, VerificationResult, EvidenceStore
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -446,15 +447,25 @@ def create_workflow_graph(
                 # policy enforcement on untrusted data is Layer 7)
                 tool_output_for_verification = step.result.data
                 
-                # Verify result
-                if not verifier.verify(step.tool, tool_output_for_verification, {}):
+                # Layer 7: Three-state verification (Module 04 Task 9).
+                # Returns pass, fail, or unknown. unknown -> NEEDS_VERIFICATION state.
+                verification_result = verifier.verify_detailed(step.tool, tool_output_for_verification, {})
+                
+                if verification_result.status == "fail":
                     step.status = StepStatus.FAILED
-                    step.error = "Verification failed"
+                    step.error = f"Verification failed: {verification_result.reason}"
                     workflow.state = WorkflowState.FAILED
-                    workflow.last_error = "Tool result verification failed"
+                    workflow.last_error = f"Tool result verification failed: {verification_result.reason}"
+                elif verification_result.status == "unknown":
+                    # Absent evidence leaves status unknown (Layer 7, spec:216).
+                    # Pause workflow for human review rather than failing.
+                    workflow.state = WorkflowState.NEEDS_VERIFICATION
+                    step.status = StepStatus.FAILED
+                    step.error = f"Verification unknown: {verification_result.reason}"
+                    workflow.last_error = f"Verification unknown: {verification_result.reason}"
                 else:
                     # Validate result
-                    if not validators.validate_enum(tool_output_for_verification.get("status"), ["ok", "success"], "status"):
+                    if not validators.validate_enum(step.result.data.get("status"), ["ok", "success"], "status"):
                         step.status = StepStatus.FAILED
                         step.error = "Invalid result status"
                         workflow.state = WorkflowState.FAILED
@@ -554,6 +565,8 @@ def create_workflow_graph(
             return "finalize"
         elif workflow.state == WorkflowState.EXECUTING:
             return "decide"  # Next step needs policy check
+        elif workflow.state == WorkflowState.NEEDS_VERIFICATION:
+            return "finalize"  # Pause for human review
         else:
             return "finalize"
     
@@ -582,7 +595,10 @@ def create_orchestrator(
     mcp_client = MCPClientWrapper(mcp_url, service_jwt, "nova-mcp")
     audit_client = AuditClient(audit_url, service_jwt)
     audit_emitter = AuditEmitter(audit_client, "agent-orchestrator")
-    verifier = Verifier({})  # Empty evidence store for stub phase
+    
+    # Layer 7: Initialize verifier with evidence store (Module 04 Task 9)
+    evidence_store = EvidenceStore()
+    verifier = Verifier(evidence_store)
     validators = Validators()
     
     return create_workflow_graph(

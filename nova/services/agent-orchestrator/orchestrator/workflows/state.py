@@ -28,6 +28,7 @@ class WorkflowState(str, Enum):
     FAILED = "failed"
     CANCELLED = "cancelled"
     NEEDS_MANUAL_ACTION = "needs_manual_action"
+    NEEDS_VERIFICATION = "needs_verification"
 
 
 class StepStatus(str, Enum):

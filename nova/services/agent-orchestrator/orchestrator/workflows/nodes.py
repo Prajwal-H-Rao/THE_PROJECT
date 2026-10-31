@@ -120,15 +120,6 @@ class FakeModelClient:
                  "idempotency_key": step.get("idempotency_key")} for step in response["steps"]]
 
 
-class Verifier:
-    def __init__(self, evidence_store: Dict[str, Any]):
-        self.evidence_store = evidence_store
-    
-    def verify(self, tool: str, result: Dict[str, Any], expected: Dict[str, Any]) -> bool:
-        key = f"{tool}:{json.dumps(result, sort_keys=True)}"
-        return key in self.evidence_store
-
-
 class Validators:
     @staticmethod
     def validate_enum(value: Any, allowed: List[str], field: str) -> bool:

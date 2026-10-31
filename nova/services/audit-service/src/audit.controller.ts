@@ -13,6 +13,7 @@ import {
 import { ApiTags, ApiOperation, ApiQuery } from "@nestjs/swagger";
 import type { AuditRecordInput, AuditRecordResponse, AuditRecord, AuditQuery } from "@nova/contracts/audit-contracts";
 import { AuditService } from "./audit.service.js";
+import { DenialCode } from "@nova/contracts/audit-contracts";
 
 @ApiTags("audit")
 @Controller("audit")
@@ -25,6 +26,17 @@ export class AuditController {
   async record(@Body() input: AuditRecordInput): Promise<AuditRecordResponse> {
     if (!input.actorType || !input.actorId || !input.action || !input.resourceType || !input.policyResult || !input.policyVersion || !input.correlationId) {
       throw new BadRequestException({ error: "invalid_input", message: "Missing required fields" });
+    }
+    if (input.policyResult === "denied" && !input.denialCode) {
+      throw new BadRequestException({ error: "invalid_input", message: "denialCode is required when policyResult is denied" });
+    }
+    if (input.policyResult === "denied" && input.payload && Object.keys(input.payload).length > 0) {
+      // Layer 8: denial row carries a code, not content - sanitize payload
+      const sanitizedInput: AuditRecordInput = {
+        ...input,
+        payload: {},
+      };
+      return this.auditService.recordDecision(sanitizedInput);
     }
     return this.auditService.recordDecision(input);
   }
