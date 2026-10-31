@@ -76,8 +76,8 @@ labs:
     name: "Small-model agent benchmark on identical fixtures"
     owning_module: "05-model-strategy"
     phase: "P3"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "python labs/lab11/run_benchmark.py --mock"
 
   - number: 12
     name: "500-employer directory import and pilot verification"

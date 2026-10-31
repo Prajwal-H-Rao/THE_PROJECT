@@ -58,7 +58,7 @@ The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility
 | 12 | Test llama.cpp as the fallback runtime | eval report | Same contracts hold |
 | 13 | Test the `0.8b` for classification only. Fence it from the MCP surface that `21-mcp-surface` binds in P5. Use a dummy listener in P3. | Compose network plus config | A dummy listener on the MCP port is unreachable from the `0.8b` container | ✅ DONE |
 | 14 | Add a deterministic fake model as the CI default, which `03-agent-runtime` reuses in P5 | `tests/fixtures/` | CI needs no GPU | ✅ DONE |
-| 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:695) |
+| 15 | Deliver curriculum lab 11: four-model benchmark on identical fixtures, the `0.8b`, the `2b` and the `4b-q4_K_M`, plus at least one alternative | `labs/lab11/` | The report records RAM, VRAM and p95 for all four models (spec:695) | ✅ DONE |
 | 16 | Define the model routing policy: every task family names the model tier it uses. A lightweight family uses the smallest model that clears the floor. A major family uses the larger model. The policy is deterministic and the registry holds it. `03-agent-runtime` reads it. | `models/model-registry.yaml` | Every task family names a tier, and a family that writes, handles finance, qualifications or submission never names the classifier-only model | ✅ DONE |
 ## Release thresholds
 
