@@ -103,8 +103,9 @@ services:
 
   ollama:
     image: ollama/ollama:0.5.7@sha256:c45072e5f8b1c2b7f3c8e9a1b7d6e5f4c3d2a1b8c9e7f6a5d4c3b2a1e9f8d7c6b
-    # WHY: Ollama runs the local model inference. It is bound to loopback and the private
-    # network only (nova-app). No public port exposure. The model-gateway connects to it.
+    # WHY: Ollama runs the local model inference for planner models (2b, 4b, 9b).
+    # It is bound to loopback and the private network only (nova-app).
+    # No public port exposure. The model-gateway connects to it.
     # WHY: The model tag and digest are pinned via model-registry.yaml and setup.sh.
     command: ["serve"]
     environment:
@@ -125,6 +126,42 @@ services:
     networks:
       - nova-app
     deploy: {resources: {limits: {cpus: "4.0", memory: 12G}}}
+
+  ollama-classifier:
+    image: ollama/ollama:0.5.7@sha256:c45072e5f8b1c2b7f3c8e9a1b7d6e5f4c3d2a1b8c9e7f6a5d4c3b2a1e9f8d7c6b
+    # WHY: Ollama runs the classifier-only model (0.8b) for notes_memory family.
+    # WHY: Fenced from MCP surface by network isolation - on nova-classifier network only.
+    # The classifier cannot reach the MCP surface (port 8002) or any other service.
+    command: ["serve"]
+    environment:
+      OLLAMA_HOST: "127.0.0.1:11434"
+      OLLAMA_ORIGINS: ""
+      OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_MAX_QUEUE: "512"
+      OLLAMA_NUM_CTX: "4096"
+    volumes:
+      - nova-ollama-classifier-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:11434/api/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks:
+      - nova-classifier
+    deploy: {resources: {limits: {cpus: "2.0", memory: 4G}}}
+
+  mcp-dummy-listener:
+    image: alpine:3.21@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+    # WHY: Dummy MCP listener on port 8002 to verify classifier fence.
+    # The ollama-classifier container CANNOT reach this listener (different network).
+    # The ollama (planner) container CAN reach this listener (same nova-app network).
+    command: ["sh", "-c", "nc -l -p 8002"]
+    networks:
+      - nova-app
+    profiles: [ml, test]
+    deploy: {resources: {limits: {cpus: "0.1", memory: "64M"}}}
 
   tests:
     build:
@@ -175,9 +212,13 @@ networks:
   nova-admin:
     driver: bridge
     internal: true
+  nova-classifier:
+    driver: bridge
+    internal: true
 
 volumes:
   nova-postgres-data:
   nova-redis-data:
   nova-rustfs-data:
   nova-ollama-data:
+  nova-ollama-classifier-data:
