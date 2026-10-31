@@ -125,6 +125,50 @@ services:
 
   profiles: [edge]
 
+  ollama:
+    image: ollama/ollama:0.5.7@sha256:c45072e5f8b1c2b7f3c8e9a1b7d6e5f4c3d2a1b8c9e7f6a5d4c3b2a1e9f8d7c6b
+    # WHY: Ollama runs the local model inference on the platform network.
+    # It is bound to the private network (nova-app). No public port exposure.
+    command: ["serve"]
+    environment:
+      OLLAMA_HOST: "127.0.0.1:11434"
+      OLLAMA_ORIGINS: ""
+      OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_MAX_QUEUE: "512"
+    volumes:
+      - nova-ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:11434/api/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks:
+      - nova-app
+    deploy: {resources: {limits: {cpus: "4.0", memory: "12G"}}}
+    profiles: [ml]
+
+  model-gateway:
+    build:
+      context: ../../services/model-gateway
+      dockerfile: Dockerfile
+    environment:
+      NOVA_OLLAMA_HOST: ollama
+      NOVA_OLLAMA_PORT: "11434"
+      NOVA_MODEL_REGISTRY_PATH: /app/models/model-registry.yaml
+      NOVA_PORT: "8002"
+      NOVA_ENV: production
+    volumes:
+      - ../../models:/app/models:ro
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - nova-app
+    deploy: {resources: {limits: {cpus: "2.0", memory: "4G"}}}
+    profiles: [ml]
+
   policy-admin-service:
     build:
       context: ../../services/policy-approval-service
@@ -164,3 +208,4 @@ services:
 
 volumes:
   caddy-data:
+  nova-ollama-data:

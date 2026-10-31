@@ -101,6 +101,30 @@ services:
       - nova-app
     deploy: {resources: {limits: {cpus: "1.0", memory: 512M}}}
 
+  ollama:
+    image: ollama/ollama:0.5.7@sha256:c45072e5f8b1c2b7f3c8e9a1b7d6e5f4c3d2a1b8c9e7f6a5d4c3b2a1e9f8d7c6b
+    # WHY: Ollama runs the local model inference. It is bound to loopback and the private
+    # network only (nova-app). No public port exposure. The model-gateway connects to it.
+    # WHY: The model tag and digest are pinned via model-registry.yaml and setup.sh.
+    command: ["serve"]
+    environment:
+      OLLAMA_HOST: "127.0.0.1:11434"
+      OLLAMA_ORIGINS: ""
+      OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_MAX_QUEUE: "512"
+    volumes:
+      - nova-ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:11434/api/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks:
+      - nova-app
+    deploy: {resources: {limits: {cpus: "4.0", memory: 12G}}}
+
   tests:
     build:
       context: ../../tests/security
@@ -155,3 +179,4 @@ volumes:
   nova-postgres-data:
   nova-redis-data:
   nova-rustfs-data:
+  nova-ollama-data:
