@@ -114,6 +114,7 @@ services:
       OLLAMA_NUM_PARALLEL: "1"
       OLLAMA_MAX_LOADED_MODELS: "1"
       OLLAMA_MAX_QUEUE: "512"
+      OLLAMA_NUM_CTX: "4096"
     volumes:
       - nova-ollama-data:/root/.ollama
     healthcheck:

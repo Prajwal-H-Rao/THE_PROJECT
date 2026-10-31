@@ -48,7 +48,7 @@ The spec's `Qwen3-4B-Instruct-2507` and `SmolLM3-3B` need template compatibility
 | 2 | Create `models/model-registry.yaml` at the spec:961 path. Add provider, ID, digest, quant, licence, template, `num_ctx`, latency, RAM/VRAM, hardware, tool-call quality and eval date. | `models/` | Registry validates against a schema | ✅ DONE |
 | 3 | Bind Ollama to loopback and the private container network only | Compose config | Public port scan fails |
 | 4 | Pin the model tag and digest in deployment config | Compose config | Drift fails CI |
-| 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request waits in queue order and never runs in parallel |
+| 5 | Set 4K context, one concurrent generation and a low output limit on the model runtime | Ollama and llama.cpp config | A second concurrent request waits in queue order and never runs in parallel | ✅ DONE |
 | 6 | Measure CPU-only and GPU-assisted runs separately | eval report | The report has a CPU block and a GPU block, each with peak RAM and p95 |
 | 7 | Build the 250-case evaluation set: supported tasks, ambiguity, out-of-scope, wrong tool, invalid args, injection, multilingual, multi-turn | `tests/model-eval/` | Set has 250 cases and a manifest |
 | 8 | Score exact tool-name accuracy and per-field argument accuracy | eval runner | Report per case and worst slice |
