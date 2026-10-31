@@ -39,9 +39,9 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 14 | Emit audit events at every state change | orchestrator | Every transition has one audit row |
 | 15 | Wire the deterministic fake model that `05-model-strategy` added in P3, and add the scenario fixtures the workflow needs | `tests/fixtures/` | Full workflow runs with no LLM |
 | 16 | Implement cancellation where safe | orchestrator | Cancelled run leaves no partial write |
-| 17 | Add per-user quotas and cost accounting | gateway | Quota exceeded returns a typed error |
-| 18 | Deliver curriculum lab 4: LangGraph stub workflow with an injected hallucination | `labs/lab04/` | The validator catches the injected lie |
-| 19 | Build the Flask API boundary for plan/cancel/resume | `services/agent-orchestrator/api/app.py`, `services/agent-orchestrator/requirements.txt` | Service token verification on all routes |
+| 17 | Add per-user quotas and cost accounting | gateway | Quota exceeded returns a typed error | ✅ DONE |
+| 18 | Deliver curriculum lab 4: LangGraph stub workflow with an injected hallucination | `labs/lab04/` | The validator catches the injected lie | ✅ DONE |
+| 19 | Build the Flask API boundary for plan/cancel/resume | `services/agent-orchestrator/api/app.py`, `services/agent-orchestrator/requirements.txt` | Service token verification on all routes | ✅ DONE |
 ## Build order
 
 Work these steps in order. A step names tasks from the table above.

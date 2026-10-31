@@ -27,8 +27,8 @@ labs:
     name: "Agent workflow plan → validate → await_approval → execute → verify → audit"
     owning_module: "03-agent-runtime"
     phase: "P5"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "python labs/lab04/test_lab04.py"
 
   - number: 5
     name: "Messaging channels: Telegram first, then WhatsApp"
