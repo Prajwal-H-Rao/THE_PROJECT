@@ -1,6 +1,9 @@
 # The public HTTPS edge for NOVA. It terminates TLS and proxies to the api-gateway.
 # auto_https off + single https site = no :80 listener. Plain HTTP is refused.
 # tls internal = Caddy issues its own local CA and hostname cert.
+# 
+# Layer 10: Admin plane network rule - admin endpoints are NOT proxied here.
+# Admin endpoints are only accessible via the nova-admin network (VPN/bastion/kubectl exec).
 
 {
 	admin off
@@ -9,6 +12,17 @@
 
 https://nova-gateway.test {
 	tls internal
+	# Admin endpoints are NOT proxied here - they are on the nova-admin network only
+	@adminPaths {
+		path /policy/rules*
+		path /policy/families*
+		path /policy/validate*
+		path /policy/version*
+		path /policy-admin/*
+	}
+	respond @adminPaths 404 {
+		close
+	}
 	reverse_proxy api-gateway:8000 {
 		header_up X-Forwarded-Proto https
 		header_up X-Forwarded-Host {host}

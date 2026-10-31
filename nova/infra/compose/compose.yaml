@@ -147,6 +147,9 @@ networks:
   nova-edge:
     driver: bridge
     internal: true
+  nova-admin:
+    driver: bridge
+    internal: true
 
 volumes:
   nova-postgres-data:

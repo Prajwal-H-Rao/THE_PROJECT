@@ -47,15 +47,15 @@ The spec is explicit: prompt-level refusal is not the control. Narrow capability
 | 9 | Implement layer 7 over the verifier `03-agent-runtime` builds: independent output and side-effect verification | verifier | Absent evidence leaves status `unknown` |
 | 10 | Implement layer 8: auditable denials with reason codes, no message bodies | audit service | Denial row carries a code, not content |
 | 11 | Implement layer 9: block self-extension paths | CI + runtime | A chat message cannot change config |
-| 12 | Implement layer 10: create the admin plane network rule, with no chat access | runbook + network rule | Admin endpoint unreachable from chat |
-| 13 | Build the red-team suite covering every case in spec:216 | `tests/red-team/` | Each case asserts five outcomes |
-| 14 | Add multilingual and encoded-instruction cases | red-team suite | Hindi and base64 cases hold |
-| 15 | Add multi-turn gradual scope expansion cases | red-team suite | Turn 6 still holds the same scope |
-| 16 | Add cross-user and channel-button bypass cases against the policy service | red-team suite | A forged callback envelope for another user is denied by policy, with no live channel |
-| 17 | Wire the suite into CI with a re-run trigger on model, prompt, schema, connector, dependency, policy or infrastructure change | CI config | A planted change to any listed input triggers a rerun |
-| 18 | Log denial reason codes and count them as a metric | observability | Denial rate alert fires |
-| 19 | Add the PII exfiltration attempt case from spec:871 | red-team suite | The attempt returns a denial and leaks no data |
-| 20 | Put the MCP surface inside the scope lock allow-list. The surface arrives from `21-mcp-surface` in P5 | `04-scope-lock` | A new tool family is refused until it is registered |
+| 12 | Implement layer 10: create the admin plane network rule, with no chat access | runbook + network rule | Admin endpoint unreachable from chat | ✅ DONE
+| 13 | Build the red-team suite covering every case in spec:216 | `tests/red-team/` | Each case asserts five outcomes | ✅ DONE |
+| 14 | Add multilingual and encoded-instruction cases | red-team suite | Hindi and base64 cases hold | ✅ DONE |
+| 15 | Add multi-turn gradual scope expansion cases | red-team suite | Turn 6 still holds the same scope | ✅ DONE |
+| 16 | Add cross-user and channel-button bypass cases against the policy service | red-team suite | A forged callback envelope for another user is denied by policy, with no live channel | ✅ DONE |
+| 17 | Wire the suite into CI with a re-run trigger on model, prompt, schema, connector, dependency, policy or infrastructure change | CI config | A planted change to any listed input triggers a rerun | ✅ DONE |
+| 18 | Log denial reason codes and count them as a metric | observability | Denial rate alert fires | ✅ DONE |
+| 19 | Add the PII exfiltration attempt case from spec:871 | red-team suite | The attempt returns a denial and leaks no data | ✅ DONE |
+| 20 | Put the MCP surface inside the scope lock allow-list. The surface arrives from `21-mcp-surface` in P5 | `04-scope-lock` | A new tool family is refused until it is registered | ✅ DONE |
 
 ## Build order
 

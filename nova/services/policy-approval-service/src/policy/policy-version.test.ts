@@ -1,7 +1,7 @@
 /** Tests for the policy version management (Task 13). */
 
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   getPolicyVersion,
   setPolicyVersion,
@@ -143,13 +143,13 @@ test("policy version: verifyBinding accepts grant with current policy version", 
 test("policy version: controller get version returns current", async () => {
   resetPolicyVersion();
   const secret = process.env.NOVA_SERVICE_JWT_SECRET ?? "test-secret-key-32-bytes-minimum!!";
-  const { PolicyController } = await import("./policy.controller.js");
+  const { PolicyAdminController } = await import("./policy-admin.controller.js");
   const { PolicyDecisionService } = await import("./policy-decision.service.js");
   const { issueToken } = await import("@nova/contracts");
   const decisionService = new PolicyDecisionService();
-  const controller = new PolicyController(decisionService);
+  const controller = new PolicyAdminController(decisionService);
   const adminToken = issueToken(
-    { iss: "test-issuer", aud: "policy-service", sub: "admin-user", scope: "policy:admin", ttlSeconds: 300 },
+    { iss: "test-issuer", aud: "policy-admin-service", sub: "admin-user", scope: "policy:admin", ttlSeconds: 300 },
     secret,
   );
   const authHeader = `Bearer ${adminToken}`;
@@ -160,13 +160,13 @@ test("policy version: controller get version returns current", async () => {
 test("policy version: controller get version returns current after version change", async () => {
   setPolicyVersion(5);
   const secret = process.env.NOVA_SERVICE_JWT_SECRET ?? "test-secret-key-32-bytes-minimum!!";
-  const { PolicyController } = await import("./policy.controller.js");
+  const { PolicyAdminController } = await import("./policy-admin.controller.js");
   const { PolicyDecisionService } = await import("./policy-decision.service.js");
   const { issueToken } = await import("@nova/contracts");
   const decisionService = new PolicyDecisionService();
-  const controller = new PolicyController(decisionService);
+  const controller = new PolicyAdminController(decisionService);
   const adminToken = issueToken(
-    { iss: "test-issuer", aud: "policy-service", sub: "admin-user", scope: "policy:admin", ttlSeconds: 300 },
+    { iss: "test-issuer", aud: "policy-admin-service", sub: "admin-user", scope: "policy:admin", ttlSeconds: 300 },
     secret,
   );
   const authHeader = `Bearer ${adminToken}`;

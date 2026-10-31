@@ -39,6 +39,8 @@ services:
         condition: service_healthy
     networks:
       - nova-app
+      - nova-admin
+      - nova-admin
     restart: "no"
     profiles: [test]
 
@@ -52,6 +54,7 @@ services:
         condition: service_healthy
     networks:
       - nova-app
+      - nova-admin
 
   probe-deny:
     <<: *probe-base
@@ -60,6 +63,24 @@ services:
     command: ["--mode", "deny"]
     networks:
       - nova-untrusted
+
+  probe-admin-allow:
+    <<: *probe-base
+    # WHY: the positive control joins the admin network. It must reach admin endpoints.
+    command: ["--mode", "allow", "--admin"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-admin
+
+  probe-admin-deny:
+    <<: *probe-base
+    # WHY: the negative control joins the app network. A connect against
+    # admin endpoints must fail there. The record line names the target and the failure kind.
+    command: ["--mode", "deny", "--admin"]
+    networks:
+      - nova-app
 
   queue-runner:
     build:
@@ -74,6 +95,7 @@ services:
         condition: service_healthy
     networks:
       - nova-app
+      - nova-admin
     profiles: [test]
 
   # The public HTTPS edge. It terminates TLS and proxies to the api-gateway.
@@ -98,7 +120,30 @@ services:
         condition: service_healthy
     networks:
       - nova-app
+      - nova-admin
     profiles: [edge]
+
+  profiles: [edge]
+
+  policy-admin-service:
+    build:
+      context: ../../services/policy-approval-service
+      dockerfile: Dockerfile.admin
+    environment:
+      NOVA_SERVICE_JWT_SECRET: ${NOVA_SERVICE_JWT_SECRET:?the local secret file holds no service jwt secret}
+      NOVA_SERVICE_JWT_ISSUER: ${NOVA_SERVICE_JWT_ISSUER:?the local secret file holds no service jwt issuer}
+      NOVA_PG_HOST: postgres
+      NOVA_PG_PORT: "5432"
+      NOVA_PG_DATABASE: nova
+      NOVA_PG_PASSWORD: ${NOVA_PG_PASSWORD_POLICY_APPROVAL_SERVICE:?the local secret file holds no password for policy_approval_service}
+      NOVA_SERVICE_JWT_SECRET: ${NOVA_SERVICE_JWT_SECRET:?the local secret file holds no service jwt secret}
+      NOVA_SERVICE_JWT_ISSUER: ${NOVA_SERVICE_JWT_ISSUER:?the local secret file holds no service jwt issuer}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-admin
+    profiles: [admin]
 
   edge:
     image: caddy:2.9.1-alpine@sha256:4c4d1b5b8b5c1c1c8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b

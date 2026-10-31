@@ -1,0 +1,56 @@
+# Multi-stage Dockerfile for Policy Admin Service (Layer 10: admin plane)
+# Builds only the admin endpoints (policy-admin controller)
+
+# Stage 1: Build
+FROM node:22.23.4-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY nest-cli.json ./
+COPY tsconfig.json ./
+
+# Copy source files needed for policy-admin
+COPY src/policy/policy-admin.controller.ts src/policy/
+COPY src/policy/policy-decision.service.ts src/policy/
+COPY src/policy/policy-version.ts src/policy/
+COPY src/policy/policy-schema.ts src/policy/
+COPY src/policy/policy-bulk-schema.ts src/policy/
+COPY src/policy/policy-schema.ts src/policy/
+COPY src/policy/authorization.ts src/policy/
+COPY src/policy/usage-counter.ts src/policy/
+COPY src/policy/policy-loader.ts src/policy/
+COPY src/policy/deny-list.ts src/policy/
+COPY src/policy/policy-schema.ts src/policy/
+COPY src/policy/policy-version.ts src/policy/
+
+# Install dependencies
+RUN npm ci
+
+# Build only the policy-admin module
+RUN npm run build
+
+# Stage 2: Runtime
+FROM node:22.23.4-alpine AS runner
+
+WORKDIR /app
+
+# Copy built files
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+
+# Copy policy families (required at runtime)
+COPY src/policy/families ./dist/policy/families
+
+# Create non-root user
+RUN addgroup -g 1001 -S nova && \
+    adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G nova nova && \
+    chown -R nova:nova /app
+
+USER nova
+
+EXPOSE 8001
+
+CMD ["node", "dist/main.js"]
