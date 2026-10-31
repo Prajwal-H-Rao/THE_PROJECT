@@ -138,6 +138,13 @@ export class GrantsService {
   /** Approve a grant. Sets status to approved. */
   async approveGrant(nonce: string, decidedBy: string): Promise<StatusVerdict> {
     const record = this.repository.findByNonce(nonce);
+    if (!record) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    // Layer 9: Prevent self-extension — block self-approval of grants
+    if (record.userId === decidedBy) {
+      return { ok: false, reason: "self_extension_prohibited" };
+    }
     const verdict = await handleApproveGrant(this.repository, nonce, decidedBy);
     if (verdict.ok && record) {
       approvalMetrics.recordApproved(record, verdict.decidedAtMs!);
@@ -148,6 +155,13 @@ export class GrantsService {
   /** Reject a grant. Sets status to denied and revokes the grant. */
   async rejectGrant(nonce: string, decidedBy: string): Promise<StatusVerdict> {
     const record = this.repository.findByNonce(nonce);
+    if (!record) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    // Layer 9: Prevent self-extension — block self-rejection of grants
+    if (record.userId === decidedBy) {
+      return { ok: false, reason: "self_extension_prohibited" };
+    }
     const verdict = await handleRejectGrant(this.repository, nonce, decidedBy);
     if (verdict.ok && record) {
       approvalMetrics.recordRejected(record, verdict.decidedAtMs!);
@@ -158,6 +172,13 @@ export class GrantsService {
   /** Expire a grant. Sets status to expired and revokes the grant. */
   async expireGrant(nonce: string, decidedBy: string): Promise<StatusVerdict> {
     const record = this.repository.findByNonce(nonce);
+    if (!record) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    // Layer 9: Prevent self-extension — block self-expiration of grants
+    if (record.userId === decidedBy) {
+      return { ok: false, reason: "self_extension_prohibited" };
+    }
     const verdict = await handleExpireGrant(this.repository, nonce, decidedBy);
     if (verdict.ok && record) {
       approvalMetrics.recordExpired(record, verdict.decidedAtMs!);
@@ -173,6 +194,14 @@ export class GrantsService {
     input: EditGrantInput,
     policyDecision: { decision: "allow" | "deny" | "needs_approval"; ruleId: string; policyVersion: string | number; requiresStepUp?: boolean }
   ): Promise<EditVerdict> {
+    const record = this.repository.findByNonce(nonce);
+    if (!record) {
+      return { ok: false, reason: "unknown_nonce" };
+    }
+    // Layer 9: Prevent self-extension — block self-editing of grants
+    if (record.userId === input.userId) {
+      return { ok: false, reason: "self_extension_prohibited" };
+    }
     return handleEditGrant(this.repository, nonce, input, policyDecision);
   }
 }

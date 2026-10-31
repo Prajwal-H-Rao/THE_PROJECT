@@ -1,11 +1,10 @@
 /** Tests for the policy version management (Task 13). */
 
-import { test, beforeEach, afterEach } from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   getPolicyVersion,
   setPolicyVersion,
-  bumpPolicyVersion,
   resetPolicyVersion,
   getPolicyVersionConfig,
 } from "./policy-version.js";
@@ -46,15 +45,6 @@ test("policy version: setPolicyVersion rejects invalid versions", () => {
   assert.throws(() => setPolicyVersion(1.5), /positive integer/);
 });
 
-test("policy version: bumpPolicyVersion increments version", () => {
-  resetPolicyVersion();
-  assert.strictEqual(getPolicyVersion(), 1);
-  bumpPolicyVersion();
-  assert.strictEqual(getPolicyVersion(), 2);
-  bumpPolicyVersion();
-  assert.strictEqual(getPolicyVersion(), 3);
-});
-
 test("policy version: getPolicyVersionConfig returns current version", () => {
   resetPolicyVersion();
   const config = getPolicyVersionConfig();
@@ -76,7 +66,7 @@ test("policy version: decision service uses current policy version", () => {
   assert.strictEqual(decision.policyVersion, 1);
 });
 
-test("policy version: decision service reflects version bump", () => {
+test("policy version: decision service reflects version change", () => {
   resetPolicyVersion();
   const service = new PolicyDecisionService();
   const request: PolicyDecisionRequest = {
@@ -86,10 +76,9 @@ test("policy version: decision service reflects version bump", () => {
     target: "own_messages",
   };
   assert.strictEqual(service.decide(request).policyVersion, 1);
-  bumpPolicyVersion();
-  assert.strictEqual(service.decide(request).policyVersion, 2);
-  bumpPolicyVersion();
-  assert.strictEqual(service.decide(request).policyVersion, 3);
+  // Policy version changes only via deployment (Layer 9: self-extension prohibited)
+  setPolicyVersion(7);
+  assert.strictEqual(service.decide(request).policyVersion, 7);
 });
 
 test("policy version: grant pins current policy version", async () => {
@@ -97,23 +86,28 @@ test("policy version: grant pins current policy version", async () => {
   const grantsService = new GrantsService(new InMemoryGrantRepository());
   const record = await grantsService.createGrant(createGrantInput());
   assert.strictEqual(record.policyVersion, "1");
-  bumpPolicyVersion();
+  // Policy version changes only via deployment (Layer 9: self-extension prohibited)
+  setPolicyVersion(7);
   const record2 = await grantsService.createGrant(createGrantInput());
-  assert.strictEqual(record2.policyVersion, "2");
+  assert.strictEqual(record2.policyVersion, "7");
 });
 
 test("policy version: verifyBinding rejects grant with old policy version", async () => {
   resetPolicyVersion();
   const grantsService = new GrantsService(new InMemoryGrantRepository());
   const record = await grantsService.createGrant(createGrantInput({ nowMs: 1_700_000_000_000 }));
-  const nonce = record.nonce;
+  const nonce1 = record.nonce;
   assert.strictEqual(record.policyVersion, "1");
 
-  // Bump policy version
-  bumpPolicyVersion();
+  // Simulate version 2 by creating a grant with version 2
+  // (Policy version changes only via deployment - Layer 9)
+  setPolicyVersion(2);
+  const record2 = await grantsService.createGrant(createGrantInput({ nowMs: 1_700_000_000_000 }));
+  const nonce2 = record2.nonce;
+  assert.strictEqual(record2.policyVersion, "2");
 
-  // Verify with CURRENT version (2) should fail because grant has version 1
-  const verdict = grantsService.verifyGrant(nonce, {
+  // Verify with CURRENT version (2) should fail because OLD grant (nonce1) has version 1
+  const verdict = grantsService.verifyGrant(nonce1, {
     userId: "8f2dc4e0-3f2a-4b8e-9d11-5a9b7c2e6f01",
     service: "inbox-service",
     action: "inbox.send",
@@ -128,7 +122,7 @@ test("policy version: verifyBinding rejects grant with old policy version", asyn
 test("policy version: verifyBinding accepts grant with current policy version", async () => {
   resetPolicyVersion();
   const grantsService = new GrantsService(new InMemoryGrantRepository());
-  bumpPolicyVersion(); // version = 2
+  setPolicyVersion(2); // version = 2
   const record = await grantsService.createGrant(createGrantInput({ nowMs: 1_700_000_000_000 }));
   const nonce = record.nonce;
   assert.strictEqual(record.policyVersion, "2");
@@ -163,8 +157,8 @@ test("policy version: controller get version returns current", async () => {
   assert.strictEqual(response.currentVersion, 1);
 });
 
-test("policy version: controller bump version increments and returns new", async () => {
-  resetPolicyVersion();
+test("policy version: controller get version returns current after version change", async () => {
+  setPolicyVersion(5);
   const secret = process.env.NOVA_SERVICE_JWT_SECRET ?? "test-secret-key-32-bytes-minimum!!";
   const { PolicyController } = await import("./policy.controller.js");
   const { PolicyDecisionService } = await import("./policy-decision.service.js");
@@ -176,10 +170,6 @@ test("policy version: controller bump version increments and returns new", async
     secret,
   );
   const authHeader = `Bearer ${adminToken}`;
-
-  const response1 = await controller.bumpVersion(authHeader);
-  assert.strictEqual(response1.currentVersion, 2);
-
-  const response2 = await controller.bumpVersion(authHeader);
-  assert.strictEqual(response2.currentVersion, 3);
+  const response = await controller.getVersion(authHeader);
+  assert.strictEqual(response.currentVersion, 5);
 });

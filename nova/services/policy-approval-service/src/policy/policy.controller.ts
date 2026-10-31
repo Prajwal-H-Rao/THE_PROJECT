@@ -3,7 +3,7 @@
 import { Controller, Post, Body, Get, Param, HttpCode, HttpStatus, Headers, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { PolicyDecisionService } from "./policy-decision.service.js";
-import { getPolicyVersion, bumpPolicyVersion, getPolicyVersionConfig } from "./policy-version.js";
+import { getPolicyVersion, getPolicyVersionConfig } from "./policy-version.js";
 import type { PolicyDecisionRequest, PolicyDecisionResponse } from "./policy-schema.js";
 import type { PolicyRule } from "./policy-schema.js";
 import type { BulkDecisionRequest, BulkDecisionResponse } from "./policy-bulk-schema.js";
@@ -140,21 +140,5 @@ export class PolicyController {
       throw new ForbiddenException({ error: "insufficient_scope", message: "Admin scope required" });
     }
     return getPolicyVersionConfig();
-  }
-
-  /** Bump the policy version. This invalidates all existing grants. */
-  @Post("version/bump")
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Bump the policy version (invalidates all grants)" })
-  @ApiResponse({ status: 200, description: "New policy version" })
-  async bumpVersion(
-    @Headers("authorization") authHeader: string | undefined
-  ): Promise<{ currentVersion: number }> {
-    const caller = extractCallerContext(authHeader);
-    if (!caller.scopes.includes(ADMIN_SCOPE)) {
-      throw new ForbiddenException({ error: "insufficient_scope", message: "Admin scope required" });
-    }
-    const newVersion = bumpPolicyVersion();
-    return { currentVersion: newVersion };
   }
 }

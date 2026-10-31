@@ -8,7 +8,9 @@
     "declaration": true,
     "noEmit": false,
     "strict": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "service-token.ts",
@@ -39,6 +41,8 @@
     "mcp/call.test.ts",
     "mcp/audit.test.ts",
     "mcp/server/index.ts",
-    "mcp/server/registry.ts"
+    "mcp/server/registry.ts",
+    "self-extension-guard.ts",
+    "self-extension-guard.test.ts"
   ]
 }

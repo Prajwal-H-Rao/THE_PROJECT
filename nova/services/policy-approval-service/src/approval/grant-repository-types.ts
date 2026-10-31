@@ -46,7 +46,7 @@ export type RevokeVerdict =
 /** Result of a status update (approve/reject/expire). */
 export type StatusVerdict =
   | { readonly ok: true; readonly decidedAtMs: number }
-  | { readonly ok: false; readonly reason: "unknown_nonce" };
+  | { readonly ok: false; readonly reason: "unknown_nonce" | "self_extension_prohibited" };
 
 /** Input for editing a grant (Task 9). */
 export interface EditGrantInput {
@@ -63,4 +63,4 @@ export interface EditGrantInput {
 /** Result of an edit attempt. */
 export type EditVerdict =
   | { readonly ok: true; readonly record: GrantRecord }
-  | { readonly ok: false; readonly reason: "unknown_nonce" | "already_terminal" | "policy_denied" | "policy_needs_approval" };
+  | { readonly ok: false; readonly reason: "unknown_nonce" | "already_terminal" | "policy_denied" | "policy_needs_approval" | "self_extension_prohibited" };

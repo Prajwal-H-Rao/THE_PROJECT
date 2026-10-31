@@ -15,9 +15,14 @@ export class RbacService {
     role: "admin" | "user" | "viewer",
     grantedBy: string
   ): Promise<string> {
-    // Prevent self-granting of admin role
+    // Layer 9: Prevent self-extension — block self-granting of admin role
     if (role === "admin" && userId === grantedBy) {
-      throw new Error("Cannot self-grant admin role");
+      throw new Error("Cannot self-grant admin role (self-extension prohibited)");
+    }
+
+    // Layer 9: Prevent self-extension — block any self-granting of roles
+    if (userId === grantedBy) {
+      throw new Error("Cannot self-grant any role (self-extension prohibited)");
     }
 
     // Only admins can grant admin role
@@ -42,7 +47,12 @@ export class RbacService {
   }
 
   /** Revoke a role from a user. */
-  async revokeRole(userId: string, role: "admin" | "user" | "viewer"): Promise<boolean> {
+  async revokeRole(userId: string, role: "admin" | "user" | "viewer", revokedBy: string): Promise<boolean> {
+    // Layer 9: Prevent self-extension — block self-revocation of admin role
+    if (role === "admin" && userId === revokedBy) {
+      throw new Error("Cannot self-revoke admin role (self-extension prohibited)");
+    }
+    
     const result = await this.pool.query(
       `UPDATE identity_service.user_roles
        SET revoked_at = NOW()

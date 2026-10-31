@@ -67,6 +67,10 @@
     "./mcp/server": {
       "types": "./dist/mcp/server/index.d.ts",
       "default": "./dist/mcp/server/index.js"
+    },
+    "./self-extension-guard": {
+      "types": "./dist/self-extension-guard.d.ts",
+      "default": "./dist/self-extension-guard.js"
     }
   },
   "scripts": {
