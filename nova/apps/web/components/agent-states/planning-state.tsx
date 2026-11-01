@@ -1,6 +1,7 @@
 /**
  * Nova design system - PlanningState agent state.
  * Shows an honest planning state: the agent is thinking, no result yet.
+ * All user-facing text comes from props (no hardcoded text).
  */
 
 "use client";
@@ -11,20 +12,17 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface PlanningStateProps {
+  label?: string;
   message?: string;
 }
 
-function PlanningState({ message }: PlanningStateProps) {
+function PlanningState({ label, message }: PlanningStateProps) {
   return (
     <Card className="w-full border border-info">
       <CardContent className="p-4">
         <div className="flex items-center gap-2">
-          <Badge variant="info" className="text-xs">
-            Planning
-          </Badge>
-          <p className="text-sm text-muted-foreground">
-            {message || "Planning your request…"}
-          </p>
+          {label && <Badge variant="info" className="text-xs">{label}</Badge>}
+          {message && <p className="text-sm text-muted-foreground">{message}</p>}
         </div>
         <div className="mt-2 flex gap-2">
           <Skeleton className="w-1/3 h-3" />

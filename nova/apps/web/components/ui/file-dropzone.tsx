@@ -13,6 +13,8 @@ interface FileDropzoneProps {
   accept?: string;
   disabled?: boolean;
   children?: React.ReactNode;
+  dropLabel?: string;
+  acceptLabel?: string;
 }
 
 function FileDropzone({
@@ -20,6 +22,8 @@ function FileDropzone({
   accept,
   disabled,
   children,
+  dropLabel,
+  acceptLabel,
 }: FileDropzoneProps) {
   const [isDragging, setIsDragging] = React.useState(false);
 
@@ -81,8 +85,8 @@ function FileDropzone({
       >
         {children || (
           <>
-            <p>Click to upload or drag and drop</p>
-            {accept && <p className="text-xs text-muted-foreground mt-2">Accept: {accept}</p>}
+            {dropLabel && <p>{dropLabel}</p>}
+            {accept && acceptLabel && <p className="text-xs text-muted-foreground mt-2">{acceptLabel}</p>}
           </>
         )}
       </button>

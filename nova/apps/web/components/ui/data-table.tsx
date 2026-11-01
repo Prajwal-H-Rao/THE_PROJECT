@@ -17,7 +17,7 @@ interface DataTableProps {
 function DataTable({
   columns,
   rows,
-  emptyMessage = "No data available",
+  emptyMessage,
 }: DataTableProps) {
   if (rows.length === 0) {
     return (

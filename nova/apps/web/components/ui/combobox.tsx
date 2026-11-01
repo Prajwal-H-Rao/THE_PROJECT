@@ -31,13 +31,13 @@ function ComboboxImpl({
   options,
   value,
   onChange,
-  placeholder = "Select...",
+  placeholder,
   label,
   error,
   hint,
   disabled,
   readOnly,
-  noResultsMessage = "No results found",
+  noResultsMessage,
 }: ComboboxProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
