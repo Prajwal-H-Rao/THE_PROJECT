@@ -143,3 +143,27 @@
     color: var(--nova-text);
   }
 }
+
+/* Reduced motion: disable animations when the user prefers less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast: forced-colors mode keeps borders and text visible */
+@media (forced-colors: active) {
+  * {
+    border-color: CanvasText !important;
+  }
+  :root {
+    --nova-border: CanvasText;
+    --nova-border-strong: CanvasText;
+    --nova-focus-ring: CanvasText;
+  }
+}

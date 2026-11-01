@@ -1,3 +1,8 @@
+/**
+ * Nova design system - TextArea component.
+ * Provides textarea with label, error and hint states.
+ */
+
 "use client";
 
 import * as React from "react";

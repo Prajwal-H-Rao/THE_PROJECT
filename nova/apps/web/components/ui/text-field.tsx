@@ -1,3 +1,8 @@
+/**
+ * Nova design system - TextField component.
+ * Provides input with label, error and hint states.
+ */
+
 "use client";
 
 import * as React from "react";
