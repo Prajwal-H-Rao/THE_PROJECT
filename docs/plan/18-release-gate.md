@@ -8,7 +8,7 @@ All ten security invariants pass by test or by an operator-reviewed record. Gate
 
 ## The ten invariants (spec:1018-1027, binding)
 
-Spec:1016: "every item below must be demonstrated by automated test or an operator-reviewed test record."
+Spec:1019: "every item below must be demonstrated by automated test or an operator-reviewed test record."
 
 | # | Invariant (spec wording) | Evidence type |
 |---|---|---|

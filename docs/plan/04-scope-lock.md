@@ -44,7 +44,7 @@ The spec is explicit: prompt-level refusal is not the control. Narrow capability
 | 6 | Implement layer 4: deterministic authorisation on identity, ownership, grants, quotas, policy version | policy service | Cross-user read is denied |
 | 7 | Implement layer 5: mint an action-scoped grant bound to service, operation, user, target and payload hash | policy service | Grant cannot be reused |
 | 8 | Implement layer 6 over the orchestrator `03-agent-runtime` builds: label every external payload untrusted | orchestrator | Injection in an email body cannot change policy |
-| 9 | Implement layer 7 over the verifier `03-agent-runtime` builds: independent output and side-effect verification | verifier | Absent evidence leaves status `unknown` |
+| 9 | Implement layer 7 over the verifier `03-agent-runtime` builds: independent output and side-effect verification | `services/agent-orchestrator/orchestrator/verify/verifier.py` | Absent evidence leaves status `unknown` |
 | 10 | Implement layer 8: auditable denials with reason codes, no message bodies | audit service | Denial row carries a code, not content |
 | 11 | Implement layer 9: block self-extension paths | CI + runtime | A chat message cannot change config |
 | 12 | Implement layer 10: create the admin plane network rule, with no chat access | runbook + network rule | Admin endpoint unreachable from chat | ✅ DONE

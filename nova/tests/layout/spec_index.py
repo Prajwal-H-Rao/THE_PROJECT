@@ -154,3 +154,7 @@ class SpecIndex:
         if 1 <= number <= len(self.lines):
             return self.lines[number - 1]
         return ""
+
+    def is_deployable(self, path):
+        """Return True when a layout path is a deployable unit."""
+        return is_deployable(path)

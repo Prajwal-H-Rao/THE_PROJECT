@@ -15,7 +15,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 - Spec:15: "Python services using Flask own all document parsing and ML/NLP work."
 - Spec:18: "No model direct access: a model sees a constrained context and returns candidate structured output."
 - Spec:20: "A single Postgres cluster is acceptable for local and MVP deployment, with per-service schemas/roles and no cross-service write privileges."
-- Spec:974: "Local Compose should use an internal network for private services, explicit service names, named volumes for data, health checks and resource constraints."
+- Spec:977: "Local Compose should use an internal network for private services, explicit service names, named volumes for data, health checks and resource constraints."
 - Spec:787: "no secrets in source, images, prompt contexts, audit payloads or error traces."
 - Spec:23: "Docker is the mandatory service packaging layer."
 - Only the owning adapter calls an external integration.
@@ -24,7 +24,7 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 
 | # | Task | Artifact | Test |
 |---|---|---|---|
-| 1 | Create the monorepo tree from the spec layout at spec:917, then record the diff against the catalogue | `nova/` tree, `nova/docs/layout-diff.md`, `nova/tests/layout/` checks | The diff has exactly 10 rows: 3 catalogue-only, 2 layout-only and 5 renamed entries |
+| 1 | Create the monorepo tree from the spec layout at spec:917, then record the diff against the catalogue | `nova/` tree, `nova/docs/layout-diff.md`, `nova/tests/layout/` checks | The diff has exactly 11 rows: 3 catalogue-only, 3 layout-only and 5 renamed entries |
 | 2 | Add lint, typecheck and a single CI workflow | `.github/workflows/ci.yml`, `pyproject.toml`, `nova/tests/layout/ci_checks.py`, `nova/tests/layout/ci_mutations.py` | CI fails on a type error |
 | 3 | Write the service skeleton template | `services/_template/` | Template builds and serves `/health/live` |
 | 4 | Build `api-gateway-bff` with session middleware, rate limiting, CSRF and trace IDs. It sets the session token format | `services/api-gateway/` | Gateway rejects an unauthenticated request |

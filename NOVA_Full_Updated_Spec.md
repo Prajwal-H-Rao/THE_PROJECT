@@ -922,6 +922,9 @@ nova/
     api-gateway/                 # TypeScript gateway/BFF
     identity-service/            # login, sessions, account linking
     agent-orchestrator/          # Python/Flask, Pydantic, LangGraph where useful
+      orchestrator/
+        verify/
+          verifier.py
     model-gateway/               # model provider allow-list and quotas
     policy-approval-service/     # deterministic policy and approval grants
     inbox-service/               # Gmail/provider email adapter

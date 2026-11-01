@@ -17,7 +17,7 @@ This module interleaves with `12-jobs-agent` inside P8. See rule 4 in `order-and
 - Spec:584: "If no current check is possible, display “last seen” and the date, not “open now.”"
 - Spec:629: "For a source with no verified permitted URL, leave the URL nullable in the company record and do not guess the domain/endpoint."
 - Spec:633: "Batch actions must not silently enable new sources or authorize applications."
-- Spec:1544: "The source registry is the only authority for whether and how an employer can be polled."
+- Spec:1547: "The source registry is the only authority for whether and how an employer can be polled."
 
 ## Registry lifecycle (spec:562)
 

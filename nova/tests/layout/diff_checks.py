@@ -65,7 +65,7 @@ def check_diff_split(rows, expected):
 def check_partition(index, rows):
     """Check that the rows close the catalogue and the layout partition."""
     names = sorted(row["Catalogue entry"] for row in rows if row["Kind"] != "layout-only")
-    paths = sorted(row["Layout path"] for row in rows if row["Kind"] != "catalogue-only")
+    paths = sorted(row["Layout path"] for row in rows if row["Kind"] != "catalogue-only" and index.is_deployable(row["Layout path"]))
     if names != index.unmatched_names:
         return "the catalogue names do not close: %s, not %s" % (names, index.unmatched_names)
     if paths != index.unmatched_paths:
@@ -116,6 +116,8 @@ def check_note_evidence(index, rows):
         layout = row["Layout path"]
         if layout != ABSENT:
             line = index.layout_directories.get(layout)
+            if line is None:
+                line = index.layout_files.get(layout)
             if line is None or line not in cites:
                 problems.append("row %d does not cite %s at spec:%s" % (number, layout, line))
     if problems:
