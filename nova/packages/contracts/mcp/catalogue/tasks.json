@@ -1,0 +1,153 @@
+{
+  "family": "tasks",
+  "operations": [
+    {
+      "operation_id": "tasks.complete",
+      "name": "tasks.complete",
+      "description": "Complete a task.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "task_id"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "completed_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "completed_at"
+          ]
+        }
+      },
+      "classification": "write",
+      "risk_tier": "tier2",
+      "idempotency": "idempotency_key",
+      "verifier": "verify_tasks_complete",
+      "family": "tasks",
+      "owning_service": "tasks-reminders-service",
+      "mcp_server": "tasks-mcp",
+      "resource_scope": "own_tasks",
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "tasks:write"
+      ],
+      "version": 1
+    },
+    {
+      "operation_id": "tasks.reschedule",
+      "name": "tasks.reschedule",
+      "description": "Reschedule a task.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string"
+            },
+            "due_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "task_id",
+            "due_at"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "due_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "due_at"
+          ]
+        }
+      },
+      "classification": "write",
+      "risk_tier": "tier2",
+      "idempotency": "idempotency_key",
+      "verifier": "verify_tasks_reschedule",
+      "family": "tasks",
+      "owning_service": "tasks-reminders-service",
+      "mcp_server": "tasks-mcp",
+      "resource_scope": "own_tasks",
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "tasks:write"
+      ],
+      "version": 1
+    },
+    {
+      "operation_id": "tasks.search",
+      "name": "tasks.search",
+      "description": "Search tasks.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer"
+            }
+          },
+          "required": []
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "tasks": {
+              "type": "array"
+            },
+            "total": {
+              "type": "integer"
+            }
+          },
+          "required": []
+        }
+      },
+      "classification": "read",
+      "risk_tier": "tier1",
+      "idempotency": "none",
+      "verifier": "verify_tasks_search",
+      "family": "tasks",
+      "owning_service": "tasks-reminders-service",
+      "mcp_server": "tasks-mcp",
+      "resource_scope": "own_tasks",
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "tasks:read"
+      ],
+      "version": 1
+    }
+  ],
+  "version": 1
+}
