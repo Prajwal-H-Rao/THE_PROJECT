@@ -1,0 +1,143 @@
+/**
+ * Nova Spacing tokens — 4px base (spec:338).
+ * 21 tokens from space-0 to space-20.
+ * Layout dimensions from spec:340-360.
+ */
+
+/* Base spacing unit = 4px */
+:root {
+  --nova-space-0: 0;
+  --nova-space-1: 0.25rem;   /* 4px  */
+  --nova-space-2: 0.5rem;    /* 8px  */
+  --nova-space-3: 0.75rem;   /* 12px */
+  --nova-space-4: 1rem;      /* 16px */
+  --nova-space-5: 1.25rem;   /* 20px */
+  --nova-space-6: 1.5rem;    /* 24px */
+  --nova-space-7: 1.75rem;   /* 28px */
+  --nova-space-8: 2rem;      /* 32px */
+  --nova-space-9: 2.25rem;   /* 36px */
+  --nova-space-10: 2.5rem;   /* 40px */
+  --nova-space-11: 2.75rem;  /* 44px */
+  --nova-space-12: 3rem;     /* 48px */
+  --nova-space-13: 3.25rem;  /* 52px */
+  --nova-space-14: 3.5rem;   /* 56px */
+  --nova-space-15: 3.75rem;  /* 60px */
+  --nova-space-16: 4rem;     /* 64px */
+  --nova-space-17: 4.25rem;  /* 68px */
+  --nova-space-18: 4.5rem;   /* 72px */
+  --nova-space-19: 4.75rem;  /* 76px */
+  --nova-space-20: 5rem;     /* 80px */
+}
+
+/* Layout dimensions from spec:340-360 */
+:root {
+  /* Container max widths */
+  --nova-container-sm: 640px;
+  --nova-container-md: 768px;
+  --nova-container-lg: 1024px;
+  --nova-container-xl: 1280px;
+  --nova-container-2xl: 1536px;
+
+  /* Sidebar */
+  --nova-sidebar-width: 280px;
+  --nova-sidebar-collapsed-width: 72px;
+
+  /* Header / app bar */
+  --nova-header-height: 64px;
+
+  /* Chat */
+  --nova-chat-min-width: 320px;
+  --nova-chat-max-width: 768px;
+
+  /* Card */
+  --nova-card-min-width: 280px;
+  --nova-card-max-width: 600px;
+
+  /* Modal / Dialog */
+  --nova-modal-sm: 400px;
+  --nova-modal-md: 560px;
+  --nova-modal-lg: 720px;
+  --nova-modal-xl: 960px;
+
+  /* Drawer */
+  --nova-drawer-width: 480px;
+
+  /* Toast */
+  --nova-toast-max-width: 448px;
+
+  /* Breakpoints (for reference in CSS) */
+  --nova-breakpoint-sm: 640px;
+  --nova-breakpoint-md: 768px;
+  --nova-breakpoint-lg: 1024px;
+  --nova-breakpoint-xl: 1280px;
+  --nova-breakpoint-2xl: 1536px;
+}
+
+/* Utility classes for spacing */
+.space-0 { margin: var(--nova-space-0); }
+.space-1 { margin: var(--nova-space-1); }
+.space-2 { margin: var(--nova-space-2); }
+.space-3 { margin: var(--nova-space-3); }
+.space-4 { margin: var(--nova-space-4); }
+.space-5 { margin: var(--nova-space-5); }
+.space-6 { margin: var(--nova-space-6); }
+.space-7 { margin: var(--nova-space-7); }
+.space-8 { margin: var(--nova-space-8); }
+.space-9 { margin: var(--nova-space-9); }
+.space-10 { margin: var(--nova-space-10); }
+.space-11 { margin: var(--nova-space-11); }
+.space-12 { margin: var(--nova-space-12); }
+.space-13 { margin: var(--nova-space-13); }
+.space-14 { margin: var(--nova-space-14); }
+.space-15 { margin: var(--nova-space-15); }
+.space-16 { margin: var(--nova-space-16); }
+.space-17 { margin: var(--nova-space-17); }
+.space-18 { margin: var(--nova-space-18); }
+.space-19 { margin: var(--nova-space-19); }
+.space-20 { margin: var(--nova-space-20); }
+
+/* Padding utilities */
+.p-0 { padding: var(--nova-space-0); }
+.p-1 { padding: var(--nova-space-1); }
+.p-2 { padding: var(--nova-space-2); }
+.p-3 { padding: var(--nova-space-3); }
+.p-4 { padding: var(--nova-space-4); }
+.p-5 { padding: var(--nova-space-5); }
+.p-6 { padding: var(--nova-space-6); }
+.p-7 { padding: var(--nova-space-7); }
+.p-8 { padding: var(--nova-space-8); }
+.p-9 { padding: var(--nova-space-9); }
+.p-10 { padding: var(--nova-space-10); }
+.p-11 { padding: var(--nova-space-11); }
+.p-12 { padding: var(--nova-space-12); }
+.p-13 { padding: var(--nova-space-13); }
+.p-14 { padding: var(--nova-space-14); }
+.p-15 { padding: var(--nova-space-15); }
+.p-16 { padding: var(--nova-space-16); }
+.p-17 { padding: var(--nova-space-17); }
+.p-18 { padding: var(--nova-space-18); }
+.p-19 { padding: var(--nova-space-19); }
+.p-20 { padding: var(--nova-space-20); }
+
+/* Gap utilities */
+.gap-0 { gap: var(--nova-space-0); }
+.gap-1 { gap: var(--nova-space-1); }
+.gap-2 { gap: var(--nova-space-2); }
+.gap-3 { gap: var(--nova-space-3); }
+.gap-4 { gap: var(--nova-space-4); }
+.gap-5 { gap: var(--nova-space-5); }
+.gap-6 { gap: var(--nova-space-6); }
+.gap-7 { gap: var(--nova-space-7); }
+.gap-8 { gap: var(--nova-space-8); }
+.gap-9 { gap: var(--nova-space-9); }
+.gap-10 { gap: var(--nova-space-10); }
+.gap-11 { gap: var(--nova-space-11); }
+.gap-12 { gap: var(--nova-space-12); }
+.gap-13 { gap: var(--nova-space-13); }
+.gap-14 { gap: var(--nova-space-14); }
+.gap-15 { gap: var(--nova-space-15); }
+.gap-16 { gap: var(--nova-space-16); }
+.gap-17 { gap: var(--nova-space-17); }
+.gap-18 { gap: var(--nova-space-18); }
+.gap-19 { gap: var(--nova-space-19); }
+.gap-20 { gap: var(--nova-space-20); }

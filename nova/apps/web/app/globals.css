@@ -3,10 +3,20 @@
  * spec:253-279, verbatim. The workspace is dark-first: the root holds the
  * dark set and the light set applies when the system asks for light. The
  * theme switcher lands with module 15.
+ *
+ * This file imports the spec:284-313 CSS token block verbatim and appends
+ * the four chart keys from spec:274-277. The block omits chart keys.
+ *
+ * Radius and shadow tokens from spec:284-313 are included here.
+ * Type, spacing, and chart tokens are in separate CSS modules.
  */
+
 @import "tailwindcss";
+@import "./typography.css";
+@import "./spacing.css";
 
 :root {
+  /* Color tokens — spec:253-277 (25 rows) */
   --nova-bg: #0B1220;
   --nova-bg-sidebar: #0E1728;
   --nova-surface-1: #121D2E;
@@ -32,6 +42,19 @@
   --nova-chart-2: #2DD4BF;
   --nova-chart-3: #FBBF24;
   --nova-chart-4: #C4B5FD;
+
+  /* Radius tokens — spec:284-313 */
+  --nova-radius-xs: 2px;
+  --nova-radius-sm: 4px;
+  --nova-radius-md: 8px;
+  --nova-radius-lg: 12px;
+  --nova-radius-xl: 16px;
+  --nova-radius-pill: 9999px;
+
+  /* Shadow tokens — spec:284-313 */
+  --nova-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --nova-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --nova-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 @media (prefers-color-scheme: light) {
@@ -61,6 +84,18 @@
     --nova-chart-2: #0F766E;
     --nova-chart-3: #B45309;
     --nova-chart-4: #6D28D9;
+
+    /* Radius and shadow tokens are the same for both themes */
+    --nova-radius-xs: 2px;
+    --nova-radius-sm: 4px;
+    --nova-radius-md: 8px;
+    --nova-radius-lg: 12px;
+    --nova-radius-xl: 16px;
+    --nova-radius-pill: 9999px;
+
+    --nova-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --nova-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --nova-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
 }
 
@@ -92,6 +127,14 @@
   --color-chart-2: var(--nova-chart-2);
   --color-chart-3: var(--nova-chart-3);
   --color-chart-4: var(--nova-chart-4);
+  --color-success: var(--nova-success);
+  --color-success-foreground: #FFFFFF;
+  --color-warning: var(--nova-warning);
+  --color-warning-foreground: #000000;
+  --color-info: var(--nova-info);
+  --color-info-foreground: #FFFFFF;
+  --color-pending: var(--nova-pending);
+  --color-pending-foreground: #FFFFFF;
 }
 
 @layer base {

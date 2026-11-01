@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 
 import { routing, type Locale } from "@/i18n/routing";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 import "../globals.css";
 
@@ -38,9 +39,11 @@ export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
   const resolved = await resolveLocale(locale);
   return (
-    <html lang={resolved}>
-      <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+    <html lang={resolved} className="h-full">
+      <body className="h-full">
+        <ThemeProvider>
+          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
