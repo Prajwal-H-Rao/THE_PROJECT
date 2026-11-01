@@ -25,7 +25,8 @@ Each bullet names the spec line it quotes. Quote marks mean verbatim text.
 | 2 | Encode per-action default policies for all 7 task families | `families.yaml` | Every family in `families.yaml` has a default rule, and a family with no rule fails validation |
 | 3 | Implement the decision endpoint returning `allow`, `deny` or `needs_approval` | policy service | Decision is deterministic for the same input |
 | 4 | Create the approval record bound to payload hash, user, target, expiry and nonce | policy schema | Any byte change invalidates it |
-| 5 | Implement single-use consumption with a race test | policy service | Two concurrent approvals, one wins |
+| 5 | Implement the grant repository: in-memory storage, single-use nonce, expiry, revocation | `src/approval/grant-repository.ts`, `src/approval/grant-repository-types.ts` | Repository enforces single-use and expiry |
+| 6 | Implement single-use consumption with a race test | policy service | Two concurrent approvals, one wins |
 | 6 | Implement expiry and revocation | policy service | An expired or revoked grant fails the policy check. The domain services prove the same rule in P6 and P8 |
 | 7 | Build the grant-verification helper that domain services call. The inbox, calendar and job services consume it in P6 and P8. | policy service | A grant issued for another service fails |
 | 8 | Build the approval card API: target, data preview, permissions, consequence, expiry, hash. `09-inbox-calendar` and `12-jobs-agent` verify the live match in P6 and P8. | policy service | The card hash binds the preview, and a preview edited after hashing fails |

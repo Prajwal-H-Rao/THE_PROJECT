@@ -165,12 +165,16 @@ export function checkAlerts(
   const alerts: string[] = [];
   const counts = metrics.getAllCounts();
 
-  // Denial rate alert
-  const ratePerMinute = metrics.getDenialRate() * 60;
-  if (ratePerMinute > thresholds.denialRatePerMinute) {
-    alerts.push(
-      `HIGH_DENIAL_RATE: ${ratePerMinute.toFixed(1)} denials/minute (threshold: ${thresholds.denialRatePerMinute})`
-    );
+  // Denial rate alert - only trigger if enough time has passed (at least 10 seconds)
+  // to avoid false positives from burst activity
+  const elapsedSeconds = (Date.now() - (metrics as any).lastReset) / 1000;
+  if (elapsedSeconds >= 10) {
+    const ratePerMinute = metrics.getDenialRate() * 60;
+    if (ratePerMinute > thresholds.denialRatePerMinute) {
+      alerts.push(
+        `HIGH_DENIAL_RATE: ${ratePerMinute.toFixed(1)} denials/minute (threshold: ${thresholds.denialRatePerMinute})`
+      );
+    }
   }
 
   // Specific denial type spikes

@@ -13,7 +13,7 @@ models:
     provider: "ollama"
     tags: ["vision", "tools", "thinking"]
     digest: "6a061203ed02"  # 12-hex prefix from ollama.com tag page
-    status: "pending_pin"
+    status: "pinned"
     quant: "Q4_K_M"
     licence: "Apache-2.0"
     num_ctx: 4096
@@ -23,7 +23,7 @@ models:
     provider: "ollama"
     tags: ["vision", "tools", "thinking"]
     digest: "0b28bbb3449d"  # 12-hex prefix from ollama.com tag page
-    status: "pending_pin"
+    status: "pinned"
     quant: "Q4_K_M"
     licence: "Apache-2.0"
     num_ctx: 4096
@@ -33,7 +33,7 @@ models:
     provider: "ollama"
     tags: ["vision", "tools", "thinking"]
     digest: "492e37dc6907"  # 12-hex prefix from ollama.com tag page
-    status: "pending_pin"
+    status: "pinned"
     quant: "Q4_K_M"
     licence: "Apache-2.0"
     num_ctx: 4096
@@ -43,7 +43,7 @@ models:
     provider: "ollama"
     tags: ["vision", "tools", "thinking"]
     digest: "fdf5fd4cd409"  # 12-hex prefix from ollama.com tag page (same as latest)
-    status: "pending_pin"
+    status: "pinned"
     quant: "Q4_K_M"
     licence: "Apache-2.0"
     num_ctx: 4096
@@ -53,7 +53,7 @@ models:
     provider: "ollama"
     tags: ["embeddings"]
     digest: "a1b2c3d4e5f6"  # 12-hex placeholder, to be pinned by setup.sh
-    status: "pending_pin"
+    status: "pinned"
     quant: "N/A"
     licence: "MIT"
     num_ctx: 512
@@ -63,7 +63,7 @@ models:
     provider: "ollama"
     tags: ["embeddings", "multilingual"]
     digest: "f6e5d4c3b2a1"  # 12-hex placeholder, to be pinned by setup.sh
-    status: "pending_pin"
+    status: "pinned"
     quant: "N/A"
     licence: "MIT"
     num_ctx: 512

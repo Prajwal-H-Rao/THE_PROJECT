@@ -4,14 +4,14 @@
 
 This document is the copy of the record at `nova/docs/layout-diff.md` that
 module 01 task 16 owns. The checker at `tests/layout/copy_checks.py` compares
-every row of this copy against the record. The copy holds the same 10 rows in
+every row of this copy against the record. The copy holds the same 11 rows in
 the same order. The notes repeat the note text of the record, so no note cites
 a spec line that the record does not cite.
 
 ## Differences
 
 | # | Kind | Catalogue entry | Layout path | Note |
-|---|------|-----------------|-------------|------|
+|---|---|---|---|---|
 | 1 | catalogue-only | employer-registry-service | none | The catalogue entry sits at spec:735. The layout names no directory for employer-registry-service. Module 13 task 1 creates `services/employer-registry-service/import/`. |
 | 2 | catalogue-only | job-source-worker | none | The catalogue entry sits at spec:736. The layout names no directory for job-source-worker. The plan names no path under `job-source-worker`. The table row at docs/plan/12-jobs-agent.md:40 names `job-source-worker` for the adapters and polling work. Module 13 task 6 carries the `worker` artifact. Module 13 task 7 carries the `connectors/` artifact. Module 13 tasks 8 to 11 carry the `connector` artifact. Module 13 task 13 carries the `connector` artifact. Module 13 task 15 carries the `worker` artifact. Module 13 task 16 carries the `worker` artifact. |
 | 3 | catalogue-only | integration-registry | none | The catalogue entry sits at spec:747. The layout names no directory for integration-registry. Module 20 task 11 creates `services/integration-registry/`. |
@@ -22,6 +22,7 @@ a spec line that the record does not cite.
 | 8 | renamed | channel-adapter-telegram | services/telegram-adapter | The catalogue entry sits at spec:743. The layout path sits at spec:936. Module 14 task 6 builds the `telegram` adapter. The plan names no `services/telegram-adapter/` path. |
 | 9 | renamed | channel-adapter-whatsapp | services/whatsapp-adapter | The catalogue entry sits at spec:744. The layout path sits at spec:937. Module 14 task 1 builds `services/whatsapp-adapter/`. |
 | 10 | renamed | audit-activity-service | services/audit-service | The catalogue entry sits at spec:746. The layout path sits at spec:938. Module 02 task 5 starts the audit service. Module 02 task 16 builds the audit search. The plan names no `services/audit-service/` path. |
+| 11 | layout-only | none | services/agent-orchestrator/orchestrator/verify/verifier.py | The layout path is a new implementation for Layer 7 verification (Module 04 Task 9). The catalogue has no entry for this specific verification module; it is part of the orchestrator runtime. |
 
 ## Use
 

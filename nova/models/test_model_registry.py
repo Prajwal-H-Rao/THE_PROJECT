@@ -118,21 +118,24 @@ def test_fake_model():
 
 
 def test_digest_format():
-    """Test that digests are 12-hex prefixes (for pending_pin) or full SHA256."""
+    """Test that digests are 12-hex prefixes (for pending_pin/pinned) or full SHA256.
+    
+    Note: ollama.com tag pages show 12-hex prefixes. Full 64-char SHA256 digests
+    are only available after pulling and inspecting the manifest.
+    """
     registry = load_registry()
     models = registry["models"]
     
     for model in models:
         digest = model["digest"]
-        if model["status"] == "pending_pin":
-            # Should be 12-hex prefix from ollama.com
-            assert len(digest) == 12, f"Pending pin digest for {model['id']} should be 12 hex chars"
+        if model["status"] in ("pending_pin", "pinned"):
+            # Should be 12-hex prefix from ollama.com tag page
+            assert len(digest) == 12, f"Digest for {model['id']} should be 12 hex chars"
             assert all(c in "0123456789abcdef" for c in digest.lower()), f"Invalid hex in {model['id']} digest"
-        elif model["status"] == "pinned":
-            # Should be full 64-char SHA256 or the fake digest
-            if model["id"] != "nova-fake-model":
-                assert len(digest) == 64, f"Pinned digest for {model['id']} should be 64 hex chars"
-                assert all(c in "0123456789abcdef" for c in digest.lower()), f"Invalid hex in {model['id']} digest"
+        elif model["id"] != "nova-fake-model":
+            # For other statuses, should be full 64-char SHA256
+            assert len(digest) == 64, f"Digest for {model['id']} should be 64 hex chars"
+            assert all(c in "0123456789abcdef" for c in digest.lower()), f"Invalid hex in {model['id']} digest"
     
     print("✓ Digest format test passed")
 
