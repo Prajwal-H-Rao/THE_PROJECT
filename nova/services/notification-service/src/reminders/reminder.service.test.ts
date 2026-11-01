@@ -7,13 +7,10 @@ import { describe, it } from "node:test";
 import { ReminderService, ReminderNotFoundError } from "./reminder.service.js";
 import { ReminderRepository } from "./reminder-repository.js";
 import { ReminderDeliveryRepository } from "./reminder-delivery.js";
+import { ReminderDeliveryLogRepository } from "./reminder-delivery-log.js";
+import { EscalationRepository } from "./escalation-repository.js";
 
-function makeRepo(config: {
-  createReminder?: any;
-  findReminder?: any;
-  cancelReminder?: boolean;
-  listDue?: any;
-}): ReminderRepository {
+function makeRepo(config: any): ReminderRepository {
   const repo = new ReminderRepository({} as any);
   repo.create = async (_userId: string, input: any) => ({
     reminderId: "reminder-1",
@@ -57,13 +54,14 @@ function makeRepo(config: {
   return repo;
 }
 
-function makeDeliveryRepo(config: {
-  claimResult: { reminderId: string; idempotencyKey: string } | null;
-  markDeliveredOk: boolean;
-  markFailedOk: boolean;
-}): ReminderDeliveryRepository {
+function makeDeliveryRepo(config: any): ReminderDeliveryRepository {
   const repo = new ReminderDeliveryRepository({} as any);
-  repo.claimReminder = async () => config.claimResult;
+  let cr = config.claimResult;
+  repo.claimReminder = async () => {
+    const result = cr;
+    cr = null;
+    return result;
+  };
   repo.markDelivered = async () => {
     if (!config.markDeliveredOk) throw new Error("delivery record failed");
   };
@@ -74,16 +72,28 @@ function makeDeliveryRepo(config: {
   return repo;
 }
 
+function makeEscalationRepo(config: any): EscalationRepository {
+  const repo = new EscalationRepository({} as any);
+  let results = [...(config.escalateResult || [])];
+  repo.claimAndEscalate = async () => {
+    const result = results.shift();
+    if (!result) return [];
+    return [result];
+  };
+  return repo;
+}
+
+function makeService(config: any): ReminderService {
+  const repo = makeRepo(config);
+  const deliveryRepo = makeDeliveryRepo(config);
+  const escalationRepo = makeEscalationRepo(config);
+  const deliveryLogRepo = new ReminderDeliveryLogRepository({} as any);
+  return new ReminderService(repo, deliveryRepo, deliveryLogRepo, escalationRepo);
+}
+
 describe("ReminderService", () => {
   it("creates reminder for user", async () => {
-    const repo = makeRepo({});
-    const deliveryRepo = makeDeliveryRepo({
-      claimResult: null,
-      markDeliveredOk: true,
-      markFailedOk: true,
-    });
-    const service = new ReminderService(repo, deliveryRepo);
-
+    const service = makeService({});
     const reminder = await service.createReminder("user-1", {
       title: "Take medicine",
       dueAt: "2026-10-01T10:00:00Z",
@@ -97,14 +107,7 @@ describe("ReminderService", () => {
   });
 
   it("getReminder throws ReminderNotFoundError when not found", async () => {
-    const repo = makeRepo({ findReminder: null });
-    const deliveryRepo = makeDeliveryRepo({
-      claimResult: null,
-      markDeliveredOk: true,
-      markFailedOk: true,
-    });
-    const service = new ReminderService(repo, deliveryRepo);
-
+    const service = makeService({ findReminder: null });
     await assert.rejects(
       () => service.getReminder("reminder-999"),
       ReminderNotFoundError
@@ -112,14 +115,7 @@ describe("ReminderService", () => {
   });
 
   it("cancelReminder throws ReminderNotFoundError when not cancelled", async () => {
-    const repo = makeRepo({ cancelReminder: false });
-    const deliveryRepo = makeDeliveryRepo({
-      claimResult: null,
-      markDeliveredOk: true,
-      markFailedOk: true,
-    });
-    const service = new ReminderService(repo, deliveryRepo);
-
+    const service = makeService({ cancelReminder: false });
     await assert.rejects(
       () => service.cancelReminder("reminder-999"),
       ReminderNotFoundError
@@ -127,7 +123,7 @@ describe("ReminderService", () => {
   });
 
   it("listDueReminders returns due reminders", async () => {
-    const repo = makeRepo({
+    const service = makeService({
       listDue: [
         {
           reminderId: "reminder-1",
@@ -148,12 +144,6 @@ describe("ReminderService", () => {
         },
       ],
     });
-    const deliveryRepo = makeDeliveryRepo({
-      claimResult: null,
-      markDeliveredOk: true,
-      markFailedOk: true,
-    });
-    const service = new ReminderService(repo, deliveryRepo);
 
     const reminders = await service.listDueReminders("2026-10-01T12:00:00Z");
     assert.strictEqual(reminders.length, 1);
@@ -161,8 +151,7 @@ describe("ReminderService", () => {
   });
 
   it("claimReminder returns claimed reminder", async () => {
-    const repo = makeRepo({});
-    const deliveryRepo = makeDeliveryRepo({
+    const service = makeService({
       claimResult: {
         reminderId: "reminder-1",
         idempotencyKey: "key-1",
@@ -170,7 +159,6 @@ describe("ReminderService", () => {
       markDeliveredOk: true,
       markFailedOk: true,
     });
-    const service = new ReminderService(repo, deliveryRepo);
 
     const claimed = await service.claimReminder();
     assert.ok(claimed);
@@ -179,51 +167,59 @@ describe("ReminderService", () => {
   });
 
   it("claimReminder returns null when no reminders", async () => {
-    const repo = makeRepo({});
-    const deliveryRepo = makeDeliveryRepo({
+    const service = makeService({
       claimResult: null,
       markDeliveredOk: true,
       markFailedOk: true,
     });
-    const service = new ReminderService(repo, deliveryRepo);
 
     const claimed = await service.claimReminder();
     assert.strictEqual(claimed, null);
   });
 
   it("markDelivered succeeds", async () => {
-    const repo = makeRepo({});
-    const deliveryRepo = makeDeliveryRepo({
+    const service = makeService({
       claimResult: null,
       markDeliveredOk: true,
       markFailedOk: true,
     });
-    const service = new ReminderService(repo, deliveryRepo);
-
     await service.markDelivered("reminder-1", "msg-1", "key-1");
   });
 
   it("markFailed succeeds", async () => {
-    const repo = makeRepo({});
-    const deliveryRepo = makeDeliveryRepo({
+    const service = makeService({
       claimResult: null,
       markDeliveredOk: true,
       markFailedOk: true,
     });
-    const service = new ReminderService(repo, deliveryRepo);
-
     await service.markFailed("reminder-1", "provider error", "key-1");
   });
 
   it("reclaimOrphaned succeeds", async () => {
-    const repo = makeRepo({});
-    const deliveryRepo = makeDeliveryRepo({
+    const service = makeService({
       claimResult: null,
       markDeliveredOk: true,
       markFailedOk: true,
     });
-    const service = new ReminderService(repo, deliveryRepo);
-
     await service.reclaimOrphaned(5);
+  });
+
+  it("escalateMissed escalates missed reminders", async () => {
+    const service = makeService({
+      claimResult: null,
+      markDeliveredOk: true,
+      markFailedOk: true,
+      escalateResult: [
+        {
+          reminderId: "reminder-1",
+          idempotencyKey: "key-1",
+          dueAt: "2026-10-01T09:00:00Z",
+          escalationAttempts: 1,
+        },
+      ],
+    });
+
+    const count = await service.escalateMissed(5);
+    assert.strictEqual(count, 1);
   });
 });

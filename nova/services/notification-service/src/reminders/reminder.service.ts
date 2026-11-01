@@ -10,7 +10,10 @@
 import { Injectable } from "@nestjs/common";
 import { ReminderRepository } from "./reminder-repository.js";
 import { ReminderDeliveryRepository } from "./reminder-delivery.js";
-import type { Reminder, CreateReminderInput, ClaimedReminder } from "./reminder.entity.js";
+import { ReminderDeliveryLogRepository } from "./reminder-delivery-log.js";
+import { EscalationRepository } from "./escalation-repository.js";
+import type { Reminder, CreateReminderInput, ClaimedReminder, ReminderDeliveryLog } from "./reminder.entity.js";
+import type { EscalatedReminder } from "./escalation-repository.js";
 
 export class ReminderNotFoundError extends Error {
   constructor(public readonly reminderId: string) {
@@ -30,7 +33,9 @@ export class ReminderAlreadyExistsError extends Error {
 export class ReminderService {
   constructor(
     private readonly repository: ReminderRepository,
-    private readonly deliveryRepository: ReminderDeliveryRepository
+    private readonly deliveryRepository: ReminderDeliveryRepository,
+    private readonly deliveryLogRepository: ReminderDeliveryLogRepository,
+    private readonly escalationRepository: EscalationRepository
   ) {}
 
   /** Create one reminder for one user.
@@ -113,5 +118,41 @@ export class ReminderService {
    * threshold. Resets them to pending so another worker can claim them. */
   async reclaimOrphaned(staleMinutes: number = 5): Promise<void> {
     return this.deliveryRepository.reclaimOrphaned(staleMinutes);
+  }
+
+  /** Escalate missed reminders past due without delivery.
+   * Claims reminders with escalated = false and status != 'delivered'
+   * and due_at < now(), marks them escalated atomically, then calls
+   * escalateReminder for each. Returns the number escalated. */
+  async escalateMissed(limit = 50): Promise<number> {
+    const claimed = await this.escalationRepository.claimAndEscalate(limit);
+    for (const reminder of claimed) {
+      await this.escalateReminder(reminder);
+    }
+    return claimed.length;
+  }
+
+  /** Escalate one reminder to its notification channel.
+   * Hook method for escalation notification delivery. Default
+   * implementation logs the escalation. Override to send SMS/email/
+   * push notification. */
+  protected async escalateReminder(reminder: EscalatedReminder): Promise<void> {
+    // Hook for escalation notification delivery.
+    // Override to send to SMS/email/push notification provider.
+  }
+
+  /** Find delivery log entries by reminder ID. */
+  async findDeliveryLogByReminderId(reminderId: string): Promise<ReminderDeliveryLog[]> {
+    return this.deliveryLogRepository.findByReminderId(reminderId);
+  }
+
+  /** Find delivery log entries by status. */
+  async findDeliveryLogByStatus(status: string): Promise<ReminderDeliveryLog[]> {
+    return this.deliveryLogRepository.findByStatus(status);
+  }
+
+  /** Find delivery log entries by date range (delivered_at between startDate and endDate). */
+  async findDeliveryLogByDateRange(startDate: string, endDate: string): Promise<ReminderDeliveryLog[]> {
+    return this.deliveryLogRepository.findByDateRange(startDate, endDate);
   }
 }

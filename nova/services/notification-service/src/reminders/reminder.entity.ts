@@ -37,6 +37,7 @@ export interface ReminderDeliveryLog {
   readonly deliveredAt: string | null;
   readonly status: string;
   readonly errorMessage: string | null;
+  readonly idempotencyKey: string;
   readonly createdAt: string;
 }
 

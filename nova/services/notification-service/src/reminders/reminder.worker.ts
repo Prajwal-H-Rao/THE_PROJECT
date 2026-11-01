@@ -9,6 +9,9 @@
 
 import { ReminderRepository } from "./reminder-repository.js";
 import { ReminderService } from "./reminder.service.js";
+import { ReminderDeliveryRepository } from "./reminder-delivery.js";
+import { EscalationService } from "./escalation-service.js";
+import { EscalationRepository } from "./escalation-repository.js";
 
 export interface ReminderWorkerOptions {
   readonly pollIntervalMs?: number;
@@ -20,6 +23,7 @@ export interface ReminderWorkerOptions {
 export class ReminderWorker {
   private repository: ReminderRepository;
   private service: ReminderService;
+  private escalationService: EscalationService;
   private options: Required<ReminderWorkerOptions>;
   private timer: ReturnType<typeof setInterval> | null = null;
   private reclaimTimer: ReturnType<typeof setInterval> | null = null;
@@ -28,10 +32,12 @@ export class ReminderWorker {
   constructor(
     repository: ReminderRepository,
     service: ReminderService,
+    escalationService: EscalationService,
     options: ReminderWorkerOptions = {}
   ) {
     this.repository = repository;
     this.service = service;
+    this.escalationService = escalationService;
     this.options = {
       pollIntervalMs: options.pollIntervalMs ?? 30000,
       batchSize: options.batchSize ?? 50,
@@ -66,9 +72,9 @@ export class ReminderWorker {
   }
 
   /** Run one poll cycle: claim due reminders, deliver each one. */
-  async poll(): Promise<{ delivered: number; failed: number; skipped: number }> {
+  async poll(): Promise<{ delivered: number; failed: number; skipped: number; escalated: number }> {
     if (this.running) {
-      return { delivered: 0, failed: 0, skipped: 0 };
+      return { delivered: 0, failed: 0, skipped: 0, escalated: 0 };
     }
     this.running = true;
     try {
@@ -78,10 +84,14 @@ export class ReminderWorker {
     }
   }
 
-  private async pollCycle(): Promise<{ delivered: number; failed: number; skipped: number }> {
+  private async pollCycle(): Promise<{ delivered: number; failed: number; skipped: number; escalated: number }> {
     let delivered = 0;
     let failed = 0;
     let skipped = 0;
+    let escalated = 0;
+
+    // Escalate missed reminders past due without delivery.
+    escalated = await this.service.escalateMissed(this.options.batchSize);
 
     while (true) {
       const claimed = await this.service.claimReminder();
@@ -108,7 +118,7 @@ export class ReminderWorker {
       }
     }
 
-    return { delivered, failed, skipped };
+    return { delivered, failed, skipped, escalated };
   }
 
   /** Reclaim orphaned processing reminders older than the staleness
