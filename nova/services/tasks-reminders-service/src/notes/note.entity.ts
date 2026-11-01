@@ -1,0 +1,39 @@
+/**
+ * Nova design system - Note entity.
+ * Represents one user-owned note.
+ */
+
+export interface Note {
+  readonly noteId: string;
+  readonly userId: string;
+  readonly title: string;
+  readonly content: string | null;
+  readonly tags: string[];
+  readonly sourceType: string | null;
+  readonly sourceRef: string | null;
+  readonly isArchived: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface CreateNoteInput {
+  readonly title: string;
+  readonly content: string;
+  readonly tags?: string[];
+  readonly sourceType?: string;
+  readonly sourceRef?: string;
+}
+
+export interface UpdateNoteInput {
+  readonly title?: string;
+  readonly content?: string | null;
+  readonly tags?: string[] | null;
+  readonly sourceType?: string | null;
+  readonly sourceRef?: string | null;
+  readonly isArchived?: boolean;
+}
+
+export interface NoteListFilter {
+  tags?: string[];
+  isArchived?: boolean;
+}

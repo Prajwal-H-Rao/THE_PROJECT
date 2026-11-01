@@ -1,5 +1,5 @@
 /**
- * Tasks module - wires TaskRepository, TaskService, TaskController.
+ * Tasks module - wires TaskRepository and TaskService.
  */
 
 import { Module } from "@nestjs/common";

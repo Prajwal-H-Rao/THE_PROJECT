@@ -1,7 +1,7 @@
 /**
- * Task repository - SQL queries against tasks_reminders_service.tasks.
- * All read queries enforce ownership: WHERE user_id = $1.
- * Uses pg Pool for database connections.
+ * Task repository runs SQL queries against tasks_reminders_service.tasks.
+ * All read queries filter by user_id.
+ * It uses pg Pool for database connections.
  */
 
 import { Injectable, Inject } from "@nestjs/common";
@@ -13,16 +13,15 @@ import type {
   TaskListFilter,
 } from "./task.entity.js";
 
-const TABLE = "tasks_reminders_service.tasks";
+const TASKS_TABLE = "tasks_reminders_service.tasks";
 
 @Injectable()
 export class TaskRepository {
   constructor(@Inject("PG_POOL") private readonly pool: Pool) {}
 
-  /** Create one task for one user. Returns the created task row. */
   async create(userId: string, input: CreateTaskInput): Promise<Task> {
     const query = `
-      INSERT INTO ${TABLE}
+      INSERT INTO ${TASKS_TABLE}
         (user_id, title, description, priority, due_at, parent_task_id, recurrence_rule, timezone)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING task_id, user_id, title, description, status, priority,
@@ -42,26 +41,22 @@ export class TaskRepository {
     return this.mapRow(result.rows[0]);
   }
 
-  /** Read one task by ID only if the user owns it.
-   * Returns null if not found or not owned by the user. */
   async findById(userId: string, taskId: string): Promise<Task | null> {
     const query = `
       SELECT task_id, user_id, title, description, status, priority,
              due_at, parent_task_id, recurrence_rule, timezone, created_at, updated_at
-      FROM ${TABLE}
+      FROM ${TASKS_TABLE}
       WHERE task_id = $1 AND user_id = $2
     `;
     const result = await this.pool.query(query, [taskId, userId]);
     return result.rows.length > 0 ? this.mapRow(result.rows[0]) : null;
   }
 
-  /** List tasks for one user with optional status/due filter.
-   * Ownership enforced: only rows where user_id = $1 are returned. */
   async list(userId: string, filter?: TaskListFilter): Promise<Task[]> {
     let query = `
       SELECT task_id, user_id, title, description, status, priority,
              due_at, parent_task_id, recurrence_rule, timezone, created_at, updated_at
-      FROM ${TABLE}
+      FROM ${TASKS_TABLE}
       WHERE user_id = $1
     `;
     const values: unknown[] = [userId];
@@ -78,18 +73,12 @@ export class TaskRepository {
       paramIndex++;
     }
 
-    query += " ORDER BY created_at DESC";
+    query += " ORDER BY updated_at DESC";
     const result = await this.pool.query(query, values);
     return result.rows.map((row) => this.mapRow(row));
   }
 
-  /** Update one task only if the user owns it.
-   * Returns null if not found or not owned by the user. */
-  async update(
-    userId: string,
-    taskId: string,
-    input: UpdateTaskInput
-  ): Promise<Task | null> {
+  async update(userId: string, taskId: string, input: UpdateTaskInput): Promise<Task | null> {
     const sets: string[] = [];
     const values: unknown[] = [userId, taskId];
     let paramIndex = 3;
@@ -141,7 +130,7 @@ export class TaskRepository {
 
     sets.push(`updated_at = now()`);
     const query = `
-      UPDATE ${TABLE}
+      UPDATE ${TASKS_TABLE}
       SET ${sets.join(", ")}
       WHERE task_id = $2 AND user_id = $1
       RETURNING task_id, user_id, title, description, status, priority,
@@ -151,11 +140,9 @@ export class TaskRepository {
     return result.rows.length > 0 ? this.mapRow(result.rows[0]) : null;
   }
 
-  /** Delete one task only if the user owns it.
-   * Returns true if deleted, false if not found or not owned. */
   async delete(userId: string, taskId: string): Promise<boolean> {
     const query = `
-      DELETE FROM ${TABLE}
+      DELETE FROM ${TASKS_TABLE}
       WHERE task_id = $1 AND user_id = $2
       RETURNING task_id
     `;
@@ -163,7 +150,6 @@ export class TaskRepository {
     return (result.rowCount ?? 0) > 0;
   }
 
-  /** Map a database row to a Task entity. */
   private mapRow(row: unknown): Task {
     const r = row as Record<string, unknown>;
     return {

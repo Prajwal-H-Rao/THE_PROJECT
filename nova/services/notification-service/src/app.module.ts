@@ -1,11 +1,10 @@
 /**
  * Root application module for notification-service.
- * Provides PG_POOL injection token for the reminder repository.
  */
 
 import { Module, Global } from "@nestjs/common";
 import { Pool } from "pg";
-import { RemindersModule } from "./reminders/reminders.module.js";
+import { NotificationsModule } from "./notifications/notifications.module.js";
 
 const PG_POOL = "PG_POOL";
 
@@ -18,6 +17,6 @@ const PG_POOL = "PG_POOL";
     },
   ],
   exports: [PG_POOL],
-  imports: [RemindersModule],
+  imports: [NotificationsModule],
 })
 export class AppModule {}

@@ -16,6 +16,10 @@ interface ShellProps {
   status?: "online" | "offline" | "degraded";
   navItems?: React.ComponentProps<typeof ShellNav>["items"];
   onAudit?: () => void;
+  /** Command palette node, forwarded to the header. */
+  palette?: React.ReactNode;
+  /** User menu node, forwarded to the header. */
+  userMenu?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -24,11 +28,21 @@ function Shell({
   status,
   navItems,
   onAudit,
+  palette,
+  userMenu,
   children,
 }: ShellProps) {
   return (
     <PageLayout
-      header={<ShellHeader appName={appName} status={status} onAudit={onAudit} />}
+      header={
+        <ShellHeader
+          appName={appName}
+          status={status}
+          onAudit={onAudit}
+          palette={palette}
+          userMenu={userMenu}
+        />
+      }
       sidebar={
         navItems && navItems.length ? (
           <ShellNav items={navItems} />

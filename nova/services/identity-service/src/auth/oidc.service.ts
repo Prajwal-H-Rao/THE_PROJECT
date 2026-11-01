@@ -156,7 +156,7 @@ export class OidcService {
     try {
       const parts = idToken.split(".");
       if (parts.length !== 3) return {};
-      const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+      const payload = JSON.parse(Buffer.from(parts[1]!, "base64url").toString("utf8"));
       return payload as { nonce?: string; [key: string]: unknown };
     } catch {
       return {};

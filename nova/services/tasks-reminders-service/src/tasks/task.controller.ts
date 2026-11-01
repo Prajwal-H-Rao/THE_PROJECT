@@ -1,6 +1,7 @@
 /**
- * Task controller - REST endpoints for task CRUD.
- * Extracts user_id from request headers (x-user-id) for ownership checks.
+ * Task controller handles task CRUD.
+ * It exposes REST endpoints for task CRUD.
+ * It extracts user_id from request headers for ownership checks.
  */
 
 import {
@@ -14,7 +15,6 @@ import {
   Query,
   Headers,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
 } from "@nestjs/common";
 import { TaskService } from "./task.service.js";
@@ -28,11 +28,10 @@ import type {
 export class TaskController {
   constructor(private readonly service: TaskService) {}
 
-  /** Create one task. */
   @Post()
   async create(
     @Headers("x-user-id") userId: string,
-    @Body() input: CreateTaskInput
+    @Body() input: CreateTaskInput,
   ) {
     if (!userId) {
       throw new BadRequestException("Missing x-user-id header");
@@ -43,11 +42,10 @@ export class TaskController {
     return this.service.createTask(userId, input);
   }
 
-  /** Read one task by ID. */
   @Get(":taskId")
   async getOne(
     @Headers("x-user-id") userId: string,
-    @Param("taskId") taskId: string
+    @Param("taskId") taskId: string,
   ) {
     if (!userId) {
       throw new BadRequestException("Missing x-user-id header");
@@ -62,12 +60,11 @@ export class TaskController {
     }
   }
 
-  /** List tasks for one user. */
   @Get()
   async list(
     @Headers("x-user-id") userId: string,
     @Query("status") status?: string,
-    @Query("dueAt") dueAt?: string
+    @Query("dueAt") dueAt?: string,
   ) {
     if (!userId) {
       throw new BadRequestException("Missing x-user-id header");
@@ -78,12 +75,11 @@ export class TaskController {
     return this.service.listTasks(userId, filter);
   }
 
-  /** Update one task. */
   @Patch(":taskId")
   async update(
     @Headers("x-user-id") userId: string,
     @Param("taskId") taskId: string,
-    @Body() input: UpdateTaskInput
+    @Body() input: UpdateTaskInput,
   ) {
     if (!userId) {
       throw new BadRequestException("Missing x-user-id header");
@@ -98,11 +94,10 @@ export class TaskController {
     }
   }
 
-  /** Delete one task. */
   @Delete(":taskId")
   async delete(
     @Headers("x-user-id") userId: string,
-    @Param("taskId") taskId: string
+    @Param("taskId") taskId: string,
   ) {
     if (!userId) {
       throw new BadRequestException("Missing x-user-id header");

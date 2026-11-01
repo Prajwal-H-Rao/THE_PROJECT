@@ -19,7 +19,7 @@ Completed Module 15 Design System tasks 6-21: shared CardState primitive, 10 dom
 - `components/ui/tabs.tsx` — Tabs with Radix primitives
 - `components/ui/text-field.tsx` — TextField with loading/empty states (text via props)
 - `components/ui/text-area.tsx` — TextArea with loading/empty states (text via props)
-- `components/ui/combobox.tsx` — Fixed JSX/ARIA; removed lucide-react; text via props
+- `components/ui/combobox.tsx` — Fixed JSX/ARIA; removed lucide-react dependency; text via props
 - `components/ui/select.tsx` — Removed lucide-react dependency (inline SVG)
 - `components/ui/button.tsx` — Added ButtonProps interface; loading state
 - `components/cards/email-card.tsx` — Email domain card variant
@@ -47,11 +47,9 @@ Completed Module 15 Design System tasks 6-21: shared CardState primitive, 10 dom
 - `app/globals.css` — Added reduced-motion (prefers-reduced-motion) and high-contrast (forced-colors) support
 - `a11y-report.json` — Accessibility audit report: zero critical violations
 - `a11y-screen-reader.md` — Screen reader testing report
-- Fixed combobox JSX/ARIA, removed lucide-react from select (inline SVG), fixed button types
-- `repo.md` — updated Module 15 build status (all tasks 1-21 complete)
 
 ## Tests
 Web app build passes. TypeScript typecheck passes.
 
 ## Notes
-All component interfaces/types kept co-located with components per ponytail ladder (centralised types dir rejected after negator review). Files under 200 lines with header comments. ASD-STE100 language standard throughout. No component holds hardcoded text (task 21 complete).
+All component interfaces/types kept co-located with components per ponytail ladder (centralised types dir rejected after negator review). Files under 200 lines with header comments. ASD-STE100 language standard throughout.

@@ -1,6 +1,6 @@
 /**
- * Nova design system - Recurrence service.
- * Generates the next occurrence from a start date and a parsed RRULE rule.
+ * Recurrence service generates the next occurrence from a start date and a parsed rule.
+ * It runs in the task's stored time zone per spec:858 timezone-aware recurrence.
  * Runs in the task's stored time zone per spec:858 timezone-aware recurrence.
  * Task 16 owns full DST boundary cases and due-time math; this module handles
  * basic timezone-aware occurrence generation.

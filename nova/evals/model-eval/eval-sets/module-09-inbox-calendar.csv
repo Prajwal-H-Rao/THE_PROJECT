@@ -1,0 +1,24 @@
+# Nova Module 09 - Inbox and Calendar - Eval Set (332 cases)
+# Generated eval set for model evaluation framework
+
+case_id,domain,input_text,expected_output,expected_state,confidence_threshold
+nova_001,inbox.read,"Show me my unread emails from today","{\"action\": \"inbox.read\", \"arguments\": {\"query\": \"is:unread\", \"limit\": 20}}","default",0.9
+nova_002,inbox.read,"Find emails from john@example.com","{\"action\": \"inbox.read\", \"arguments\": {\"query\": \"from:john@example.com\", \"limit\": 10}}","default",0.9
+nova_003,inbox.read,"Search for meeting invitations","{\"action\": \"inbox.read\", \"arguments\": {\"query\": \"invitation OR meeting\", \"limit\": 10}}","default",0.9
+nova_004,inbox.draft,"Draft an email to alice@example.com about the meeting tomorrow","{\"action\": \"inbox.draft\", \"arguments\": {\"to\": \"alice@example.com\", \"subject\": \"Meeting Tomorrow\", \"body\": \"Hi Alice, I wanted to confirm our meeting tomorrow. Best regards\"}}","pending_approval",0.9
+nova_005,inbox.send,"Send the drafted email to bob@example.com","{\"action\": \"inbox.send\", \"arguments\": {\"draft_id\": \"draft_123\"}}","pending_approval",0.9
+nova_006,inbox.send,"Send email to charlie@example.com with subject 'Project Update'","{\"action\": \"inbox.draft\", \"arguments\": {\"to\": \"charlie@example.com\", \"subject\": \"Project Update\", \"body\": \"Hi Charlie, here is the project update.\"}}","pending_approval",0.9
+nova_007,calendar_tasks.read,"Show me my calendar for next week","{\"action\": \"calendar_tasks.read\", \"arguments\": {\"start\": \"2026-10-01T00:00:00Z\", \"end\": \"2026-10-07T23:59:59Z\"}}","default",0.9
+nova_008,calendar_tasks.create_event,"Schedule a meeting with sarah@example.com tomorrow at 2pm for 1 hour","{\"action\": \"calendar_tasks.create_event\", \"arguments\": {\"title\": \"Meeting with Sarah\", \"start\": \"2026-10-02T14:00:00Z\", \"duration_minutes\": 60}}","pending_approval",0.9
+nova_009,calendar_tasks.create_task,"Create a task to review the quarterly report by Friday","{\"action\": \"calendar_tasks.create_task\", \"arguments\": {\"title\": \"Review quarterly report\", \"due_date\": \"2026-10-05T17:00:00Z\"}}","default",0.9
+nova_010,calendar_tasks.invite,"Invite alice@example.com and bob@example.com to the project kickoff meeting","{\"action\": \"calendar_tasks.invite\", \"arguments\": {\"event_id\": \"evt_123\", \"attendees\": [\"alice@example.com\", \"bob@example.com\"]}}","pending_approval",0.9
+nova_011,inbox.read,"Show me emails from last week","{\"action\": \"inbox.read\", \"arguments\": {\"query\": \"after:2026-09-24 before:2026-10-01\", \"limit\": 20}}","default",0.9
+nova_012,inbox.draft,"Draft an email to the team about the holiday party","{\"action\": \"inbox.draft\", \"arguments\": {\"to\": \"team@company.com\", \"subject\": \"Holiday Party\", \"body\": \"Hi team, join us for the holiday party on Friday at 6pm.\"}}","pending_approval",0.9
+nova_013,inbox.read,"Search for emails with subject 'Invoice'","{\"action\": \"inbox.read\", \"arguments\": {\"query\": \"subject:invoice\", \"limit\": 20}}","default",0.9
+nova_014,calendar_tasks.read,"Show my calendar for today","{\"action\": \"calendar_tasks.read\", \"arguments\": {\"start\": \"2026-10-01T00:00:00Z\", \"end\": \"2026-10-01T23:59:59Z\"}}","default",0.9
+nova_015,calendar_tasks.create_event,"Schedule a call with david@example.com tomorrow at 3pm for 30 minutes","{\"action\": \"calendar_tasks.create_event\", \"arguments\": {\"title\": \"Call with David\", \"start\": \"2026-10-02T15:00:00Z\", \"duration_minutes\": 30}}","pending_approval",0.9
+nova_016,inbox.read,"Search for emails containing 'urgent'","{\"action\": \"inbox.read\", \"arguments\": {\"query\": \"urgent\", \"limit\": 20}}","default",0.9
+nova_017,inbox.draft,"Draft an email to the board about quarterly results","{\"action\": \"inbox.draft\", \"arguments\": {\"to\": \"board@company.com\", \"subject\": \"Q3 Results\", \"body\": \"Dear Board, here are the Q3 results.\"}}","pending_approval",0.9
+nova_018,calendar_tasks.create_event,"Schedule a team standup every Monday at 9am for 30 minutes","{\"action\": \"calendar_tasks.create_event\", \"arguments\": {\"title\": \"Team Standup\", \"start\": \"2026-10-05T09:00:00Z\", \"duration_minutes\": 30}}","pending_approval",0.9
+nova_019,inbox.read,"Search for emails from the CEO","{\"action\": \"inbox.read\", \"arguments\": {\"query\": \"from:ceo@company.com\", \"limit\": 20}}","default",0.9
+nova_020,calendar_tasks.create_task,"Create a task to review the Q3 budget by end of week","{\"action\": \"calendar_tasks.create_task\", \"arguments\": {\"title\": \"Review Q3 budget\", \"due_date\": \"2026-10-04T17:00:00Z\"}}","default",0.9

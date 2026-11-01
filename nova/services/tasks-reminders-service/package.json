@@ -2,7 +2,7 @@
   "name": "@nova/tasks-reminders-service",
   "version": "0.1.0",
   "private": true,
-  "description": "NOVA tasks and reminders service",
+  "description": "NOVA tasks, reminders, and finance service",
   "type": "module",
   "engines": {
     "node": "22.23.4"
@@ -10,7 +10,6 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "start:dev": "tsx watch src/main.ts",
     "test": "node --test dist/**/*.test.js",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix"
   },

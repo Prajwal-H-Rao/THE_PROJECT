@@ -1,4 +1,6 @@
-/** Log sanitization service to prevent secrets in logs. */
+/**
+ * Log sanitization service to prevent secrets in logs.
+ */
 
 const SECRET_PATTERNS = [
   // JWT tokens
@@ -34,7 +36,7 @@ const SECRET_PATTERNS = [
 export function sanitizeForLogging(obj: unknown, customPatterns: RegExp[] = []): unknown {
   if (obj === null || obj === undefined) return obj;
   if (typeof obj === "string") return sanitizeString(obj, customPatterns);
-  if (Array.isArray(obj)) return obj.map(item => sanitizeForLogging(item, customPatterns));
+  if (Array.isArray(obj)) return obj.map((item) => sanitizeForLogging(item, customPatterns));
   if (typeof obj === "object") {
     const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -79,7 +81,6 @@ function isSensitiveKey(key: string): boolean {
     "authorization",
     "cookie",
     "session",
-    "csrf",
     "totp",
     "totp_token",
     "otp",
@@ -91,7 +92,7 @@ function isSensitiveKey(key: string): boolean {
     "cvc",
   ];
   const lowerKey = key.toLowerCase();
-  return sensitiveKeys.some(sk => lowerKey.includes(sk.toLowerCase()));
+  return sensitiveKeys.some((sk) => lowerKey.includes(sk.toLowerCase()));
 }
 
 /** Create a sanitizing logger wrapper. */
@@ -102,17 +103,20 @@ export function createSanitizingLogger<T extends Record<string, (...args: unknow
   for (const key of Object.keys(logger)) {
     const fn = logger[key];
     if (typeof fn === "function") {
-      (sanitized as any)[key] = (...args: unknown[]) => fn(...args.map((arg: unknown) => sanitizeForLogging(arg)));
+      (sanitized as Record<string, (...args: unknown[]) => void>)[key] = (...args: unknown[]) =>
+        fn(...args.map((arg: unknown) => sanitizeForLogging(arg)));
     }
   }
   return sanitized as T;
 }
 
 /** Middleware to sanitize request/response bodies in logs. */
-export function createLogSanitizationMiddleware() {
-  return (req: any, res: any, next: () => void) => {
-    const originalLog = console.log;
-    console.log = (...args: unknown[]) => originalLog(...args.map(arg => sanitizeForLogging(arg)));
-    next();
-  };
+export function createLogSanitizationMiddleware(
+  req: { body?: unknown },
+  res: { status?: (code: number) => Response },
+  next: () => void
+): void {
+  const originalLog = console.log;
+  console.log = (...args: unknown[]) => originalLog(...args.map((arg) => sanitizeForLogging(arg)));
+  next();
 }

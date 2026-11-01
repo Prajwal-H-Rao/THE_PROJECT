@@ -9,6 +9,7 @@ import { ReminderRepository } from "./reminder-repository.js";
 import { ReminderDeliveryRepository } from "./reminder-delivery.js";
 import { ReminderDeliveryLogRepository } from "./reminder-delivery-log.js";
 import { EscalationRepository } from "./escalation-repository.js";
+import type { Reminder, CreateReminderInput } from "./reminder.entity.js";
 
 function makeRepo(config: any): ReminderRepository {
   const repo = new ReminderRepository({} as any);
@@ -54,7 +55,11 @@ function makeRepo(config: any): ReminderRepository {
   return repo;
 }
 
-function makeDeliveryRepo(config: any): ReminderDeliveryRepository {
+function makeDeliveryRepo(config: {
+  claimResult: { reminderId: string; idempotencyKey: string } | null;
+  markDeliveredOk: boolean;
+  markFailedOk: boolean;
+}): ReminderDeliveryRepository {
   const repo = new ReminderDeliveryRepository({} as any);
   let cr = config.claimResult;
   repo.claimReminder = async () => {

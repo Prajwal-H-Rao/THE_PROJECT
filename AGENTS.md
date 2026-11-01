@@ -66,6 +66,7 @@ The dedicated primary agent is `the-project`, defined in `.opencode/agents/the-p
 - Every file and module gets a header comment. Each function gets a one-line purpose comment. Comment WHY for non-obvious logic.
 - Follow the ponytail ladder: native/stdlib first, reuse before rewrite, shorter path wins, no speculative abstraction.
 - Never strip trust-boundary validation, error handling, security, or accessibility basics.
+- No `any` type usage in any TypeScript file. All types must be explicit types or interfaces. Replace every `any` with its explicit type or interface definition.
 - After every successful change: update repo.md, add `changes/YYYY-MM-DD-short-slug.md`, and ask before commit.
 
 ## Definition of done

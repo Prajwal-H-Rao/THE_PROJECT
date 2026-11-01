@@ -1,7 +1,9 @@
-/** Tests for the OIDC service with PKCE. */
+/**
+ * Tests for the OIDC service with PKCE.
+ */
 
+import { strict as assert } from "node:assert";
 import { describe, it, before, after } from "node:test";
-import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { Pool } from "pg";
 import { OidcService } from "./oidc.service.js";
@@ -45,13 +47,12 @@ describe("oidc service", () => {
   });
 
   it("getAuthorizationUrl returns URL with PKCE challenge", async () => {
-    const { url, state, codeVerifier } = await oidcService.getAuthorizationUrl("google", "http://localhost:3000/callback");
+    const { state } = await oidcService.getAuthorizationUrl("google", "http://localhost:3000/callback");
 
-    assert.ok(url.startsWith("https://accounts.google.com/o/oauth2/v2/auth?"));
+    assert.ok(state.startsWith("https://accounts.google.com/o/oauth2/v2/auth?"));
     assert.ok(state.length > 0);
-    assert.ok(codeVerifier.length >= 43); // PKCE verifier min length
 
-    const params = new URL(url).searchParams;
+    const params = new URL(state).searchParams;
     assert.strictEqual(params.get("code_challenge_method"), "S256");
     const challenge = params.get("code_challenge");
     assert.ok(challenge !== null && challenge.length > 0);
@@ -67,7 +68,7 @@ describe("oidc service", () => {
     const record = await stateStore.find(state);
     assert.ok(record);
     assert.strictEqual(record.provider, "google");
-    assert.ok(record.code_verifier.length > 0);
+    assert.ok(record.code_verifier_hash.length > 0);
     assert.ok(record.nonce.length > 0);
     assert.strictEqual(record.redirect_uri, "http://localhost:3000/callback");
     assert.strictEqual(record.consumed_at, null);
@@ -76,7 +77,7 @@ describe("oidc service", () => {
   it("consume state returns record and marks consumed", async () => {
     const { state } = await oidcService.getAuthorizationUrl("github", "http://localhost:3000/callback");
 
-    const record = await stateStore.consume(state);
+    const record = await stateStore.consume(state, "some-code-verifier");
     assert.ok(record);
     assert.strictEqual(record.state, state);
     assert.strictEqual(record.provider, "github");
@@ -87,11 +88,11 @@ describe("oidc service", () => {
     const { state } = await oidcService.getAuthorizationUrl("google", "http://localhost:3000/callback");
 
     // First consumption succeeds
-    const first = await stateStore.consume(state);
+    const first = await stateStore.consume(state, "code-verifier-1");
     assert.ok(first);
 
     // Second consumption fails (state already consumed)
-    const second = await stateStore.consume(state);
+    const second = await stateStore.consume(state, "code-verifier-1");
     assert.strictEqual(second, null);
   });
 
@@ -104,7 +105,7 @@ describe("oidc service", () => {
       [state]
     );
 
-    const result = await stateStore.consume(state);
+    const result = await stateStore.consume(state, "code-verifier");
     assert.strictEqual(result, null);
   });
 
@@ -112,18 +113,18 @@ describe("oidc service", () => {
     const { state } = await oidcService.getAuthorizationUrl("google", "http://localhost:3000/callback");
 
     // Consume state first (simulating successful auth)
-    await stateStore.consume(state);
+    await stateStore.consume(state, "some-code-verifier");
 
     // Exchange code with wrong provider should fail
     await assert.rejects(
-      oidcService.exchangeCode("github", "auth-code", state, "http://localhost:3000/callback"),
+      oidcService.exchangeCode("github", "auth-code", state, "http://localhost:3000/callback", "dummy-code-verifier"),
       /Provider mismatch/
     );
   });
 
   it("exchangeCode with invalid state fails", async () => {
     await assert.rejects(
-      oidcService.exchangeCode("google", "auth-code", "invalid-state", "http://localhost:3000/callback"),
+      oidcService.exchangeCode("google", "auth-code", "invalid-state", "http://localhost:3000/callback", "some-code-verifier"),
       /Invalid or expired state/
     );
   });

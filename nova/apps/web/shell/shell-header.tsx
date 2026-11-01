@@ -16,12 +16,18 @@ interface ShellHeaderProps {
   appName?: string;
   status?: "online" | "offline" | "degraded";
   onAudit?: () => void;
+  /** Optional command palette slot, self-configured by the caller. */
+  palette?: React.ReactNode;
+  /** Optional user menu slot, self-configured by the caller. */
+  userMenu?: React.ReactNode;
 }
 
 function ShellHeader({
   appName,
   status = "online",
   onAudit,
+  palette,
+  userMenu,
 }: ShellHeaderProps) {
   return (
     <header
@@ -39,6 +45,8 @@ function ShellHeader({
         <ThemeSwitcher />
       </div>
       <div className="flex items-center gap-2">
+        {palette}
+        {userMenu}
         <Badge
           variant={status === "online" ? "success" : "warning"}
           className="text-xs"

@@ -1,4 +1,6 @@
-/** TOTP controller for 2FA management. */
+/**
+ * TOTP controller for 2FA management.
+ */
 
 import { Controller, Get, Post, Body, Req, HttpCode, HttpStatus } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
@@ -17,8 +19,8 @@ export class TotpController {
   @Get("setup")
   @ApiOperation({ summary: "Get TOTP setup info (secret + QR code URI)" })
   @ApiResponse({ status: 200, description: "TOTP secret and URI" })
-  async setup(@Req() req: any): Promise<{ secret: string; uri: string }> {
-    const token = req.headers?.authorization?.replace("Bearer ", "");
+  async setup(@Req() req: Request): Promise<{ secret: string; uri: string }> {
+    const token = (req.headers as { authorization?: string }).authorization?.replace("Bearer ", "");
     if (!token) throw new Error("Unauthorized");
 
     const validation = await this.sessionService.validateToken(token);
@@ -34,10 +36,10 @@ export class TotpController {
   @ApiOperation({ summary: "Enable TOTP with verified token and backup codes" })
   @ApiResponse({ status: 200, description: "TOTP enabled with backup codes" })
   async enable(
-    @Req() req: any,
+    @Req() req: Request,
     @Body() body: { token: string }
   ): Promise<{ backupCodes: string[] }> {
-    const authToken = req.headers?.authorization?.replace("Bearer ", "");
+    const authToken = (req.headers as { authorization?: string }).authorization?.replace("Bearer ", "");
     if (!authToken) throw new Error("Unauthorized");
 
     const validation = await this.sessionService.validateToken(authToken);
@@ -59,8 +61,8 @@ export class TotpController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Disable TOTP" })
   @ApiResponse({ status: 200, description: "TOTP disabled" })
-  async disable(@Req() req: any): Promise<{ ok: boolean }> {
-    const token = req.headers?.authorization?.replace("Bearer ", "");
+  async disable(@Req() req: Request): Promise<{ ok: boolean }> {
+    const token = (req.headers as { authorization?: string }).authorization?.replace("Bearer ", "");
     if (!token) throw new Error("Unauthorized");
 
     const validation = await this.sessionService.validateToken(token);
@@ -74,8 +76,11 @@ export class TotpController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Verify TOTP token (for step-up auth)" })
   @ApiResponse({ status: 200, description: "Token verification result" })
-  async verify(@Req() req: any, @Body() body: { token: string }): Promise<{ valid: boolean; usedBackupCode: boolean }> {
-    const token = req.headers?.authorization?.replace("Bearer ", "");
+  async verify(
+    @Req() req: Request,
+    @Body() body: { token: string }
+  ): Promise<{ valid: boolean; usedBackupCode: boolean }> {
+    const token = (req.headers as { authorization?: string }).authorization?.replace("Bearer ", "");
     if (!token) throw new Error("Unauthorized");
 
     const validation = await this.sessionService.validateToken(token);

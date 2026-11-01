@@ -20,7 +20,10 @@ function makeRepo(config: any): ReminderRepository {
   repo.claimReminder = async () => {
     const reminder = reminders.shift();
     if (!reminder) return null;
-    return { reminderId: reminder.reminderId, idempotencyKey: reminder.idempotencyKey };
+    return {
+      reminderId: reminder.reminderId,
+      idempotencyKey: reminder.idempotencyKey,
+    };
   };
   return repo;
 }
@@ -54,7 +57,12 @@ function makeEscalationRepo(config: any): EscalationRepository {
   return repo;
 }
 
-function makeService(config: any): ReminderService {
+function makeService(config: {
+  dueReminders: any[];
+  deliverSucceeds: boolean;
+  markDeliveredOk: boolean;
+  markFailedOk: boolean;
+}): ReminderService {
   const repo = makeRepo(config);
   const deliveryRepo = makeDeliveryRepo(config);
   const escalationRepo = makeEscalationRepo(config);

@@ -1,6 +1,6 @@
 /**
- * Task entity - represents one user-owned task.
- * All fields are read-only after creation except status updates.
+ * Task entity defines Task, CreateTaskInput, UpdateTaskInput, and TaskListFilter interfaces.
+ * It represents one user-owned task.
  */
 
 export interface Task {

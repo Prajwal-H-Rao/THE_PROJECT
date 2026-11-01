@@ -1,6 +1,6 @@
 /**
  * Root application module for tasks-reminders-service.
- * Provides PG_POOL injection token for the task repository.
+ * Provides PG_POOL injection token for task repository.
  */
 
 import { Module, Global } from "@nestjs/common";

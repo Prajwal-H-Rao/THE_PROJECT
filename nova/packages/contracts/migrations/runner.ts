@@ -1,5 +1,6 @@
 /** The migration runner. It applies SQL files in order and records applied migrations. */
 
+import { Pool, PoolClient } from "pg";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { resolve, extname, basename } from "node:path";
 
@@ -37,7 +38,7 @@ CREATE TABLE IF NOT EXISTS _migrations (
 `;
 
 /** Apply one migration inside a transaction. */
-async function applyMigration(client: any, m: Migration): Promise<void> {
+async function applyMigration(client: PoolClient, m: Migration): Promise<void> {
   await client.query("BEGIN");
   try {
     await client.query(m.sql);
@@ -53,7 +54,7 @@ async function applyMigration(client: any, m: Migration): Promise<void> {
 }
 
 /** Check if a migration is already applied. */
-async function isApplied(client: any, name: string): Promise<boolean> {
+async function isApplied(client: PoolClient, name: string): Promise<boolean> {
   const res = await client.query("SELECT 1 FROM _migrations WHERE name = $1", [name]);
   return res.rowCount > 0;
 }

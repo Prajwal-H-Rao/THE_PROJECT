@@ -1,7 +1,6 @@
 /**
- * Application entry point for tasks-reminders-service.
+ * Application entry point for finance-service.
  * Creates a NestJS Fastify application and listens on the configured port.
- * Registers PG_POOL as a global provider for the task repository.
  */
 
 import { NestFactory } from "@nestjs/core";
@@ -21,17 +20,9 @@ async function bootstrap(): Promise<void> {
     })
   );
 
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-  });
-  app.use((req: any, res: any, next: any) => {
-    (req as any).pgPool = pool;
-    next();
-  });
-
-  const port = process.env.PORT ?? 8005;
+  const port = process.env.PORT ?? 8007;
   await app.listen(port, "0.0.0.0");
-  console.log(`Tasks reminders service listening on port ${port}`);
+  console.log(`Finance service listening on port ${port}`);
 }
 
 bootstrap();

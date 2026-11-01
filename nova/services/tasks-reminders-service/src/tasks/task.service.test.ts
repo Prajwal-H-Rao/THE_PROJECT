@@ -4,15 +4,17 @@
 
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
+import { Pool } from "pg";
 import { TaskService, TaskNotFoundError } from "./task.service.js";
 import { TaskRepository } from "./task.repository.js";
+import type { CreateTaskInput, TaskListFilter, UpdateTaskInput } from "./task.entity.js";
 
 function makeRepo(config: {
   owned: boolean;
   createTitle?: string;
   updateTitle?: string;
 }): TaskRepository {
-  const repo = new TaskRepository({} as any);
+  const repo = new TaskRepository({} as unknown as Pool);
   repo.findById = async (_userId: string, _taskId: string) => {
     if (!config.owned) return null;
     return {
@@ -30,7 +32,7 @@ function makeRepo(config: {
       updatedAt: "t",
     };
   };
-  repo.list = async (_userId: string, _filter?: any) => {
+  repo.list = async (_userId: string, _filter?: TaskListFilter) => {
     if (!config.owned) return [];
     return [
       {
@@ -49,7 +51,7 @@ function makeRepo(config: {
       },
     ];
   };
-  repo.create = async (_userId: string, input: any) => ({
+  repo.create = async (_userId: string, input: CreateTaskInput) => ({
     taskId: "t-1",
     userId: _userId,
     title: input.title,
@@ -63,7 +65,7 @@ function makeRepo(config: {
     createdAt: "t",
     updatedAt: "t",
   });
-  repo.update = async (_userId: string, _taskId: string, input: any) => {
+  repo.update = async (_userId: string, _taskId: string, input: UpdateTaskInput) => {
     if (!config.owned) return null;
     return {
       taskId: _taskId,

@@ -1,6 +1,6 @@
 /**
- * Nova design system - Recurrence parser.
- * Parses RFC 5545 RRULE strings into structured fields.
+ * Recurrence parser parses deterministic RRULE rules and validates their bounds.
+ * It parses RFC 5545 RRULE strings into structured fields.
  * Validates bounds (UNTIL, COUNT). UTC-based parsing; timezone
  * application is handled by the recurrence service per task timezone.
  */
