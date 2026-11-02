@@ -37,7 +37,7 @@ export class NoteRepository {
         (user_id, title, content, tags, source_type, source_ref, object_store_pointer)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING note_id, user_id, title, content, tags, source_type, source_ref,
-                object_store_pointer, is_archived, created_at, updated_at
+                object_store_pointer, is_archived, created_at, updated_at, embedding
     `;
     const values = [userId, input.title, content, input.tags ?? [],
       input.sourceType ?? null, input.sourceRef ?? null, objectStorePointer];
@@ -48,7 +48,7 @@ export class NoteRepository {
   async findById(userId: string, noteId: string): Promise<Note | null> {
     const query = `
       SELECT note_id, user_id, title, content, tags, source_type, source_ref,
-             object_store_pointer, is_archived, created_at, updated_at
+             object_store_pointer, is_archived, created_at, updated_at, embedding
       FROM ${NOTES_TABLE}
       WHERE note_id = $2 AND user_id = $1
     `;
@@ -60,7 +60,7 @@ export class NoteRepository {
   async list(userId: string, filter?: NoteListFilter): Promise<Note[]> {
     let query = `
       SELECT note_id, user_id, title, content, tags, source_type, source_ref,
-             object_store_pointer, is_archived, created_at, updated_at
+             object_store_pointer, is_archived, created_at, updated_at, embedding
       FROM ${NOTES_TABLE}
       WHERE user_id = $1
     `;
@@ -124,7 +124,7 @@ export class NoteRepository {
       UPDATE ${NOTES_TABLE} SET ${sets.join(", ")}
       WHERE note_id = $2 AND user_id = $1
       RETURNING note_id, user_id, title, content, tags, source_type, source_ref,
-                object_store_pointer, is_archived, created_at, updated_at
+                object_store_pointer, is_archived, created_at, updated_at, embedding
     `;
     const result = await this.pool.query(query, values);
     return result.rows.length > 0 ? this.mapRow(result.rows[0]) : null;
@@ -243,6 +243,7 @@ export class NoteRepository {
       isArchived: Boolean(r.is_archived),
       createdAt: String(r.created_at), updatedAt: String(r.updated_at),
       objectStorePointer: r.object_store_pointer === null ? null : String(r.object_store_pointer),
+      embedding: r.embedding === null ? null : Array.isArray(r.embedding) ? r.embedding : (r.embedding as unknown as number[]),
     };
   }
 

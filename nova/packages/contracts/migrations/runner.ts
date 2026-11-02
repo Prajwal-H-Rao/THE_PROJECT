@@ -56,7 +56,7 @@ async function applyMigration(client: PoolClient, m: Migration): Promise<void> {
 /** Check if a migration is already applied. */
 async function isApplied(client: PoolClient, name: string): Promise<boolean> {
   const res = await client.query("SELECT 1 FROM _migrations WHERE name = $1", [name]);
-  return res.rowCount > 0;
+  return (res.rowCount ?? 0) > 0;
 }
 
 /** Run all pending migrations in order. */

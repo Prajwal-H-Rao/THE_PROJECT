@@ -53,6 +53,7 @@
     "mcp/server/index.ts",
     "mcp/server/registry.ts",
     "self-extension-guard.ts",
-    "self-extension-guard.test.ts"
+    "self-extension-guard.test.ts",
+    "ml-client.ts"
   ]
 }

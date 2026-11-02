@@ -71,6 +71,10 @@
     "./self-extension-guard": {
       "types": "./dist/self-extension-guard.d.ts",
       "default": "./dist/self-extension-guard.js"
+    },
+    "./ml-client": {
+      "types": "./dist/ml-client.d.ts",
+      "default": "./dist/ml-client.js"
     }
   },
   "scripts": {

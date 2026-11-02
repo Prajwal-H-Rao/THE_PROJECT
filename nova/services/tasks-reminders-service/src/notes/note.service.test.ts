@@ -28,6 +28,7 @@ function makeRepo(config: {
       sourceRef: null,
       isArchived: false,
       objectStorePointer: null,
+      embedding: null,
       createdAt: "t",
       updatedAt: "t",
     };
@@ -45,6 +46,7 @@ function makeRepo(config: {
         sourceRef: null,
         isArchived: false,
         objectStorePointer: null,
+        embedding: null,
         createdAt: "t",
         updatedAt: "t",
       },
@@ -60,6 +62,7 @@ function makeRepo(config: {
     sourceRef: null,
     isArchived: false,
     objectStorePointer: null,
+    embedding: null,
     createdAt: "t",
     updatedAt: "t",
   });
@@ -75,6 +78,7 @@ function makeRepo(config: {
       sourceRef: null,
       isArchived: false,
       objectStorePointer: null,
+      embedding: null,
       createdAt: "t",
       updatedAt: "t",
     };

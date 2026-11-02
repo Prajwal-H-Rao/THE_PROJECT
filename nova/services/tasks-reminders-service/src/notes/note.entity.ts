@@ -15,6 +15,7 @@ export interface Note {
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly objectStorePointer: string | null;
+  readonly embedding: number[] | null;
 }
 
 export interface CreateNoteInput {
