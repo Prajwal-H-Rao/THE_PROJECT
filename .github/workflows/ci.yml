@@ -27,7 +27,7 @@ jobs:
           node-version: "22.23.4"
 
       - name: Install the tools
-        run: python -m pip install --disable-pip-version-check ruff==0.17.1 mypy==2.4.0
+        run: python -m pip install --disable-pip-version-check ruff==0.17.1 mypy==1.11.0
 
       - name: Run the layout checks
         run: |
@@ -80,6 +80,19 @@ jobs:
           cd nova/packages/contracts
           npm ci
           npm test
+
+      - name: Build and test the policy-approval-service
+        run: |
+          cd nova/services/policy-approval-service
+          npm ci
+          npm test
+
+      - name: Build and test the audit-service
+        run: |
+          cd nova/services/audit-service
+          npm install
+          npm run build
+          node --test dist/*.test.js
 
       - name: Build and test the api-gateway
         run: |

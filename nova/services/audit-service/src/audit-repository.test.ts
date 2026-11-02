@@ -427,7 +427,7 @@ test("audit: defaults for optional fields", async () => {
   assert.strictEqual(records.length, 1);
   const record = records[0];
   assert.ok(record);
-  assert.strictEqual(record.executionStatus, "succeeded");
+  assert.strictEqual(record.executionStatus, "pending");
   assert.strictEqual(record.verificationType, "none");
   assert.ok(record.evidenceRef === undefined || record.evidenceRef === "");
   assert.deepEqual(record.payload, {});

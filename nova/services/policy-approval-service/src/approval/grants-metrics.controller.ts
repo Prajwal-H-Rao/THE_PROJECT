@@ -1,12 +1,24 @@
 /** The approval metrics HTTP endpoints (Task 15). */
 
-import { BadRequestException, Controller, Get, HttpCode, HttpStatus, Query } from "@nestjs/common";
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Query,
+  UseGuards,
+  SetMetadata,
+} from "@nestjs/common";
 import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { approvalMetrics } from "./approval-metrics.js";
 import { formatPrometheus } from "./approval-metrics-format.js";
+import { ServiceAuthGuard } from "../policy/service-auth.guard.js";
 
 @ApiTags("policy-grants")
 @Controller("policy")
+@UseGuards(ServiceAuthGuard)
+@SetMetadata("audience", "policy-service")
 export class GrantsMetricsController {
   @Get("grants/metrics")
   @HttpCode(HttpStatus.OK)

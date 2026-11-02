@@ -1,6 +1,6 @@
 /**
- * Nova design system - Note entity.
- * Represents one user-owned note.
+ * Note entity defines Note, CreateNoteInput, UpdateNoteInput, NoteListFilter interfaces.
+ * It represents one user-owned note.
  */
 
 export interface Note {

@@ -37,6 +37,13 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 | 17 | Add task and reminder metrics: queue backlog, delivery latency | observability | Alert fires on backlog |
 | 18 | Add per-item export and per-item delete for notes and remembered facts | note service | One note exports and deletes without touching others |
 | 19 | Build remembered-fact controls: per-item source, edit, deletion and forget action | notes schema + web UI | A forgotten fact leaves no row and no vector |
+| 20 | Fix note repository ownership: userId-first filters on find/update/delete | `nova/services/tasks-reminders-service/src/notes/note.repository.ts` | Cross-user note access denied |
+| 21 | Fix note entity header to ASD-STE100 sentence | `nova/services/tasks-reminders-service/src/notes/note.entity.ts` | Header is ASD-STE100 |
+| 22 | Create notes module wiring service and controller | `nova/services/tasks-reminders-service/src/notes/notes.module.ts` | Module registers service/controller |
+| 23 | Create note service with ownership enforcement | `nova/services/tasks-reminders-service/src/notes/note.service.ts` | Throws on not-found/not-owned |
+| 24 | Create note controller with x-user-id header | `nova/services/tasks-reminders-service/src/notes/note.controller.ts` | Rejects missing header, 404 on not-found |
+| 25 | Create note service tests for cross-user denial | `nova/services/tasks-reminders-service/src/notes/note.service.test.ts` | Cross-user denial tests pass |
+| 26 | Create note controller tests for header enforcement | `nova/services/tasks-reminders-service/src/notes/note.controller.test.ts` | Header enforcement tests pass |
 
 ## Build order
 

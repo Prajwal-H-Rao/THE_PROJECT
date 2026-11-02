@@ -1,8 +1,7 @@
 /**
- * Nova design system - Note repository.
- * SQL queries against notes_memory_service.notes table.
- * Provides CRUD operations for notes with ownership enforcement.
- * Uses pg Pool for database connections.
+ * Note repository runs SQL queries against notes_memory_service.notes.
+ * All read queries filter by user_id.
+ * It uses pg Pool for database connections.
  */
 
 import { Injectable, Inject } from "@nestjs/common";
@@ -36,21 +35,21 @@ export class NoteRepository {
     return this.mapRow(result.rows[0]);
   }
 
-  /** Read one note by ID for one user. Returns null if not found. */
-  async findById(noteId: string): Promise<Note | null> {
+  /** Read one note by ID only if the user owns it.
+   * Returns null if not found or not owned. */
+  async findById(userId: string, noteId: string): Promise<Note | null> {
     const query = `
       SELECT note_id, user_id, title, content, tags, source_type, source_ref,
              is_archived, created_at, updated_at
       FROM ${NOTES_TABLE}
-      WHERE note_id = $1
+      WHERE note_id = $2 AND user_id = $1
     `;
-    const result = await this.pool.query(query, [noteId]);
+    const result = await this.pool.query(query, [userId, noteId]);
     return result.rows.length > 0 ? this.mapRow(result.rows[0]) : null;
   }
 
   /** List notes for one user with optional tag filter.
-   * Ownership enforced: only rows where user_id = $1 are returned.
-   */
+   * Ownership enforced: only rows where user_id = $1 are returned. */
   async list(userId: string, filter?: NoteListFilter): Promise<Note[]> {
     let query = `
       SELECT note_id, user_id, title, content, tags, source_type, source_ref,
@@ -77,16 +76,17 @@ export class NoteRepository {
     return result.rows.map((row) => this.mapRow(row));
   }
 
-  /** Update one note by ID. Returns null if not found. */
-  async update(noteId: string, input: UpdateNoteInput): Promise<Note | null> {
-    const current = await this.findById(noteId);
+  /** Update one note only if the user owns it.
+   * Throws if not found or not owned. Returns the updated note. */
+  async update(userId: string, noteId: string, input: UpdateNoteInput): Promise<Note | null> {
+    const current = await this.findById(userId, noteId);
     if (!current) {
       return null;
     }
 
     const sets: string[] = [];
-    const values: unknown[] = [noteId];
-    let paramIndex = 2;
+    const values: unknown[] = [userId, noteId];
+    let paramIndex = 3;
 
     if (input.title !== undefined) {
       sets.push(`title = $${paramIndex}`);
@@ -127,13 +127,13 @@ export class NoteRepository {
     const query = `
       UPDATE ${NOTES_TABLE}
       SET ${sets.join(", ")}
-      WHERE note_id = $1
+      WHERE note_id = $2 AND user_id = $1
       RETURNING note_id, user_id, title, content, tags, source_type, source_ref,
                 is_archived, created_at, updated_at
     `;
     const result = await this.pool.query(query, values);
 
-    // Save previous version to note_versions
+    // Save previous version to note_versions with the changing user.
     if (result.rows.length > 0) {
       await this.pool.query(
         `INSERT INTO notes_memory_service.note_versions
@@ -149,7 +149,7 @@ export class NoteRepository {
           current.sourceRef,
           current.isArchived,
           current.updatedAt,
-          current.updatedAt,
+          userId,
         ]
       );
     }
@@ -157,14 +157,15 @@ export class NoteRepository {
     return result.rows.length > 0 ? this.mapRow(result.rows[0]) : null;
   }
 
-  /** Delete one note by ID. Returns true if deleted, false if not found. */
-  async delete(noteId: string): Promise<boolean> {
+  /** Delete one note only if the user owns it.
+   * Returns true if deleted, false if not found or not owned. */
+  async delete(userId: string, noteId: string): Promise<boolean> {
     const query = `
       DELETE FROM ${NOTES_TABLE}
-      WHERE note_id = $1
+      WHERE note_id = $2 AND user_id = $1
       RETURNING note_id
     `;
-    const result = await this.pool.query(query, [noteId]);
+    const result = await this.pool.query(query, [userId, noteId]);
     return (result.rowCount ?? 0) > 0;
   }
 

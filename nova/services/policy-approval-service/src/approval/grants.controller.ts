@@ -4,15 +4,32 @@
  *  WHY: expiry is judged by the server clock only; a caller-supplied nowMs is
  *  stripped, so an expired grant can never verify from the wire. */
 
-import { BadRequestException, Body, ConflictException, Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Query } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+  SetMetadata,
+} from "@nestjs/common";
 import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import type { GrantRecord, GrantVerdict, GrantVerifyAttempt } from "./grant-binding.js";
 import type { CreateGrantInput, CreateGrantWithDetailsInput, EditGrantInput } from "./grants.service.js";
 import type { ConsumeVerdict, RevokeVerdict } from "./grant-repository-types.js";
 import { GrantValidationError, GrantsService } from "./grants.service.js";
+import { ServiceAuthGuard } from "../policy/service-auth.guard.js";
 
 @ApiTags("policy-grants")
 @Controller("policy")
+@UseGuards(ServiceAuthGuard)
+@SetMetadata("audience", "policy-service")
 export class GrantsController {
   constructor(private readonly grantsService: GrantsService) {}
 

@@ -1,13 +1,28 @@
-/** The policy admin HTTP endpoints (Layer 10: admin plane network rule).
- *  These endpoints are only accessible from the nova-admin network. */
+/**
+ * The policy admin HTTP endpoints (Layer 10: admin plane network rule).
+ * These endpoints are only accessible from the nova-admin network.
+ * All endpoints require a valid service JWT via ServiceAuthGuard.
+ */
 
-import { Controller, Get, Param, HttpCode, HttpStatus, Headers, ForbiddenException } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Headers,
+  ForbiddenException,
+  UnauthorizedException,
+  UseGuards,
+  SetMetadata,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { PolicyDecisionService } from "./policy-decision.service.js";
 import { getPolicyVersionConfig } from "./policy-version.js";
 import type { PolicyRule } from "./policy-schema.js";
 import { verifyToken, ServiceClaims } from "@nova/contracts";
 import { CallerContext } from "./authorization.js";
+import { ServiceAuthGuard } from "./service-auth.guard.js";
 
 const ADMIN_SCOPE = "policy:admin";
 
@@ -21,7 +36,7 @@ function getServiceJwtIssuer(): string {
 
 function extractCallerContext(authHeader: string | undefined): CallerContext {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { service: "unknown", scopes: [], userId: undefined, resourceOwnerId: undefined };
+    throw new UnauthorizedException("Missing or invalid authorization header");
   }
   const token = authHeader.slice(7);
   const nowSeconds = Math.floor(Date.now() / 1000);
@@ -30,7 +45,7 @@ function extractCallerContext(authHeader: string | undefined): CallerContext {
     audience: "policy-admin-service",
   }, nowSeconds);
   if (!result.ok) {
-    return { service: "unknown", scopes: [], userId: undefined, resourceOwnerId: undefined };
+    throw new UnauthorizedException("Invalid or expired token");
   }
   const claims: ServiceClaims = result.claims;
   const scopes = claims.scope.split(" ");
@@ -39,6 +54,8 @@ function extractCallerContext(authHeader: string | undefined): CallerContext {
 
 @ApiTags("policy-admin")
 @Controller("policy-admin")
+@UseGuards(ServiceAuthGuard)
+@SetMetadata("audience", "policy-admin-service")
 export class PolicyAdminController {
   constructor(private readonly decisionService: PolicyDecisionService) {}
 

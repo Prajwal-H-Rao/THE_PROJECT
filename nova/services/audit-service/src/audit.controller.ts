@@ -9,14 +9,19 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  UseGuards,
+  SetMetadata,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiQuery } from "@nestjs/swagger";
 import type { AuditRecordInput, AuditRecordResponse, AuditRecord, AuditQuery } from "@nova/contracts/audit-contracts";
 import { AuditService } from "./audit.service.js";
 import { DenialCode } from "@nova/contracts/audit-contracts";
+import { ServiceAuthGuard } from "./auth/service-auth.guard.js";
 
 @ApiTags("audit")
 @Controller("audit")
+@UseGuards(ServiceAuthGuard)
+@SetMetadata("audience", "audit-service")
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 

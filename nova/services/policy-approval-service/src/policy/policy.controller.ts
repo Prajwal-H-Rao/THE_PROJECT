@@ -1,12 +1,27 @@
-/** The policy decision HTTP endpoint (service endpoints). */
+/**
+ * The policy decision HTTP endpoint (service endpoints).
+ * All endpoints require a valid service JWT via ServiceAuthGuard.
+ */
 
-import { Controller, Post, Body, HttpCode, HttpStatus, Headers, BadRequestException } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Headers,
+  BadRequestException,
+  UnauthorizedException,
+  UseGuards,
+  SetMetadata,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { PolicyDecisionService } from "./policy-decision.service.js";
 import type { PolicyDecisionRequest, PolicyDecisionResponse } from "./policy-schema.js";
 import type { BulkDecisionRequest, BulkDecisionResponse } from "./policy-bulk-schema.js";
 import { verifyToken, ServiceClaims } from "@nova/contracts";
 import { CallerContext } from "./authorization.js";
+import { ServiceAuthGuard } from "./service-auth.guard.js";
 
 function getServiceJwtSecret(): string {
   return process.env.NOVA_SERVICE_JWT_SECRET ?? "test-secret-key-32-bytes-minimum!!";
@@ -18,7 +33,7 @@ function getServiceJwtIssuer(): string {
 
 function extractCallerContext(authHeader: string | undefined): CallerContext {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { service: "unknown", scopes: [], userId: undefined, resourceOwnerId: undefined };
+    throw new UnauthorizedException("Missing or invalid authorization header");
   }
   const token = authHeader.slice(7);
   const nowSeconds = Math.floor(Date.now() / 1000);
@@ -27,7 +42,7 @@ function extractCallerContext(authHeader: string | undefined): CallerContext {
     audience: "policy-service",
   }, nowSeconds);
   if (!result.ok) {
-    return { service: "unknown", scopes: [], userId: undefined, resourceOwnerId: undefined };
+    throw new UnauthorizedException("Invalid or expired token");
   }
   const claims: ServiceClaims = result.claims;
   const scopes = claims.scope.split(" ");
@@ -36,6 +51,8 @@ function extractCallerContext(authHeader: string | undefined): CallerContext {
 
 @ApiTags("policy")
 @Controller("policy")
+@UseGuards(ServiceAuthGuard)
+@SetMetadata("audience", "policy-service")
 export class PolicyController {
   constructor(private readonly decisionService: PolicyDecisionService) {}
 
@@ -48,8 +65,6 @@ export class PolicyController {
     @Headers("authorization") authHeader: string | undefined
   ): Promise<PolicyDecisionResponse> {
     const caller = extractCallerContext(authHeader);
-    // Fail closed if the request carries a user-plane rule but no identity.
-    // The authorization gate inside decide() will enforce this.
     return this.decisionService.decide(request, caller);
   }
 

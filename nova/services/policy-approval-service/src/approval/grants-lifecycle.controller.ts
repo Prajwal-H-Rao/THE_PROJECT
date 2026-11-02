@@ -1,15 +1,38 @@
 /** Grant lifecycle HTTP endpoints (approve, reject, expire, edit). */
 
-import { BadRequestException, Body, ConflictException, Controller, HttpCode, HttpStatus, NotFoundException, Param, Post } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  ConflictException,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+  UnauthorizedException,
+  UseGuards,
+  SetMetadata,
+} from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { StatusVerdict, EditVerdict } from "./grant-repository-types.js";
 import { GrantValidationError, GrantsService } from "./grants.service.js";
 import { PolicyDecisionService } from "../policy/policy-decision.service.js";
 import type { PolicyDecisionRequest, Sensitivity } from "../policy/policy-schema.js";
+import type { CallerContext } from "../policy/authorization.js";
 import type { EditGrantInput } from "./grants.service.js";
+import { ServiceAuthGuard } from "../policy/service-auth.guard.js";
+import { ServiceClaims } from "@nova/contracts";
+
+interface CallerRequest {
+  user?: ServiceClaims;
+}
 
 @ApiTags("policy-grants")
 @Controller("policy")
+@UseGuards(ServiceAuthGuard)
+@SetMetadata("audience", "policy-service")
 export class GrantsLifecycleController {
   constructor(
     private readonly grantsService: GrantsService,
@@ -73,8 +96,20 @@ export class GrantsLifecycleController {
   @Post("grants/:nonce/edit")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Edit a grant: re-hash and re-route to policy" })
-  async edit(@Param("nonce") nonce: string, @Body() input: EditGrantInput): Promise<EditVerdict> {
+  async edit(
+    @Param("nonce") nonce: string,
+    @Body() input: EditGrantInput,
+    @Req() req: CallerRequest,
+  ): Promise<EditVerdict> {
     try {
+      const claims = req.user as ServiceClaims;
+      const caller: CallerContext = {
+        service: claims.sub,
+        scopes: claims.scope.split(" "),
+        userId: claims.sub,
+        resourceOwnerId: undefined,
+      };
+
       // Build a policy decision request from the edit input
       const policyRequest: PolicyDecisionRequest = {
         actor: "user",
@@ -87,7 +122,7 @@ export class GrantsLifecycleController {
         payloadHash: undefined,
       };
 
-      const policyDecision = this.policyDecisionService.decide(policyRequest);
+      const policyDecision = this.policyDecisionService.decide(policyRequest, caller);
 
       const verdict = await this.grantsService.editGrant(nonce, input, {
         decision: policyDecision.decision,
