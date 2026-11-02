@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import { Pool } from "pg";
 import { NoteService, NoteNotFoundError } from "./note.service.js";
 import { NoteRepository } from "./note.repository.js";
+import { InMemoryObjectStore } from "./note.object-storage.js";
 import type { CreateNoteInput, NoteListFilter, UpdateNoteInput } from "./note.entity.js";
 
 function makeRepo(config: {
@@ -14,7 +15,7 @@ function makeRepo(config: {
   createTitle?: string;
   updateTitle?: string;
 }): NoteRepository {
-  const repo = new NoteRepository({} as unknown as Pool);
+  const repo = new NoteRepository({} as unknown as Pool, new InMemoryObjectStore());
   repo.findById = async (_userId: string, _noteId: string) => {
     if (!config.owned) return null;
     return {
@@ -26,6 +27,7 @@ function makeRepo(config: {
       sourceType: null,
       sourceRef: null,
       isArchived: false,
+      objectStorePointer: null,
       createdAt: "t",
       updatedAt: "t",
     };
@@ -42,6 +44,7 @@ function makeRepo(config: {
         sourceType: null,
         sourceRef: null,
         isArchived: false,
+        objectStorePointer: null,
         createdAt: "t",
         updatedAt: "t",
       },
@@ -56,6 +59,7 @@ function makeRepo(config: {
     sourceType: null,
     sourceRef: null,
     isArchived: false,
+    objectStorePointer: null,
     createdAt: "t",
     updatedAt: "t",
   });
@@ -70,6 +74,7 @@ function makeRepo(config: {
       sourceType: null,
       sourceRef: null,
       isArchived: false,
+      objectStorePointer: null,
       createdAt: "t",
       updatedAt: "t",
     };

@@ -44,6 +44,9 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 | 24 | Create note controller with x-user-id header | `nova/services/tasks-reminders-service/src/notes/note.controller.ts` | Rejects missing header, 404 on not-found |
 | 25 | Create note service tests for cross-user denial | `nova/services/tasks-reminders-service/src/notes/note.service.test.ts` | Cross-user denial tests pass |
 | 26 | Create note controller tests for header enforcement | `nova/services/tasks-reminders-service/src/notes/note.controller.test.ts` | Header enforcement tests pass |
+| 27 | Add object store interface | `nova/services/tasks-reminders-service/src/notes/note.object-storage.ts` | ObjectStore interface and in-memory impl |
+| 28 | Implement object storage for long bodies | `nova/services/tasks-reminders-service/src/notes/note.object-storage-repo.ts` | Large bodies stored externally |
+| 29 | Add object storage repository tests | `nova/services/tasks-reminders-service/src/notes/note.repository.object-storage.test.ts` | Object store round-trip tests pass |
 
 ## Build order
 

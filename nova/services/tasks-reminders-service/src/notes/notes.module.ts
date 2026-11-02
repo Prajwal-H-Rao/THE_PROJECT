@@ -7,9 +7,18 @@ import { Module } from "@nestjs/common";
 import { NoteRepository } from "./note.repository.js";
 import { NoteService } from "./note.service.js";
 import { NoteController } from "./note.controller.js";
+import { NoteObjectStorage } from "./note.object-storage-repo.js";
+import { InMemoryObjectStore } from "./note.object-storage.js";
+
+const OBJECT_STORE = "OBJECT_STORE";
 
 @Module({
-  providers: [NoteRepository, NoteService],
+  providers: [
+    NoteRepository,
+    NoteService,
+    NoteObjectStorage,
+    { provide: OBJECT_STORE, useClass: InMemoryObjectStore },
+  ],
   controllers: [NoteController],
   exports: [NoteService],
 })

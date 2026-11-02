@@ -14,6 +14,7 @@ export interface Note {
   readonly isArchived: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly objectStorePointer: string | null;
 }
 
 export interface CreateNoteInput {
