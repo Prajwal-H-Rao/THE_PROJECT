@@ -5,7 +5,7 @@
 
 import { Injectable } from "@nestjs/common";
 import { NoteRepository } from "./note.repository.js";
-import type { Note, CreateNoteInput, UpdateNoteInput, NoteListFilter } from "./note.entity.js";
+import type { Note, CreateNoteInput, UpdateNoteInput, NoteListFilter, NoteVersion, RestoreVersionInput } from "./note.entity.js";
 
 export class NoteNotFoundError extends Error {
   constructor(public readonly noteId: string) {
@@ -67,5 +67,24 @@ export class NoteService {
     if (!deleted) {
       throw new NoteNotFoundError(noteId);
     }
+  }
+
+  /** Get version history for a note. */
+  async getVersionHistory(userId: string, noteId: string): Promise<NoteVersion[]> {
+    return this.repository.getVersionHistory(userId, noteId);
+  }
+
+  /** Restore a note to a specific version. */
+  async restoreVersion(userId: string, noteVersionId: string): Promise<Note> {
+    const note = await this.repository.restoreVersion(userId, noteVersionId);
+    if (!note) {
+      throw new NoteNotFoundError(noteVersionId);
+    }
+    return note;
+  }
+
+  /** Get a specific version by ID. */
+  async getVersion(userId: string, noteVersionId: string): Promise<NoteVersion | null> {
+    return this.repository.getVersion(userId, noteVersionId);
   }
 }

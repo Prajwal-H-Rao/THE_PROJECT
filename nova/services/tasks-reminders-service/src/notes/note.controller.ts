@@ -19,9 +19,12 @@ import {
 } from "@nestjs/common";
 import { NoteService } from "./note.service.js";
 import type {
+  Note,
   CreateNoteInput,
   UpdateNoteInput,
   NoteListFilter,
+  NoteVersion,
+  RestoreVersionInput,
 } from "./note.entity.js";
 
 @Controller("notes")
@@ -111,5 +114,47 @@ export class NoteController {
       }
       throw error;
     }
+  }
+
+  @Get(":noteId/versions")
+  async getVersionHistory(
+    @Headers("x-user-id") userId: string,
+    @Param("noteId") noteId: string,
+  ): Promise<NoteVersion[]> {
+    if (!userId) {
+      throw new BadRequestException("Missing x-user-id header");
+    }
+    return this.service.getVersionHistory(userId, noteId);
+  }
+
+  @Post(":noteId/restore")
+  async restoreVersion(
+    @Headers("x-user-id") userId: string,
+    @Param("noteId") noteId: string,
+    @Body() input: RestoreVersionInput,
+  ): Promise<Note> {
+    if (!userId) {
+      throw new BadRequestException("Missing x-user-id header");
+    }
+    try {
+      return await this.service.restoreVersion(userId, input.noteVersionId);
+    } catch (error) {
+      if (error instanceof Error && error.name === "NoteNotFoundError") {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  @Get(":noteId/versions/:versionId")
+  async getVersion(
+    @Headers("x-user-id") userId: string,
+    @Param("noteId") noteId: string,
+    @Param("versionId") versionId: string,
+  ): Promise<NoteVersion | null> {
+    if (!userId) {
+      throw new BadRequestException("Missing x-user-id header");
+    }
+    return this.service.getVersion(userId, versionId);
   }
 }

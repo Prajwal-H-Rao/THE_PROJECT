@@ -38,3 +38,20 @@ export interface NoteListFilter {
   tags?: string[];
   isArchived?: boolean;
 }
+
+export interface NoteVersion {
+  readonly noteVersionId: string;
+  readonly noteId: string;
+  readonly title: string;
+  readonly content: string;
+  readonly tags: string[];
+  readonly sourceType: string | null;
+  readonly sourceRef: string | null;
+  readonly isArchived: boolean;
+  readonly createdAt: string;
+  readonly createdBy: string;
+}
+
+export interface RestoreVersionInput {
+  readonly noteVersionId: string;
+}

@@ -29,6 +29,9 @@ Create, list, complete and reschedule tasks. Fire reminders once, at the right t
 | 9 | Create the note table with tags, links and a full-text index | migrations | Full-text search passes |
 | 10 | Add object storage for long note bodies | notes schema | Pointer resolves to the object |
 | 11 | Implement note create, update and version history | note service | History restores a prior version |
+| 28 | Add version history REST endpoints | `nova/services/tasks-reminders-service/src/notes/note.controller.ts` | GET :noteId/versions, POST :noteId/restore, GET :noteId/versions/:versionId |
+| 29 | Implement version history in repository | `nova/services/tasks-reminders-service/src/notes/note.repository.ts` | getVersionHistory, restoreVersion, getVersion |
+| 30 | Add version history types | `nova/services/tasks-reminders-service/src/notes/note.entity.ts` | NoteVersion, RestoreVersionInput interfaces |
 | 12 | Wire local embeddings from `workers/inference-worker/` as an optional index | `services/ml-service/` | Vector row deleted with the note |
 | 13 | Implement search: full-text first, vector as a rerank | note service | Search returns note IDs |
 | 14 | Register the note tool family: create, search, read, link, summarise | MCP tool catalogue | Overwrite requires confirmation |
