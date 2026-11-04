@@ -7,6 +7,7 @@ import { Module } from "@nestjs/common";
 import { NoteRepository } from "./note.repository.js";
 import { NoteService } from "./note.service.js";
 import { NoteController } from "./note.controller.js";
+import { NoteSearchController } from "./note.search.controller.js";
 import { NoteObjectStorage } from "./note.object-storage-repo.js";
 import { InMemoryObjectStore } from "./note.object-storage.js";
 import { OBJECT_STORE } from "./note.object-storage.js";
@@ -23,7 +24,7 @@ import { NOTE_EMBEDDER } from "./note.search-vector.js";
     // Rerank ships disabled: plan row 12 wires the ML client adapter here.
     { provide: NOTE_EMBEDDER, useValue: null },
   ],
-  controllers: [NoteController],
+  controllers: [NoteController, NoteSearchController],
   exports: [NoteService, NoteSearcher],
 })
 export class NotesModule {}

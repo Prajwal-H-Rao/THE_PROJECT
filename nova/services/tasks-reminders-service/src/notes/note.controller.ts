@@ -16,9 +16,8 @@ import {
   Headers,
   NotFoundException,
   BadRequestException,
-  ServiceUnavailableException,
 } from "@nestjs/common";
-import { NoteService, SearchUnavailableError } from "./note.service.js";
+import { NoteService } from "./note.service.js";
 import type {
   Note,
   CreateNoteInput,
@@ -46,30 +45,6 @@ export class NoteController {
     return this.service.createNote(userId, input);
   }
 
-  @Get("search")
-  async search(
-    @Headers("x-user-id") userId: string,
-    @Query("q") q?: string,
-    @Query("limit") limit?: string,
-  ) {
-    if (!userId) {
-      throw new BadRequestException("Missing x-user-id header");
-    }
-    // (q ?? "") keeps an absent query a 400 instead of a TypeError.
-    const query = (q ?? "").trim();
-    if (query.length === 0) {
-      throw new BadRequestException("q is required");
-    }
-    try {
-      // parseInt yields NaN for garbage; the searcher falls back to its default.
-      return await this.service.searchNotes(userId, query, limit === undefined ? undefined : parseInt(limit, 10));
-    } catch (error) {
-      if (error instanceof SearchUnavailableError) {
-        throw new ServiceUnavailableException(error.message);
-      }
-      throw error;
-    }
-  }
 
   @Get(":noteId")
   async getOne(

@@ -82,6 +82,17 @@ export class NoteService {
     }
   }
 
+  /** Export one note only if the user owns it.
+   * Returns the full note including body and object-store pointer.
+   * Throws NoteNotFoundError if not found or not owned. */
+  async exportNote(userId: string, noteId: string): Promise<Note> {
+    const note = await this.repository.findById(userId, noteId);
+    if (!note) {
+      throw new NoteNotFoundError(noteId);
+    }
+    return note;
+  }
+
   /** Get version history for a note. */
   async getVersionHistory(userId: string, noteId: string): Promise<NoteVersion[]> {
     return this.repository.getVersionHistory(userId, noteId);
