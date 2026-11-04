@@ -5,6 +5,9 @@
 
 import { randomUUID } from "crypto";
 
+/** DI token for the note object store. Shared by the repository and the searcher. */
+export const OBJECT_STORE = "OBJECT_STORE";
+
 export interface ObjectStore {
   /** Store a body under a key. Returns the stored key. */
   upload(key: string, body: string): Promise<void>;

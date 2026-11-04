@@ -3,9 +3,10 @@
  * Cross-user read denied: every operation filters by user_id.
  */
 
-import { Injectable } from "@nestjs/common";
+import { Injectable, Optional } from "@nestjs/common";
 import { NoteRepository } from "./note.repository.js";
-import type { Note, CreateNoteInput, UpdateNoteInput, NoteListFilter, NoteVersion, RestoreVersionInput } from "./note.entity.js";
+import { NoteSearcher } from "./note.search.js";
+import type { Note, CreateNoteInput, UpdateNoteInput, NoteListFilter, NoteVersion, RestoreVersionInput, NoteSearchResult } from "./note.entity.js";
 
 export class NoteNotFoundError extends Error {
   constructor(public readonly noteId: string) {
@@ -21,9 +22,21 @@ export class NoteForbiddenError extends Error {
   }
 }
 
+/** Raised when search runs without a wired NoteSearcher. */
+export class SearchUnavailableError extends Error {
+  constructor() {
+    super("Note search is not configured");
+    this.name = "SearchUnavailableError";
+  }
+}
+
 @Injectable()
 export class NoteService {
-  constructor(private readonly repository: NoteRepository) {}
+  constructor(
+    private readonly repository: NoteRepository,
+    // Optional keeps existing one-argument constructions valid.
+    @Optional() private readonly search?: NoteSearcher
+  ) {}
 
   /** Create one note for one user. Returns the created note. */
   async createNote(userId: string, input: CreateNoteInput): Promise<Note> {
@@ -86,5 +99,13 @@ export class NoteService {
   /** Get a specific version by ID. */
   async getVersion(userId: string, noteVersionId: string): Promise<NoteVersion | null> {
     return this.repository.getVersion(userId, noteVersionId);
+  }
+
+  /** Search the user's notes. Throws SearchUnavailableError when no searcher is wired. */
+  async searchNotes(userId: string, query: string, limit?: number): Promise<NoteSearchResult[]> {
+    if (!this.search) {
+      throw new SearchUnavailableError();
+    }
+    return this.search.search(userId, query, limit);
   }
 }

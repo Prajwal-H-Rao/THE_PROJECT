@@ -28,7 +28,8 @@ export class NoteRepository {
     if (input.content && input.content.length > BODY_SIZE_THRESHOLD) {
       const key = buildKey(userId, "note");
       await this.objectStore.upload(key, input.content);
-      objectStorePointer = `obj://${key}`;
+      // buildKey already returns the full "obj://..." key. Do not prefix again.
+      objectStorePointer = key;
       content = "";
     }
 

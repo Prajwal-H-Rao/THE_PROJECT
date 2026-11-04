@@ -56,3 +56,9 @@ export interface NoteVersion {
 export interface RestoreVersionInput {
   readonly noteVersionId: string;
 }
+
+export interface NoteSearchResult {
+  readonly noteId: string;
+  readonly title: string;
+  readonly score: number;
+}

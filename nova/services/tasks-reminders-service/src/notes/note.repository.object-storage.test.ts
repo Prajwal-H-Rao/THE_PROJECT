@@ -43,7 +43,7 @@ describe("NoteRepository object storage", () => {
 
   it("create uploads long body to object store", async () => {
     const store = new InMemoryObjectStore();
-    const { repo, setResult } = makeRepo(store);
+    const { repo, mockPool, setResult } = makeRepo(store);
 
     const longBody = "x".repeat(2000);
     setResult({ rows: [{ note_id: "n-1", user_id: "user-1", title: "Long note", content: "", tags: [], source_type: null, source_ref: null, object_store_pointer: "obj://user-1/note/1", is_archived: false, created_at: "t", updated_at: "t" }], rowCount: 1 });
@@ -57,6 +57,12 @@ describe("NoteRepository object storage", () => {
     assert.strictEqual(note.content, "");
     assert.ok(note.objectStorePointer);
     assert.strictEqual(note.objectStorePointer, "obj://user-1/note/1");
+    // Regression: the bound pointer must be the bare uploaded key, not a
+    // double-prefixed "obj://obj://..." string. The mock row masked this once.
+    const boundPointer = mockPool.lastValues[6];
+    assert.ok(typeof boundPointer === "string");
+    assert.ok(!boundPointer.startsWith("obj://obj://"), "pointer must not double-prefix");
+    assert.strictEqual(await store.download(boundPointer), longBody);
     const downloaded = await store.download(note.objectStorePointer as string);
     assert.strictEqual(downloaded, "x".repeat(2000));
   });
