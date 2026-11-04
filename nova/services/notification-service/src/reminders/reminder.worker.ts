@@ -12,18 +12,21 @@ import { ReminderService } from "./reminder.service.js";
 import { ReminderDeliveryRepository } from "./reminder-delivery.js";
 import { EscalationService } from "./escalation-service.js";
 import { EscalationRepository } from "./escalation-repository.js";
+import { ReminderMetrics, DEFAULT_BACKLOG_THRESHOLD, checkAlert } from "./reminder-metrics.js";
 
 export interface ReminderWorkerOptions {
   readonly pollIntervalMs?: number;
   readonly batchSize?: number;
   readonly reclaimIntervalMs?: number;
   readonly reclaimStaleMinutes?: number;
+  readonly backlogThreshold?: number;
 }
 
 export class ReminderWorker {
   private repository: ReminderRepository;
   private service: ReminderService;
   private escalationService: EscalationService;
+  private metrics: ReminderMetrics;
   private options: Required<ReminderWorkerOptions>;
   private timer: ReturnType<typeof setInterval> | null = null;
   private reclaimTimer: ReturnType<typeof setInterval> | null = null;
@@ -33,16 +36,19 @@ export class ReminderWorker {
     repository: ReminderRepository,
     service: ReminderService,
     escalationService: EscalationService,
+    metrics?: ReminderMetrics,
     options: ReminderWorkerOptions = {}
   ) {
     this.repository = repository;
     this.service = service;
     this.escalationService = escalationService;
+    this.metrics = metrics ?? new ReminderMetrics();
     this.options = {
       pollIntervalMs: options.pollIntervalMs ?? 30000,
       batchSize: options.batchSize ?? 50,
       reclaimIntervalMs: options.reclaimIntervalMs ?? 300000,
       reclaimStaleMinutes: options.reclaimStaleMinutes ?? 5,
+      backlogThreshold: options.backlogThreshold ?? DEFAULT_BACKLOG_THRESHOLD,
     };
   }
 
@@ -92,6 +98,16 @@ export class ReminderWorker {
 
     // Escalate missed reminders past due without delivery.
     escalated = await this.service.escalateMissed(this.options.batchSize);
+    this.metrics.recordDelivery("escalated");
+
+    // Record current backlog before claiming.
+    const pending = await this.repository.countPending();
+    this.metrics.recordBacklog(pending);
+
+    const alert = checkAlert(this.metrics, this.options.backlogThreshold);
+    if (alert.firing) {
+      console.warn(`ALERT: ${alert.reason}`);
+    }
 
     while (true) {
       const claimed = await this.service.claimReminder();
@@ -107,6 +123,7 @@ export class ReminderWorker {
           claimed.idempotencyKey
         );
         delivered++;
+        this.metrics.recordDelivery("delivered");
       } catch (error) {
         const errMsg = error instanceof Error ? error.message : String(error);
         await this.service.markFailed(
@@ -115,6 +132,7 @@ export class ReminderWorker {
           claimed.idempotencyKey
         );
         failed++;
+        this.metrics.recordDelivery("failed");
       }
     }
 

@@ -71,6 +71,13 @@ export class ReminderRepository {
     return result.rows.map((row) => this.mapReminderRow(row));
   }
 
+  /** Count all pending reminders regardless of due time. Returns the current backlog size. */
+  async countPending(): Promise<number> {
+    const query = `SELECT count(*) AS cnt FROM ${REMINDERS_TABLE} WHERE status = 'pending'`;
+    const result = await this.pool.query(query);
+    return Number(result.rows[0]?.cnt ?? 0);
+  }
+
   /** Cancel one reminder. Returns true if cancelled, false if not found
    * or already cancelled/delivered. */
   async cancel(reminderId: string): Promise<boolean> {

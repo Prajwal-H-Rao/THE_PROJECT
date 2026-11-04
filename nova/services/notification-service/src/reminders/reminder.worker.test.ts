@@ -12,11 +12,13 @@ import { ReminderDeliveryRepository } from "./reminder-delivery.js";
 import { ReminderDeliveryLogRepository } from "./reminder-delivery-log.js";
 import { EscalationService } from "./escalation-service.js";
 import { EscalationRepository } from "./escalation-repository.js";
+import { ReminderMetrics } from "./reminder-metrics.js";
 
 function makeRepo(config: any): ReminderRepository {
   const repo = new ReminderRepository({} as any) as any;
   const reminders = [...config.dueReminders];
   repo.listDue = async () => reminders;
+  repo.countPending = async () => reminders.length;
   repo.claimReminder = async () => {
     const reminder = reminders.shift();
     if (!reminder) return null;
@@ -109,7 +111,7 @@ describe("ReminderWorker", () => {
       escalateResult: [],
     });
     const service = new ReminderService(repo, deliveryRepo, new ReminderDeliveryLogRepository({} as any), escalationRepo);
-    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), {
+    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), new ReminderMetrics(), {
       pollIntervalMs: 1000,
       batchSize: 10,
     });
@@ -164,7 +166,7 @@ describe("ReminderWorker", () => {
       escalateResult: [],
     });
     const service = new ReminderService(repo, deliveryRepo, new ReminderDeliveryLogRepository({} as any), escalationRepo);
-    const worker = new FailingWorker(repo, service, new EscalationService(escalationRepo), {
+    const worker = new FailingWorker(repo, service, new EscalationService(escalationRepo), new ReminderMetrics(), {
       pollIntervalMs: 1000,
       batchSize: 10,
     });
@@ -191,7 +193,7 @@ describe("ReminderWorker", () => {
       escalateResult: [],
     });
     const service = new ReminderService(repo, deliveryRepo, new ReminderDeliveryLogRepository({} as any), escalationRepo);
-    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), {
+    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), new ReminderMetrics(), {
       pollIntervalMs: 1000,
       batchSize: 10,
     });
@@ -241,7 +243,7 @@ describe("ReminderWorker", () => {
       escalateResult: [],
     });
     const service = new ReminderService(repo, deliveryRepo, new ReminderDeliveryLogRepository({} as any), escalationRepo);
-    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), {
+    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), new ReminderMetrics(), {
       pollIntervalMs: 1000,
       batchSize: 10,
     });
@@ -278,7 +280,7 @@ describe("ReminderWorker", () => {
       escalateResult: [escalatedReminder],
     });
     const service = new ReminderService(repo, deliveryRepo, new ReminderDeliveryLogRepository({} as any), escalationRepo);
-    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), {
+    const worker = new ReminderWorker(repo, service, new EscalationService(escalationRepo), new ReminderMetrics(), {
       pollIntervalMs: 1000,
       batchSize: 10,
     });

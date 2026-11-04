@@ -131,4 +131,43 @@ describe("recurrence-service", () => {
     const error = result as { code: string };
     assert.strictEqual(error.code, "invalid_start_date");
   });
+
+  it("maps spring-forward gap forward to first valid instant", () => {
+    const rule = parseRule("FREQ=DAILY;INTERVAL=1");
+    if ("code" in rule) {
+      assert.fail(`Expected valid rule, got: ${rule.code}`);
+    }
+    // 2026-03-07 02:30 AM EST → add 1 day → 2026-03-08 02:30 AM local does not exist
+    // (spring forward 2:00→3:00). Maps forward to 03:00 AM EDT.
+    const result = nextOccurrence(rule, "2026-03-07T07:30:00Z", "America/New_York");
+    if ("code" in result) {
+      assert.fail(`Expected occurrence, got: ${result.code}`);
+    }
+    assert.strictEqual(result.nextOccurrence, "2026-03-08T07:00:00.000Z");
+  });
+
+  it("maps fall-back ambiguity to earliest UTC instant", () => {
+    const rule = parseRule("FREQ=DAILY;INTERVAL=1");
+    if ("code" in rule) {
+      assert.fail(`Expected valid rule, got: ${rule.code}`);
+    }
+    // 2026-10-31 01:30 AM EDT → add 1 day → 2026-11-01 01:30 AM local (ambiguous)
+    // Earliest UTC instant: 01:30 AM EDT = 05:30Z.
+    const result = nextOccurrence(rule, "2026-10-31T05:30:00Z", "America/New_York");
+    if ("code" in result) {
+      assert.fail(`Expected occurrence, got: ${result.code}`);
+    }
+    assert.strictEqual(result.nextOccurrence, "2026-11-01T05:30:00.000Z");
+  });
+
+  it("rejects invalid timezone", () => {
+    const rule = parseRule("FREQ=DAILY;INTERVAL=1");
+    if ("code" in rule) {
+      assert.fail(`Expected valid rule, got: ${rule.code}`);
+    }
+    const result = nextOccurrence(rule, "2026-10-01T10:00:00Z", "Not/AZone");
+    assert.ok("code" in result);
+    const error = result as { code: string };
+    assert.strictEqual(error.code, "invalid_timezone");
+  });
 });

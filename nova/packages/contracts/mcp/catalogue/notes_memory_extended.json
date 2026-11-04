@@ -1,0 +1,112 @@
+{
+  "family": "notes_memory",
+  "operations": [
+    {
+      "operation_id": "notes_memory.read",
+      "name": "notes_memory.read",
+      "description": "Read a note by ID.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "note_id": { "type": "string" }
+          },
+          "required": ["note_id"]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "note": { "type": "object" }
+          },
+          "required": ["note"]
+        }
+      },
+      "classification": "read",
+      "risk_tier": "tier1",
+      "idempotency": "none",
+      "verifier": "verify_note_read",
+      "family": "notes_memory",
+      "owning_service": "notes-service",
+      "mcp_server": "notes-mcp",
+      "resource_scope": "own_notes",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["notes:read"],
+      "version": 1
+    },
+    {
+      "operation_id": "notes_memory.link",
+      "name": "notes_memory.link",
+      "description": "Link two notes together.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "note_id": { "type": "string" },
+            "linked_note_id": { "type": "string" },
+            "link_type": { "type": "string" },
+            "confirm_overwrite": { "type": "boolean" }
+          },
+          "required": ["note_id", "linked_note_id"]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "link_id": { "type": "string" }
+          },
+          "required": ["link_id"]
+        }
+      },
+      "classification": "write",
+      "risk_tier": "tier1",
+      "idempotency": "idempotency_key",
+      "verifier": "verify_note_link",
+      "family": "notes_memory",
+      "owning_service": "notes-service",
+      "mcp_server": "notes-mcp",
+      "resource_scope": "own_notes",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["notes:write"],
+      "version": 1
+    },
+    {
+      "operation_id": "notes_memory.summarise",
+      "name": "notes_memory.summarise",
+      "description": "Summarise a note's content.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "note_id": { "type": "string" },
+            "max_length": { "type": "integer" }
+          },
+          "required": ["note_id"]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "summary": { "type": "string" }
+          },
+          "required": ["summary"]
+        }
+      },
+      "classification": "read",
+      "risk_tier": "tier1",
+      "idempotency": "none",
+      "verifier": "verify_note_summarise",
+      "family": "notes_memory",
+      "owning_service": "notes-service",
+      "mcp_server": "notes-mcp",
+      "resource_scope": "own_notes",
+      "allowed_roles": ["user"],
+      "allowed_scopes": ["notes:read"],
+      "version": 1
+    }
+  ],
+  "version": 1
+}
