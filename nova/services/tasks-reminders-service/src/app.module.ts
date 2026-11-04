@@ -7,6 +7,7 @@ import { Module, Global } from "@nestjs/common";
 import { Pool } from "pg";
 import { TasksModule } from "./tasks/tasks.module.js";
 import { NotesModule } from "./notes/notes.module.js";
+import { FactModule } from "./facts/fact.module.js";
 
 const PG_POOL = "PG_POOL";
 
@@ -19,6 +20,6 @@ const PG_POOL = "PG_POOL";
     },
   ],
   exports: [PG_POOL],
-  imports: [TasksModule, NotesModule],
+  imports: [TasksModule, NotesModule, FactModule],
 })
 export class AppModule {}
