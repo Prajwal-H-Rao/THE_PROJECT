@@ -9,13 +9,14 @@
 import * as React from "react";
 import { PageLayout } from "@/components/layout/page-layout";
 import { ShellHeader } from "@/shell/shell-header";
-import { ShellNav } from "@/shell/shell-nav";
+import { ShellNav, type ShellNavItem } from "@/shell/shell-nav";
 
 interface ShellProps {
   appName?: string;
   status?: "online" | "offline" | "degraded";
-  navItems?: React.ComponentProps<typeof ShellNav>["items"];
+  navItems?: ShellNavItem[];
   onAudit?: () => void;
+  onItemClick?: (item: ShellNavItem) => void;
   /** Command palette node, forwarded to the header. */
   palette?: React.ReactNode;
   /** User menu node, forwarded to the header. */
@@ -28,6 +29,7 @@ function Shell({
   status,
   navItems,
   onAudit,
+  onItemClick,
   palette,
   userMenu,
   children,
@@ -45,7 +47,7 @@ function Shell({
       }
       sidebar={
         navItems && navItems.length ? (
-          <ShellNav items={navItems} />
+          <ShellNav items={navItems} onItemClick={onItemClick} />
         ) : undefined
       }
     >

@@ -3,5 +3,21 @@
     "title": "NOVA",
     "description": "The personal operations workspace.",
     "cta": "Try it"
+  },
+  "tasks": {
+    "title": "Tasks & Notes",
+    "tabs": {
+      "list": "List",
+      "board": "Board",
+      "calendar": "Calendar",
+      "notes": "Notes"
+    },
+    "empty": {
+      "tasks": "No tasks found.",
+      "notes": "No notes found."
+    },
+    "overdue": "Overdue",
+    "loading": "Loading tasks and notes",
+    "error": "Load error"
   }
 }
