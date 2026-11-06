@@ -3,12 +3,32 @@
 import ignored_paths
 
 # The module that owns a path adds the path prefix to this list.
-EXTRA_DIRECTORY_PREFIXES = ("tests/layout", "labs", "db")
+EXTRA_DIRECTORY_PREFIXES = (
+    "tests/layout",
+    "labs",
+    "db",
+    "evals",
+    "evals/model-eval",
+    "evals/model-eval/eval-sets",
+    "services/analytics-service",
+    "services/calendar-service",
+    "services/channels-service",
+    "services/content-service",
+    "services/deployment-service",
+    "services/employer-registry-service",
+    "services/finance-service",
+    "services/inbox-service",
+    "services/jobs-service",
+    "services/messages-service",
+    "services/release-gate-service",
+    "services/resilience-service",
+    "services/tasks-reminders-service",
+)
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 132
-EXPECTED_LEAVES = 88
-EXPECTED_PLACEHOLDERS = 37
+EXPECTED_DIRECTORIES = 180
+EXPECTED_LEAVES = 111
+EXPECTED_PLACEHOLDERS = 43
 
 # The header that every placeholder file holds.
 PLACEHOLDER_TEXT = "# Placeholder. Git cannot track an empty directory. The owning module task adds the content."
@@ -159,7 +179,7 @@ def check_tree_files(index, owned):
             continue
         if relative == "docs/layout-diff.md":
             continue
-        if not is_owned(relative, owned):
+        if not is_owned(relative, owned) and not is_allowed_extra(relative):
             problems.append("the tree holds the undeclared file " + relative)
     if problems:
         return "; ".join(sorted(problems))

@@ -9,6 +9,10 @@ Build plan for `NOVA_Full_Updated_Spec.md`. The spec is the source of truth. Thi
 - Each module file holds a build sequence. Each task names an artifact and a test. Order lives at phase level in `order-and-constraints.md`.
 - `claims-ledger.md` holds external facts I checked on the web. A stale claim blocks its dependent phase.
 - `coverage.md` maps every spec heading to a module file.
+- `status.md` holds the reconciled task status. Read it before you plan work.
+- `execution-plan.md` holds the task loop, the commands and the rules.
+- `execution-phases.md` holds the phase gates and the work packages.
+- `worklist.md` and `worklist-p7-p11.md` are the live task queues.
 
 ## Rules that bind this plan
 
@@ -44,6 +48,8 @@ Phase order follows dependency. The design system lands at P4. The domain pages 
 | **Total** | 21 files | **390** | |
 
 The gate column states the exit criteria for the phase. Module 18 verifies and signs gates A to G at P11, from the evidence these phases produced. No earlier phase signs a gate.
+
+The Tasks column is stale. It holds 390. The module tables hold 403 unique task IDs. Modules 08 and 10 repeat one task number. `status.md` holds the live counts. `worklist.md` and `worklist-p7-p11.md` hold the live queue.
 
 ## Spec coverage
 

@@ -1,0 +1,233 @@
+version: '3.8'
+
+name: nova
+
+services:
+  # ===== Database =====
+  postgres:
+    image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+    environment:
+      POSTGRES_USER: ${NOVA_POSTGRES_USER:-nova}
+      POSTGRES_PASSWORD: ${NOVA_POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${NOVA_POSTGRES_DB:-nova}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./nova/infra/compose/object-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${NOVA_POSTGRES_USER:-nova} -d ${NOVA_POSTGRES_DB:-nova}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===== Object Storage =====
+  rustfs:
+    image: ghcr.io/ryansheffer/rustfs:latest
+    environment:
+      RUSTFS_PORT: "9000"
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-minioadmin}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+    volumes:
+      - rustfs_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===== ML Service =====
+  ml-service:
+    build:
+      context: ./nova/services/ml-service
+      dockerfile: Dockerfile
+    image: nova/ml-service:latest
+    environment:
+      ML_SERVICE_PORT: "8000"
+      ML_SERVICE_MODEL: "all-MiniLM-L6-v2"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Identity Service =====
+  identity-service:
+    build:
+      context: ./nova/services/identity-service
+      dockerfile: Dockerfile
+    image: nova/identity-service:latest
+    environment:
+      DATABASE_URL: postgresql://${NOVA_POSTGRES_USER:-nova}:${NOVA_POSTGRES_PASSWORD:-changeme}@postgres:5432/nova
+      IDENTITY_SERVICE_PORT: "8001"
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Policy Approval Service =====
+  policy-approval-service:
+    build:
+      context: ./nova/services/policy-approval-service
+      dockerfile: Dockerfile
+    image: nova/policy-approval-service:latest
+    environment:
+      DATABASE_URL: postgresql://${NOVA_POSTGRES_USER:-nova}:${NOVA_POSTGRES_PASSWORD:-changeme}@postgres:5432/nova
+      POLICY_SERVICE_PORT: "8002"
+    ports:
+      - "8002:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Audit Service =====
+  audit-service:
+    build:
+      context: ./nova/services/audit-service
+      dockerfile: Dockerfile
+    image: nova/audit-service:latest
+    environment:
+      DATABASE_URL: postgresql://${NOVA_POSTGRES_USER:-nova}:${NOVA_POSTGRES_PASSWORD:-changeme}@postgres:5432/nova
+      AUDIT_SERVICE_PORT: "8003"
+    ports:
+      - "8003:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Tasks & Reminders Service =====
+  tasks-reminders-service:
+    build:
+      context: ./nova/services/tasks-reminders-service
+      dockerfile: Dockerfile
+    image: nova/tasks-reminders-service:latest
+    environment:
+      DATABASE_URL: postgresql://${NOVA_POSTGRES_USER:-nova}:${NOVA_POSTGRES_PASSWORD:-changeme}@postgres:5432/nova
+      TASKS_REMINDERS_PORT: "8004"
+    ports:
+      - "8004:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Tasks MCP Server =====
+  tasks-mcp-server:
+    build:
+      context: ./nova/services/tasks-mcp-server
+      dockerfile: Dockerfile
+    image: nova/tasks-mcp-server:latest
+    environment:
+      MCP_SERVER_PORT: "8005"
+      TASKS_SERVICE_URL: http://tasks-reminders-service:8000
+    ports:
+      - "8005:8000"
+    depends_on:
+      tasks-reminders-service:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Notification Service =====
+  notification-service:
+    build:
+      context: ./nova/services/notification-service
+      dockerfile: Dockerfile
+    image: nova/notification-service:latest
+    environment:
+      DATABASE_URL: postgresql://${NOVA_POSTGRES_USER:-nova}:${NOVA_POSTGRES_PASSWORD:-changeme}@postgres:5432/nova
+      NOTIFICATION_SERVICE_PORT: "8006"
+    ports:
+      - "8006:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Inbox Service =====
+  inbox-service:
+    build:
+      context: ./nova/services/inbox-service
+      dockerfile: Dockerfile
+    image: nova/inbox-service:latest
+    environment:
+      DATABASE_URL: postgresql://${NOVA_POSTGRES_USER:-nova}:${NOVA_POSTGRES_PASSWORD:-changeme}@postgres:5432/nova
+      INBOX_SERVICE_PORT: "8007"
+    ports:
+      - "8007:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== API Gateway =====
+  api-gateway:
+    build:
+      context: ./nova/services/api-gateway
+      dockerfile: Dockerfile
+    image: nova/api-gateway:latest
+    environment:
+      API_GATEWAY_PORT: "8080"
+      IDENTITY_SERVICE_URL: http://identity-service:8000
+      TASKS_SERVICE_URL: http://tasks-reminders-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      INBOX_SERVICE_URL: http://inbox-service:8000
+      ML_SERVICE_URL: http://ml-service:8000
+    ports:
+      - "8080:8080"
+    depends_on:
+      identity-service:
+        condition: service_healthy
+      tasks-reminders-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      inbox-service:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+  # ===== Edge Proxy (Caddy) =====
+  edge:
+    build:
+      context: ./nova/infra/edge
+      dockerfile: Dockerfile
+    image: nova/edge:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nova/infra/edge/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - nova-net
+
+volumes:
+  postgres_data:
+  rustfs_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  nova-net:
+    driver: bridge

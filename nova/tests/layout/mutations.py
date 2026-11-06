@@ -59,9 +59,10 @@ def empty_leaf(work):
     return True
 
 
-def copied_spec_file(work):
-    """Add a spec file that this task must omit."""
-    (tree(work) / "models" / "model-registry.yaml").write_text("name: test\n")
+def deleted_spec_file(work):
+    """Remove the spec file that the tree must hold."""
+    path = tree(work) / "data" / "employer-seed-v1.csv"
+    path.unlink()
     return True
 
 

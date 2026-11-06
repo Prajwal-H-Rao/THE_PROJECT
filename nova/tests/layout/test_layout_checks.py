@@ -8,10 +8,21 @@ from pathlib import Path
 
 import cases
 import check_layout
+import ignored_paths
 import repo_checks
 import spec_index
 
-COPY_IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc")
+# WHY: the copy skips every path that the checker ignores. node_modules alone
+# holds gigabytes and fills the tmpfs of the work parent. The mutations touch
+# source files only, so the suite keeps its guarantees without the copies.
+COPY_IGNORE = shutil.ignore_patterns(
+    *(ignored_paths.ALWAYS_IGNORED
+      + ignored_paths.OUTPUT_NAMES
+      + ignored_paths.IGNORED_FILES
+      + ignored_paths.IGNORED_TEMPORARY_FILES
+      + tuple("*" + suffix for suffix in ignored_paths.IGNORED_DIRECTORY_SUFFIXES)
+      + tuple("*" + suffix for suffix in ignored_paths.IGNORED_FILE_SUFFIXES))
+)
 WORK_PARENT = "/tmp/opencode"
 
 def work_root():

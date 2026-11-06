@@ -17,7 +17,7 @@ MUTATIONS = [
     ("F", "telegram and whatsapp swap", record_mutations.swap_channels),
     ("G", "missing spec citation", record_mutations.missing_citation),
     ("H", "empty leaf directory", mutations.empty_leaf),
-    ("I", "copied spec file", mutations.copied_spec_file),
+    ("I", "deleted spec file", mutations.deleted_spec_file),
     ("I", "wrong omitted file count", record_mutations.wrong_omitted_count),
     ("J", "bad module task reference", record_mutations.bad_task_reference),
     ("K", "wrong deferred spec item", record_mutations.wrong_deferred_item),

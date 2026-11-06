@@ -165,6 +165,10 @@ def expected_groups(index):
             "services/audit-service/src/health/health.controller.ts",
             "services/audit-service/src/health/health.module.ts",
         ],
+        [
+            "docs/architecture/layout-diff.md",
+            "docs/architecture/service-map.md",
+        ],
     ]
 
 

@@ -47,8 +47,8 @@ def wrong_omitted_count(work):
     """Change the omitted file count in the layout diff."""
     return replace_diff(
         work,
-        "The tree omits 2 files that the spec names.",
-        "The tree omits 3 files that the spec names.")
+        "The tree omits 0 files that the spec names.",
+        "The tree omits 2 files that the spec names.")
 
 
 def bad_task_reference(work):
@@ -79,8 +79,8 @@ def wrong_leaf_count(work):
     """Change the leaf directory count in the extra paths section."""
     return replace_diff(
         work,
-        "The tree holds 116 directories below the root, 80 leaf directories and 37 .gitkeep placeholder files",
-        "The tree holds 116 directories below the root, 80 leaf directories and 38 .gitkeep placeholder files")
+        "The tree holds 111 leaf directories.",
+        "The tree holds 112 leaf directories.")
 
 
 def missing_module_file(work):
@@ -92,8 +92,8 @@ def wrong_allow_list(work):
     """Change the allow-list that the extra paths section states."""
     return replace_diff(
         work,
-        "The allow-list holds tests/layout, labs and db.",
-        "The allow-list holds tests/layout and labs.")
+        "services/tasks-reminders-service and tests/layout.",
+        "services/tasks-reminders-service.")
 
 
 def bad_spec_citation(work):
@@ -140,7 +140,7 @@ def renamed_section(work):
 
 def wrong_copy_rows(work):
     """Change the row count that the authoritative copy section states."""
-    return replace_diff(work, "The copy holds the same 10 rows.", "The copy holds the same 12 rows.")
+    return replace_diff(work, "The copy holds the same 11 rows.", "The copy holds the same 12 rows.")
 
 
 def wrong_service_count(work):
@@ -155,7 +155,7 @@ def second_copy_rows(work):
     """Add a second row count to the authoritative copy section."""
     return insert_diff(
         work,
-        "The copy holds the same 10 rows.",
+        "The copy holds the same 11 rows.",
         "The copy holds the same 12 rows.")
 
 
@@ -179,5 +179,5 @@ def second_allow_list(work):
     """Add a second allow-list to the extra paths section."""
     return insert_diff(
         work,
-        "The allow-list holds tests/layout, labs and db.",
-        "The allow-list holds tests/layout and labs.")
+        "services/tasks-reminders-service and tests/layout.",
+        "The allow-list holds tests/layout.")
