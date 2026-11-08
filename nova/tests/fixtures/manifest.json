@@ -1,0 +1,27 @@
+{
+  "page_limit": 500,
+  "size_limit": 52428800,
+  "fixtures": [
+    {
+      "name": "encrypted.pdf",
+      "kind": "encrypted_pdf",
+      "expected_reason": "encrypted"
+    },
+    {
+      "name": "invalid-magic.pdf",
+      "kind": "invalid_magic",
+      "expected_reason": "invalid magic"
+    },
+    {
+      "name": "scanned-beyond-limit.pdf",
+      "kind": "page_limit",
+      "expected_reason": "page limit"
+    },
+    {
+      "name": "oversized.pdf",
+      "kind": "oversized",
+      "expected_reason": "oversized",
+      "generate_size": 52428801
+    }
+  ]
+}

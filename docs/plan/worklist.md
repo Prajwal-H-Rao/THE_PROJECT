@@ -24,9 +24,9 @@ No open task. Run the proof suite and confirm the P2 exit criteria.
 
 ## P3 — document sandbox and models
 
-- [ ] 06.3 — serve the Flask app with a production WSGI server (partial)
-- [ ] 06.12 — prove the worker sandbox: non-root, read-only root, tmpfs, capabilities (partial)
-- [ ] 06.14 — add the bad-fixture corpus; each fixture fails safely (partial)
+- [x] 06.3 — serve the Flask app with a production WSGI server (partial)
+- [x] 06.12 — prove the worker sandbox: non-root, read-only root, tmpfs, capabilities (partial)
+- [x] 06.14 — add the bad-fixture corpus; each fixture fails safely (partial)
 - [ ] 06.16 — complete the `ml-service` HTTP API for classification and embeddings (partial)
 - [ ] 06.9 — add OCR as an isolated fallback
 - [ ] 06.13 — prove no Postgres route and no internet route from the parser

@@ -94,7 +94,9 @@ def create_app(settings: DocumentServiceSettings | None = None) -> Flask:
 
 
 def run_app():
-    """Run the app with gunicorn-compatible settings."""
+    """Run the app under gunicorn, the production WSGI server. Never flask dev server."""
     settings = DocumentServiceSettings()
     app = create_app(settings)
-    app.run(host=settings.host, port=settings.port, debug=settings.debug)
+    from gunicorn.app.wsgiapp import WSGIApplication
+
+    WSGIApplication("%(prog)s [OPTIONS] [APP_MODULE]").run()

@@ -61,6 +61,7 @@ DESIGN_NOTES = (
     "docs/design-notes/nova-orchestration.md",
     "docs/design-notes/nova-monitoring.md",
     "docs/design-notes/nova-approval-grants.md",
+    "docs/design-notes/nova-export-deletion.md",
 )
 
 

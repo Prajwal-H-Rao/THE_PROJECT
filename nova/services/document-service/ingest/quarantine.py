@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any
 
 from nova.services.document_service.schemas import QuarantineSettings
+from nova.services.document_service.ingest.fixture_rules import (
+    reject_beyond_page_limit,
+    reject_encrypted_pdf,
+)
 
 
 class ValidationError(Exception):
@@ -67,6 +71,18 @@ def validate_file(file_bytes: bytes, filename: str, settings: QuarantineSettings
                 file_bytes[:1024].decode("latin-1")
             except UnicodeDecodeError:
                 raise ValidationError("Text file could not be decoded as UTF-8 or Latin-1")
+
+    # Task 06.14: byte-level rejection rules for bad fixtures.
+    # Encrypted PDFs are rejected before parsing; page limit is best-effort
+    # at ingress (the parser path enforces pages deterministically in task 06.5).
+    # The magic check above already guarantees %PDF- for .pdf files here.
+    if ext == ".pdf":
+        encrypted_reason = reject_encrypted_pdf(file_bytes)
+        if encrypted_reason:
+            raise ValidationError(encrypted_reason)
+        page_reason = reject_beyond_page_limit(file_bytes, settings.max_pages)
+        if page_reason:
+            raise ValidationError(page_reason)
 
 
 def compute_sha256(file_bytes: bytes) -> str:

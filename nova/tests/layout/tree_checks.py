@@ -14,6 +14,7 @@ EXTRA_DIRECTORY_PREFIXES = (
     "services/calendar-service",
     "services/channels-service",
     "services/content-service",
+    "services/document-service",
     "services/deployment-service",
     "services/employer-registry-service",
     "services/finance-service",
@@ -23,6 +24,7 @@ EXTRA_DIRECTORY_PREFIXES = (
     "services/release-gate-service",
     "services/resilience-service",
     "services/tasks-reminders-service",
+    "workers/document-worker",
 )
 
 # The tree counts that the repo records. A module task updates them.

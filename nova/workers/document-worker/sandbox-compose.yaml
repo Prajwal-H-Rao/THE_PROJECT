@@ -1,0 +1,36 @@
+# Document worker sandbox. Task 06.12 (module 06).
+# Purpose: wrap the worker image with the runtime guards from specs 673 and 692:
+# read-only root filesystem, tmpfs temp space, dropped capabilities, seccomp,
+# bounded CPU, memory and PIDs, and no Docker socket or host mount.
+# Merge at run time:
+#   docker compose -f compose.yaml -f compose.platform.yaml -f sandbox-compose.yaml
+
+services:
+  document-worker:
+    image: nova/document-worker:local
+
+    # The root filesystem is read-only. The worker writes only to its tmpfs.
+    read_only: true
+
+    # Bounded writable temp space. No exec and no setuid from the temp mount.
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+
+    # Drop every capability. The worker holds no privileged power.
+    cap_drop:
+      - ALL
+
+    # Seccomp from the shipped profile plus no privilege escalation.
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./seccomp-worker.json
+
+    # Bounded resources, PIDs included (spec:692).
+    mem_limit: 512m
+    cpus: "1.0"
+    pids_limit: 64
+
+    # No Docker socket and no host path mounts. The sandbox reads one input
+    # object and writes one result (spec:814). The report workers hold no
+    # writable host path, so none is declared here.
+    volumes: []

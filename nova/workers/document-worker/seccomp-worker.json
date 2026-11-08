@@ -1,0 +1,20 @@
+{
+  "_comment": "Document worker seccomp profile. Task 06.12. Docker's default profile already blocks the dangerous calls; this artifact renames the inherited rule and adds the sandbox-only denials. Keep the block list narrow: deny what a sandboxed parser never needs.",
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "syscalls": [
+    {
+      "names": [
+        "mount",
+        "umount2",
+        "unshare",
+        "setns",
+        "keyctl",
+        "add_key",
+        "request_key",
+        "ptrace",
+        "personality"
+      ],
+      "action": "SCMP_ACT_ERRNO"
+    }
+  ]
+}

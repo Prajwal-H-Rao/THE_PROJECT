@@ -21,7 +21,7 @@ A model response is never proof. A task is done only when its test passes.
 |---|---|---|---|---|---|---|
 | P1 Repo, contracts, platform | 01, 02, 19 | 39 | 38 | 0 | 1 | 97% |
 | P2 Identity and policy | 07, 08 | 33 | 33 | 0 | 0 | 100% |
-| P3 Document sandbox and models | 06, 05 | 37 | 28 | 4 | 5 | 76% |
+| P3 Document sandbox and models | 06, 05 | 37 | 31 | 1 | 5 | 84% |
 | P4 Design system | 15 | 21 | 19 | 1 | 1 | 90% |
 | P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 46 | 2 | 6 | 85% |
 | P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 39 | 0 | 9 | 81% |
@@ -30,7 +30,7 @@ A model response is never proof. A task is done only when its test passes.
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **216** | **22** | **165** | **54%** |
+| **Total** | **21 files** | **403** | **219** | **19** | **165** | **54%** |
 
 ## Module detail
 
@@ -42,7 +42,7 @@ A model response is never proof. A task is done only when its test passes.
 | 07 Identity and authz | 18 | 0 | 0 | Complete | OIDC, TOTP, RBAC, migrations 14 to 23. |
 | 08 Policy and approval | 15 | 0 | 0 | Complete | Grants, bulk decisions, metrics, audit, versioning. |
 | 05 Model strategy | 16 | 0 | 0 | Complete | Registry at `nova/models/model-registry.yaml`, eval set, lab 11. |
-| 06 Document sandbox | 12 | 4 | 5 | Partial | OCR, isolation proof, fixture corpus, citation validator, malware scan, NLP resume. |
+| 06 Document sandbox | 15 | 1 | 5 | Partial | OCR, isolation proof, fixture corpus, citation validator, malware scan, NLP resume. |
 | 15 Design system | 19 | 1 | 1 | Nearly done | Playwright harness is absent (task 17). Approval outcomes are partial (task 13). |
 | 21 MCP surface | 9 | 1 | 5 | Partial | Bounded fetch, browser worker, service MCP servers, lab 13. |
 | 03 Agent runtime | 18 | 1 | 0 | Nearly done | Cancellation (task 16) has a TODO test. |
