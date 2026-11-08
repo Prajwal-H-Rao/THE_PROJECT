@@ -28,7 +28,7 @@ No open task. Run the proof suite and confirm the P2 exit criteria.
 - [x] 06.12 — prove the worker sandbox: non-root, read-only root, tmpfs, capabilities (partial)
 - [x] 06.14 — add the bad-fixture corpus; each fixture fails safely (partial)
 - [ ] 06.16 — complete the `ml-service` HTTP API for classification and embeddings (partial)
-- [ ] 06.9 — add OCR as an isolated fallback
+- [x] 06.9 — add OCR as an isolated fallback
 - [ ] 06.13 — prove no Postgres route and no internet route from the parser
 - [ ] 06.17 — reject a citation ID that does not resolve to a stored span
 - [ ] 06.18 — scan uploads for malware when the tool is present
