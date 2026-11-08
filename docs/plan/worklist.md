@@ -27,12 +27,12 @@ No open task. Run the proof suite and confirm the P2 exit criteria.
 - [x] 06.3 — serve the Flask app with a production WSGI server (partial)
 - [x] 06.12 — prove the worker sandbox: non-root, read-only root, tmpfs, capabilities (partial)
 - [x] 06.14 — add the bad-fixture corpus; each fixture fails safely (partial)
-- [ ] 06.16 — complete the `ml-service` HTTP API for classification and embeddings (partial)
+- [x] 06.16 — complete the `ml-service` HTTP API for classification and embeddings (partial)
 - [x] 06.9 — add OCR as an isolated fallback
-- [ ] 06.13 — prove no Postgres route and no internet route from the parser
-- [ ] 06.17 — reject a citation ID that does not resolve to a stored span
-- [ ] 06.18 — scan uploads for malware when the tool is present
-- [ ] 06.21 — extract skills and experience with a source span
+- [x] 06.13 — prove no Postgres route and no internet route from the parser
+- [x] 06.17 — reject a citation ID that does not resolve to a stored span
+- [x] 06.18 — scan uploads for malware when the tool is present
+- [x] 06.21 — extract skills and experience with a source span
 
 Exit: every fixture passes. The isolation suite passes.
 

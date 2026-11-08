@@ -1,0 +1,29 @@
+# Inference worker sandbox. Task 06.16 (module 06, P3).
+# Purpose: wrap the inference-worker image with the runtime guards from specs
+# 673 and 692: read-only root filesystem, tmpfs temp space, dropped
+# capabilities, seccomp, bounded CPU/memory/PIDs, and no Docker socket or host
+# mount. Same isolation rules as workers/document-worker (task 06.12).
+# Merge at run time:
+#   docker compose -f compose.yaml -f compose.platform.yaml -f sandbox-compose.yaml
+
+services:
+  inference-worker:
+    image: nova/inference-worker:local
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+
+    cap_drop:
+      - ALL
+
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./seccomp-worker.json
+
+    mem_limit: 512m
+    cpus: "1.0"
+    pids_limit: 64
+
+    volumes: []

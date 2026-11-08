@@ -1,0 +1,20 @@
+{
+  "_comment": "Inference worker seccomp profile. Task 06.16. Mirrors workers/document-worker/seccomp-worker.json. Denies the signature-setting calls a sandboxed inference worker never needs.",
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "syscalls": [
+    {
+      "names": [
+        "mount",
+        "umount2",
+        "unshare",
+        "setns",
+        "keyctl",
+        "add_key",
+        "request_key",
+        "ptrace",
+        "personality"
+      ],
+      "action": "SCMP_ACT_ERRNO"
+    }
+  ]
+}

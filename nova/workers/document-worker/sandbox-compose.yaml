@@ -34,3 +34,9 @@ services:
     # object and writes one result (spec:814). The report workers hold no
     # writable host path, so none is declared here.
     volumes: []
+    networks:
+      - document-sandbox-net
+
+networks:
+  document-sandbox-net:
+    internal: true

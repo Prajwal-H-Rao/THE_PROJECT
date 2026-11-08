@@ -21,15 +21,17 @@ EXTRA_DIRECTORY_PREFIXES = (
     "services/inbox-service",
     "services/jobs-service",
     "services/messages-service",
+    "services/ml-service",
     "services/release-gate-service",
     "services/resilience-service",
     "services/tasks-reminders-service",
     "workers/document-worker",
+    "workers/inference-worker",
 )
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 180
-EXPECTED_LEAVES = 111
+EXPECTED_DIRECTORIES = 181
+EXPECTED_LEAVES = 112
 EXPECTED_PLACEHOLDERS = 43
 
 # The header that every placeholder file holds.
