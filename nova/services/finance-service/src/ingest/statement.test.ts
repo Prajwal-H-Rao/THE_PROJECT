@@ -108,4 +108,33 @@ describe("importParsedStatement", () => {
     assert.ok(a.length > 0 && b.length > 0, "both imports produce transactions");
     assert.strictEqual(a[0]!.sourceReference, b[0]!.sourceReference);
   });
+
+  it("idempotency key is content-based: same content, same key", () => {
+    const doc = parsedDoc([
+      { field_name: "amount", value: "10.00", source: sourceSpan(1, 3, 5, "10.00") },
+      { field_name: "date", value: "2026-11-01", source: sourceSpan(1, 3, 1, "2026-11-01") },
+      { field_name: "merchant", value: "Shop", source: sourceSpan(1, 3, 15, "Shop") },
+    ]);
+    const a = importParsedStatement(doc, "user-1").transactions as CreateFinanceTransactionInput[];
+    const b = importParsedStatement(doc, "user-1").transactions as CreateFinanceTransactionInput[];
+    assert.ok(a.length > 0 && b.length > 0);
+    assert.strictEqual(a[0]!.idempotencyKey, b[0]!.idempotencyKey);
+  });
+
+  it("idempotency key differs for different content", () => {
+    const docA = parsedDoc([
+      { field_name: "amount", value: "10.00", source: sourceSpan(1, 3, 5, "10.00") },
+      { field_name: "date", value: "2026-11-01", source: sourceSpan(1, 3, 1, "2026-11-01") },
+      { field_name: "merchant", value: "Shop", source: sourceSpan(1, 3, 15, "Shop") },
+    ]);
+    const docB = parsedDoc([
+      { field_name: "amount", value: "20.00", source: sourceSpan(1, 3, 5, "20.00") },
+      { field_name: "date", value: "2026-11-01", source: sourceSpan(1, 3, 1, "2026-11-01") },
+      { field_name: "merchant", value: "Shop", source: sourceSpan(1, 3, 15, "Shop") },
+    ]);
+    const ta = importParsedStatement(docA, "user-1").transactions as CreateFinanceTransactionInput[];
+    const tb = importParsedStatement(docB, "user-1").transactions as CreateFinanceTransactionInput[];
+    assert.ok(ta.length > 0 && tb.length > 0);
+    assert.notStrictEqual(ta[0]!.idempotencyKey, tb[0]!.idempotencyKey);
+  });
 });

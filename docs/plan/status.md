@@ -25,12 +25,12 @@ A model response is never proof. A task is done only when its test passes.
 | P4 Design system | 15 | 21 | 21 | 0 | 0 | 100% |
 | P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 1 | 1 | 96% |
 | P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 48 | 0 | 0 | 100% |
-| P7 Finance and trips | 11 | 18 | 4 | 2 | 12 | 22% |
+| P7 Finance and trips | 11 | 18 | 5 | 1 | 12 | 28% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 7 | 0 | 39 | 15% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **244** | **16** | **143** | **61%** |
+| **Total** | **21 files** | **403** | **245** | **15** | **143** | **61%** |
 
 ## Module detail
 
@@ -49,7 +49,7 @@ A model response is never proof. A task is done only when its test passes.
 | 04 Scope lock | 19 | 0 | 1 | Nearly done | CI re-run trigger (task 17) is not in `ci.yml`. |
 | 09 Inbox and calendar | 18 | 0 | 0 | Complete | Inbox rows 1 to 7, 9, 10 done. Draft preview done. Calendar page done with tests. Calendar adapter, attendee-aware approval, conflict detection, ICS import and export, provider failure paths done. Lab 6 delivered against the real service code; acceptance 'send without a grant fails' passes. Three-pane Inbox page done against spec:407. Module 09 complete. |
 | 10 Tasks and notes | 30 | 0 | 0 | Complete | All task IDs done. The file holds 32 rows; two rows repeat a number. |
-| 11 Finance and trips | 4 | 2 | 12 | Started | Transaction table and trip table only. CSV and OFX import done with locale variants (task 11.2). PDF statement parsing done through the document service; rows keep row and column refs (task 11.3). |
+| 11 Finance and trips | 5 | 1 | 12 | Started | Transaction table and trip table only. CSV and OFX import done with locale variants (task 11.2). PDF statement parsing done through the document service; rows keep row and column refs (task 11.3). Content-addressed deduplication across imports done; re-import is a no-op (task 11.4). |
 | 12 Jobs agent | 0 | 0 | 21 | Not started | `jobs-service` holds an unrelated generic job scaffold. |
 | 13 Employer registry | 7 | 0 | 18 | Started | Tasks 1 to 7 done. Connectors, scheduling, freshness, UI open. |
 | 14 Channels | 0 | 0 | 20 | Not started | Telegram and WhatsApp hold `.gitkeep` only. |

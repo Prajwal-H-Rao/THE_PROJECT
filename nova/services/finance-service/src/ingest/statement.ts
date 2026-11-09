@@ -8,6 +8,7 @@
  */
 
 import { parseAmount, parseDate } from "./normalize.js";
+import { computeContentHash, makeIdempotencyKey } from "./deduplicator.js";
 import type { CreateFinanceTransactionInput } from "../finance-entity.js";
 
 interface SourceSpan {
@@ -120,6 +121,18 @@ export function importParsedStatement(
       };
     }
 
+    // Content-addressed idempotency key: identical transaction content from
+    // any source (CSV or PDF) yields the same key, so re-import is a no-op.
+    const contentHash = computeContentHash({
+      amountMinor,
+      currency,
+      transactionDate,
+      merchant,
+      source: "pdf-statement",
+      userId,
+    });
+    const idempotencyKey = makeIdempotencyKey(userId, contentHash);
+
     transactions.push({
       userId,
       source: "pdf-statement",
@@ -130,7 +143,7 @@ export function importParsedStatement(
       postedAt: transactionDate,
       merchant,
       category: "uncategorised",
-      idempotencyKey: sourceReference,
+      idempotencyKey,
       rawJson: columnRefs,
     });
   }

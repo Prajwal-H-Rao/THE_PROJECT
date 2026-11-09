@@ -13,6 +13,14 @@ export class FinanceService {
   constructor(private readonly repository: FinanceTransactionRepository) {}
 
   async createTransaction(userId: string, input: CreateFinanceTransactionInput): Promise<FinanceTransaction> {
+    // Content-addressed deduplication: if an identical transaction (same
+    // idempotency key) already exists, return it instead of inserting a
+    // duplicate. Re-importing the same statement is a no-op.
+    const existing = await this.repository.findByIdempotencyKey(userId, input.idempotencyKey);
+    if (existing) {
+      return existing;
+    }
+
     const result = await this.repository.create(userId, input);
     if (!result) {
       throw new Error(`Failed to create transaction for user ${userId}`);

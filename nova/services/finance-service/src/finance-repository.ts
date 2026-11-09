@@ -64,6 +64,19 @@ export class FinanceTransactionRepository {
     return result.rows.length > 0 ? this.mapRow(result.rows[0]) : null;
   }
 
+  async findByIdempotencyKey(userId: string, idempotencyKey: string): Promise<FinanceTransaction | null> {
+    const query = `
+      SELECT transaction_id, user_id, source, source_reference, amount_minor,
+             currency, transaction_date, posted_at, merchant, category,
+             category_confidence, category_confidence_reason, idempotency_key,
+             raw_json, created_at
+      FROM ${FINANCE_TRANSACTIONS_TABLE}
+      WHERE idempotency_key = $1 AND user_id = $2
+    `;
+    const result = await this.pool.query(query, [idempotencyKey, userId]);
+    return result.rows.length > 0 ? this.mapRow(result.rows[0]) : null;
+  }
+
   async list(userId: string, filter?: FinanceTransactionListFilter): Promise<FinanceTransaction[]> {
     let query = `
       SELECT transaction_id, user_id, source, source_reference, amount_minor,
