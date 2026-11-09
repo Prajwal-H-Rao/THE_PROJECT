@@ -24,13 +24,13 @@ A model response is never proof. A task is done only when its test passes.
 | P3 Document sandbox and models | 06, 05 | 37 | 37 | 0 | 0 | 100% |
 | P4 Design system | 15 | 21 | 21 | 0 | 0 | 100% |
 | P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 0 | 0 | 100% |
-| P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 40 | 0 | 8 | 83% |
+| P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 41 | 0 | 7 | 83% |
 | P7 Finance and trips | 11 | 18 | 2 | 2 | 14 | 11% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 7 | 0 | 39 | 15% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **236** | **16** | **153** | **58%** |
+| **Total** | **21 files** | **403** | **237** | **16** | **152** | **59%** |
 
 ## Module detail
 
@@ -47,7 +47,7 @@ A model response is never proof. A task is done only when its test passes.
 | 21 MCP surface | 15 | 0 | 0 | Complete | Bounded fetch, browser worker, service MCP servers, lab 13. |
 | 03 Agent runtime | 19 | 0 | 0 | Complete | Cancellation (task 16) implemented — worker checks cancellation_requested at each node. |
 | 04 Scope lock | 19 | 0 | 1 | Nearly done | CI re-run trigger (task 17) is not in `ci.yml`. |
-| 09 Inbox and calendar | 9 | 10 | 0 | 8 | Partial | Inbox 1 to 7, 9, 10 done. Draft preview done; calendar tasks open. |
+| 09 Inbox and calendar | 9 | 11 | 0 | 7 | Partial | Inbox 1 to 7, 9, 10 done. Draft preview done. Calendar adapter done; citation validator, malware scan, NLP resume, calendar adapter interface done. |
 | 10 Tasks and notes | 30 | 0 | 0 | Complete | All task IDs done. The file holds 32 rows; two rows repeat a number. |
 | 11 Finance and trips | 2 | 2 | 14 | Started | Transaction table and trip table only. |
 | 12 Jobs agent | 0 | 0 | 21 | Not started | `jobs-service` holds an unrelated generic job scaffold. |
