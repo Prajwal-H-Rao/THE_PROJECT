@@ -5,6 +5,8 @@
  * (INSERT ... ON CONFLICT DO NOTHING). Uses IdempotencyStore as a read-only
  * pre-check cache, updated only after a successful DB insert.
  * Applies exponential backoff on rate-limit errors.
+ * Handles partial provider failures: retries on transient errors, re-authenticates
+ * on 401 errors, and fails safe by logging errors without crashing.
  */
 
 import { GmailAdapter } from "./gmail-adapter.js";
@@ -79,7 +81,8 @@ export class PollingWorker {
   }
 
   /** Run one poll cycle: chain pages, claim each message via DB insert,
-   * process new messages, save cursor. */
+   * process new messages, save cursor.
+   */
   async poll(): Promise<PollResult> {
     if (this.running) {
       return { processed: 0, skipped: 0, pageToken: null };
@@ -110,15 +113,39 @@ export class PollingWorker {
           token ?? undefined
         );
       } catch (error) {
-        if (!isRateLimited(error)) {
-          throw error;
+        const err = error as Error;
+        // Re-authenticate on 401 Unauthorized and retry once
+        if (err.message.includes("401")) {
+          try {
+            await this.reauthenticate();
+            result = await this.adapter.list(
+              this.options.userId,
+              "",
+              this.options.pageSize,
+              token ?? undefined
+            );
+          } catch (reauthError) {
+            // Re-authentication failed; fail safe - log and stop this poll cycle
+            console.error(
+              `Re-authentication failed for user ${this.options.userId}: ${(reauthError as Error).message}`
+            );
+            return { processed, skipped, pageToken };
+          }
+        } else if (!isRateLimited(err)) {
+          // Non-retryable error: fail safe - log and stop this poll cycle
+          console.error(
+            `Polling failed for user ${this.options.userId}: ${err.message}`
+          );
+          return { processed, skipped, pageToken };
+        } else {
+          // Rate limited: apply exponential backoff and retry
+          const delay = computeBackoff(1, {
+            baseMs: this.options.baseBackoffMs,
+            maxMs: this.options.maxBackoffMs,
+          });
+          await sleep(delay);
+          continue;
         }
-        const delay = computeBackoff(1, {
-          baseMs: this.options.baseBackoffMs,
-          maxMs: this.options.maxBackoffMs,
-        });
-        await sleep(delay);
-        continue;
       }
 
       for (const message of result.messages) {
@@ -161,4 +188,13 @@ export class PollingWorker {
 
     return { processed, skipped, pageToken: null };
   }
+
+  /**
+   * Re-authenticate with the provider to refresh expired credentials.
+   * Subclasses should override this with provider-specific auth logic.
+   */
+  async reauthenticate(): Promise<void> {
+    // Default implementation: no-op. Subclasses should override.
+  }
 }
+

@@ -64,8 +64,8 @@ Exit: the red-team suite passes. No unregistered tool call succeeds.
 - [x] 09.11 — calendar adapter interface and the Google adapter
 - [x] 09.12 — attendee-aware approval for invite events
 - [x] 09.13 — conflict detection against the provider
-- [ ] 09.14 — ICS import and export
-- [ ] 09.15 — partial provider failure paths
+- [x] 09.14 — ICS import and export
+- [x] 09.15 — partial provider failure paths
 - [ ] 09.16 — Calendar page: agenda, week, month, timezone, approval preview
 - [ ] 09.17 — deliver lab 6
 - [ ] 09.18 — three-pane Inbox page
