@@ -11,7 +11,7 @@ External gates: maps key and Plaid or AA terms. Use `manual_only` and CSV only w
 - [x] 11.2 — CSV and OFX import with locale variants
 - [x] 11.3 — PDF statement path through the document service
 - [x] 11.4 — content-addressed dedup across imports
-- [ ] 11.5 — deterministic currency conversion with a dated table
+- [x] 11.5 — deterministic currency conversion with a dated table
 - [ ] 11.6 — rule-based categoriser with override history
 - [ ] 11.7 — model-drafted category with confidence and reason
 - [ ] 11.8 — ambiguous-import review queue
