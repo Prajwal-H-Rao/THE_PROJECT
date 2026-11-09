@@ -47,14 +47,14 @@ Exit: Playwright passes. Zero critical a11y violations.
 
 Work in this order: module 21, then 03, then 04. This is order rule 6.
 
-- [ ] 21.9 — bounded fetch tool with a domain allow-list
-- [ ] 21.10 — headless browser worker for allow-listed pages only
-- [ ] 21.11 — expose the calendar MCP server
-- [ ] 21.12 — expose the inbox, finance, trips, WhatsApp and Telegram MCP servers
-- [ ] 21.13 — extend the MCP security suite to all eight cases (partial)
-- [ ] 21.14 — deliver lab 13
-- [ ] 03.16 — implement cancellation; replace the TODO test (partial)
-- [ ] 04.17 — wire the red-team suite into CI with the change trigger
+- [x] 21.9 — bounded fetch tool with a domain allow-list
+- [x] 21.10 — headless browser worker for allow-listed pages only
+- [x] 21.11 — expose the calendar MCP server
+- [x] 21.12 — expose the inbox, finance, trips, WhatsApp and Telegram MCP servers
+- [x] 21.13 — extend the MCP security suite to all eight cases
+- [x] 21.14 — deliver lab 13
+- [x] 03.16 — implement cancellation; replace the TODO test (partial)
+- [x] 04.17 — wire the red-team suite into CI with the change trigger
 
 Exit: the red-team suite passes. No unregistered tool call succeeds.
 

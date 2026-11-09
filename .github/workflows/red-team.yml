@@ -1,0 +1,70 @@
+name: Red-Team Suite
+'on':
+  push:
+    paths:
+    - nova/services/model-gateway/
+    - nova/services/agent-orchestrator/orchestrator/workflows/
+    - nova/tests/fixtures/fake-model/
+    - nova/services/agent-orchestrator/orchestrator/prompts/
+    - nova/services/agent-orchestrator/orchestrator/router/
+    - nova/packages/contracts/
+    - nova/services/policy-approval-service/src/policy/families.yaml
+    - nova/services/*/connectors/
+    - nova/infra/compose/
+    - nova/**/package.json
+    - nova/**/requirements.txt
+    - nova/**/pyproject.toml
+    - nova/services/policy-approval-service/src/policy/families.yaml
+    - nova/services/policy-approval-service/src/policy/policy-schema.ts
+    - nova/services/policy-approval-service/src/policy/deny-list.ts
+    - nova/infra/
+    - nova/db/
+    - nova/docs/plan/
+  pull_request:
+    paths:
+    - nova/services/model-gateway/
+    - nova/services/agent-orchestrator/orchestrator/workflows/
+    - nova/tests/fixtures/fake-model/
+    - nova/services/agent-orchestrator/orchestrator/prompts/
+    - nova/services/agent-orchestrator/orchestrator/router/
+    - nova/packages/contracts/
+    - nova/services/policy-approval-service/src/policy/families.yaml
+    - nova/services/*/connectors/
+    - nova/infra/compose/
+    - nova/**/package.json
+    - nova/**/requirements.txt
+    - nova/**/pyproject.toml
+    - nova/services/policy-approval-service/src/policy/families.yaml
+    - nova/services/policy-approval-service/src/policy/policy-schema.ts
+    - nova/services/policy-approval-service/src/policy/deny-list.ts
+    - nova/infra/
+    - nova/db/
+    - nova/docs/plan/
+  schedule:
+  - cron: 0 2 * * *
+  workflow_dispatch: {}
+jobs:
+  red-team:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: pip install pytest pytest-asyncio httpx
+    - name: Start test stack
+      run: cd nova/infra/compose && docker compose -f compose.yaml -f compose.platform.yaml
+        up -d
+    - name: Wait for services
+      run: sleep 10 && curl -f http://localhost:8000/health || exit 1
+    - name: Run red-team suite
+      run: cd nova && python -m pytest tests/red-team/ -v --tb=short
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: red-team-results
+        path: nova/tests/red-team/results/

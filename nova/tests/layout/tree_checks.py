@@ -28,11 +28,12 @@ EXTRA_DIRECTORY_PREFIXES = (
     "services/tasks-reminders-service",
     "workers/document-worker",
     "workers/inference-worker",
+    "workers/web-worker",
 )
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 185
-EXPECTED_LEAVES = 115
+EXPECTED_DIRECTORIES = 192
+EXPECTED_LEAVES = 119
 EXPECTED_PLACEHOLDERS = 43
 
 # The header that every placeholder file holds.

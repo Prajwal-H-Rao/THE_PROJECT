@@ -1,0 +1,58 @@
+{
+  "family": "integrations",
+  "operations": [
+    {
+      "operation_id": "integrations.fetch",
+      "name": "integrations.fetch",
+      "description": "Fetch content from an allow-listed URL only. No arbitrary URL access.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "content"
+          ]
+        }
+      },
+      "classification": "read",
+      "risk_tier": "tier2",
+      "idempotency": "none",
+      "verifier": "verify_fetch_url",
+      "family": "integrations",
+      "owning_service": "integrations-service",
+      "mcp_server": "integrations-mcp",
+      "resource_scope": "external_url",
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "integrations:fetch"
+      ],
+      "provider_allowlist": [
+        "example.com",
+        "api.local"
+      ],
+      "quota": "10/m",
+      "version": 1
+    }
+  ],
+  "version": 1
+}

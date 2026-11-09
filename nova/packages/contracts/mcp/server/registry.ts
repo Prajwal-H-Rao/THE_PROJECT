@@ -6,6 +6,9 @@ import { validate_mcp_audit_event, MCPAuditEvent } from "../audit.js";
 import { verifyToken, VerifyOptions, ServiceClaims } from "../../service-token.js";
 import { GrantVerificationClient, VerifyGrantOptions } from "../../grant-verification.js";
 
+/** Processed call IDs for replay detection. */
+const processedCallIds = new Set<string>();
+
 /** Loaded tool catalogue. */
 export interface ToolCatalogue {
   readonly tools: Map<string, ToolDefinition>;
@@ -74,8 +77,10 @@ export function authorizeCall(
   
   // Check roles
   if (tool.allowed_roles && tool.allowed_roles.length > 0) {
-    // Service-to-service calls use service identity, not user roles
-    // This is a placeholder for role-based checks
+    const hasRole = tool.allowed_roles.some(r => claims.roles.includes(r));
+    if (!hasRole) {
+      return { ok: false, reason: "forbidden" };
+    }
   }
   
   return { ok: true };
@@ -89,6 +94,12 @@ export async function validateAndAuthorizeCall(
   audience: string,
   grantClient: GrantVerificationClient
 ): Promise<{ ok: true; context: MCPCallContext } | { ok: false; error: string; code: string }> {
+  // Size guard: reject oversized calls
+  const MAX_CALL_SIZE = 1024 * 1024; // 1MB
+  if (JSON.stringify(rawCall).length > MAX_CALL_SIZE) {
+    return { ok: false, error: "Call too large", code: "quota_exceeded" };
+  }
+  
   // Validate call structure
   let mcpCall: MCPCall;
   try {
@@ -96,6 +107,12 @@ export async function validateAndAuthorizeCall(
   } catch (e) {
     return { ok: false, error: String(e), code: "validation_failed" };
   }
+  
+  // Replay guard: reject duplicate call_ids
+  if (processedCallIds.has(mcpCall.call_id)) {
+    return { ok: false, error: "Replayed call", code: "replay_detected" };
+  }
+  processedCallIds.add(mcpCall.call_id);
   
   // Find tool
   const tool = catalogue.tools.get(mcpCall.tool);

@@ -23,6 +23,7 @@ const KNOWN_MCP_CALL_FIELDS = new Set([
   "user_id",
   "correlation_id",
   "created_at",
+  "approval_grant",
 ]);
 
 const KNOWN_MCP_RESPONSE_FIELDS = new Set([

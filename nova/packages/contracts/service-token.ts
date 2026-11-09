@@ -20,6 +20,7 @@ export interface ServiceClaims {
   readonly aud: string;
   readonly sub: string;
   readonly scope: string;
+  readonly roles: string[];
   readonly iat: number;
   readonly exp: number;
 }
@@ -67,14 +68,14 @@ function digest(value: Buffer): Buffer {
 /** Issue one service token. The caller supplies the claims, the secret and the clock. */
 export function issueToken(
   claims: { readonly iss: string; readonly aud: string; readonly sub: string;
-    readonly scope: string; readonly ttlSeconds?: number },
+    readonly scope: string; readonly roles: string[]; readonly ttlSeconds?: number },
   secret: string,
   nowSeconds: number = Math.floor(Date.now() / 1000),
 ): string {
   const ttl = claims.ttlSeconds ?? DEFAULT_TOKEN_TTL_SECONDS;
   const header: ServiceTokenHeader = { alg: TOKEN_ALGORITHM, typ: "JWT" };
   const body: ServiceClaims = { iss: claims.iss, aud: claims.aud, sub: claims.sub,
-    scope: claims.scope, iat: nowSeconds, exp: nowSeconds + ttl };
+    scope: claims.scope, roles: claims.roles, iat: nowSeconds, exp: nowSeconds + ttl };
   // WHY: the covered string includes the header, so an algorithm swap breaks the signature.
   const covered = encode(header) + "." + encode(body);
   return covered + "." + signPayload(covered, secret).toString("base64url");
@@ -171,9 +172,13 @@ export function readClaims(record: Record<string, unknown>): ServiceClaims | nul
   if (recordScope.includes("  ") || recordScope.startsWith(" ") || recordScope.endsWith(" ")) {
     return null;
   }
+  const recordRoles = record["roles"];
+  if (!Array.isArray(recordRoles) || recordRoles.some(r => typeof r !== "string")) {
+    return null;
+  }
   if (!isNumber(recordIat) || !isNumber(recordExp)) {
     return null;
   }
-  return { iss: recordIss, aud: recordAud, sub: recordSub, scope: recordScope,
+  return { iss: recordIss, aud: recordAud, sub: recordSub, scope: recordScope, roles: recordRoles,
     iat: recordIat, exp: recordExp };
 }

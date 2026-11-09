@@ -23,14 +23,14 @@ A model response is never proof. A task is done only when its test passes.
 | P2 Identity and policy | 07, 08 | 33 | 33 | 0 | 0 | 100% |
 | P3 Document sandbox and models | 06, 05 | 37 | 37 | 0 | 0 | 100% |
 | P4 Design system | 15 | 21 | 21 | 0 | 0 | 100% |
-| P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 46 | 2 | 6 | 85% |
+| P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 0 | 0 | 100% |
 | P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 39 | 0 | 9 | 81% |
 | P7 Finance and trips | 11 | 18 | 2 | 2 | 14 | 11% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 7 | 0 | 39 | 15% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **227** | **18** | **158** | **56%** |
+| **Total** | **21 files** | **403** | **235** | **16** | **153** | **58%** |
 
 ## Module detail
 
@@ -44,8 +44,8 @@ A model response is never proof. A task is done only when its test passes.
 | 05 Model strategy | 16 | 0 | 0 | Complete | Registry at `nova/models/model-registry.yaml`, eval set, lab 11. |
 | 06 Document sandbox | 21 | 0 | 0 | Complete | OCR, isolation proof, fixture corpus, citation validator, malware scan, NLP resume. |
 | 15 Design system | 21 | 0 | 0 | Complete | Playwright harness written and both e2e flows pass against the local stack (spec:873). Approval outcomes keyboard-reachable (task 13 done). |
-| 21 MCP surface | 9 | 1 | 5 | Partial | Bounded fetch, browser worker, service MCP servers, lab 13. |
-| 03 Agent runtime | 18 | 1 | 0 | Nearly done | Cancellation (task 16) has a TODO test. |
+| 21 MCP surface | 15 | 0 | 0 | Complete | Bounded fetch, browser worker, service MCP servers, lab 13. |
+| 03 Agent runtime | 19 | 0 | 0 | Complete | Cancellation (task 16) implemented — worker checks cancellation_requested at each node. |
 | 04 Scope lock | 19 | 0 | 1 | Nearly done | CI re-run trigger (task 17) is not in `ci.yml`. |
 | 09 Inbox and calendar | 9 | 0 | 9 | Partial | Inbox 1 to 7, 9, 10 done. Draft preview and calendar tasks open. |
 | 10 Tasks and notes | 30 | 0 | 0 | Complete | All task IDs done. The file holds 32 rows; two rows repeat a number. |

@@ -12,16 +12,16 @@ const NOW = 1_700_000_000;
 const OPTIONS = { issuer: "nova.test", audience: "nova-internal" };
 
 const CLAIMS = { iss: "nova.test", aud: "nova-internal", sub: "jobs-service",
-  scope: "jobs.write" };
+  scope: "jobs.write", roles: ["user"] };
 
 function issued(): ServiceClaims {
-  return { iss: CLAIMS.iss, aud: CLAIMS.aud, sub: CLAIMS.sub, scope: CLAIMS.scope,
+  return { iss: CLAIMS.iss, aud: CLAIMS.aud, sub: CLAIMS.sub, scope: CLAIMS.scope, roles: CLAIMS.roles,
     iat: NOW, exp: NOW + 300 };
 }
 
 function freshToken(): string {
   return issueToken({ iss: CLAIMS.iss, aud: CLAIMS.aud, sub: CLAIMS.sub,
-    scope: CLAIMS.scope }, SECRET, NOW);
+    scope: CLAIMS.scope, roles: CLAIMS.roles }, SECRET, NOW);
 }
 
 function verify(token: string, secret: string = SECRET) {

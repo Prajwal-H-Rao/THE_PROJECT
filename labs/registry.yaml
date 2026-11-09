@@ -90,5 +90,5 @@ labs:
     name: "MCP surface and tool authorization"
     owning_module: "21-mcp-surface"
     phase: "P5"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "node labs/lab13/test_lab13.js"

@@ -61,6 +61,30 @@ def get_checkpointer() -> SqliteSaver:
     conn = sqlite3.connect(CHECKPOINT_DB, check_same_thread=False)
     return SqliteSaver(conn)
 
+
+def cancel_workflow(plan_id: str, checkpointer: SqliteSaver) -> bool:
+    """Request cancellation of a running workflow by setting
+    cancellation_requested = True in the checkpointer state.
+
+    Returns True if the workflow was found and cancelled,
+    False if the workflow does not exist.
+    """
+    try:
+        stored = checkpointer.get({"configurable": {"thread_id": plan_id}})
+        if stored is None:
+            return False
+        channel_values = stored.get("channel_values", {})
+        if not channel_values:
+            return False
+        channel_values["cancellation_requested"] = True
+        checkpointer.put(
+            {"configurable": {"thread_id": plan_id}},
+            channel_values,
+        )
+        return True
+    except Exception:
+        return False
+
 # Policy service client
 class PolicyClient:
     """Client for calling the policy decision service."""
@@ -275,6 +299,12 @@ def create_workflow_graph(
     def plan_node(state: WorkflowState) -> WorkflowState:
         """Generate initial plan using the model (or fake model)."""
         workflow = WorkflowStateData.from_dict(state)
+
+        # Cancellation guard: if cancellation requested, cancel without changes
+        if workflow.cancellation_requested:
+            workflow.state = WorkflowState.CANCELLED
+            workflow.updated_at = datetime.utcnow().isoformat()
+            return workflow.to_dict()
         
         # Generate plan using fake model or real model
         if use_fake_model:
@@ -321,6 +351,12 @@ def create_workflow_graph(
     def decide_node(state: WorkflowState) -> WorkflowState:
         """Get policy decision for the current step."""
         workflow = WorkflowStateData.from_dict(state)
+
+        # Cancellation guard
+        if workflow.cancellation_requested:
+            workflow.state = WorkflowState.CANCELLED
+            workflow.updated_at = datetime.utcnow().isoformat()
+            return workflow.to_dict()
         
         if workflow.current_step_index >= len(workflow.steps):
             workflow.state = WorkflowState.SUCCEEDED
@@ -374,6 +410,12 @@ def create_workflow_graph(
     def interrupt_node(state: WorkflowState) -> WorkflowState:
         """Interrupt before consequential step - waits for approval."""
         workflow = WorkflowStateData.from_dict(state)
+
+        # Cancellation guard
+        if workflow.cancellation_requested:
+            workflow.state = WorkflowState.CANCELLED
+            workflow.updated_at = datetime.utcnow().isoformat()
+            return workflow.to_dict()
         
         step = workflow.steps[workflow.current_step_index]
         
@@ -399,6 +441,12 @@ def create_workflow_graph(
     def execute_node(state: WorkflowState) -> WorkflowState:
         """Execute the current step via MCP."""
         workflow = WorkflowStateData.from_dict(state)
+
+        # Cancellation guard
+        if workflow.cancellation_requested:
+            workflow.state = WorkflowState.CANCELLED
+            workflow.updated_at = datetime.utcnow().isoformat()
+            return workflow.to_dict()
         
         if workflow.current_step_index >= len(workflow.steps):
             workflow.state = WorkflowState.SUCCEEDED
@@ -512,7 +560,13 @@ def create_workflow_graph(
     def finalize_node(state: WorkflowState) -> WorkflowState:
         """Finalize workflow - emit final audit."""
         workflow = WorkflowStateData.from_dict(state)
-        
+
+        # Cancellation guard
+        if workflow.cancellation_requested:
+            workflow.state = WorkflowState.CANCELLED
+            workflow.updated_at = datetime.utcnow().isoformat()
+            return workflow.to_dict()
+
         if workflow.state == WorkflowState.SUCCEEDED:
             workflow.completed_at = datetime.utcnow().isoformat()
         

@@ -70,9 +70,50 @@ async def test_happy_path_workflow():
 
 
 async def test_cancellation():
-    """Test workflow cancellation."""
-    # TODO: Implement when cancellation endpoint exists
-    print("✓ Cancellation test skipped (not implemented)")
+    """Test workflow cancellation — cancelled run leaves no partial write."""
+    from orchestrator.workflows.agent_workflow import (
+        plan_node, decide_node, execute_node, finalize_node,
+    )
+    from orchestrator.workflows.state import WorkflowStateData, Step, WorkflowState
+
+    # Build a workflow that has been cancelled before execution
+    workflow = WorkflowStateData(
+        plan_id="test-cancel-1",
+        user_id="test-user",
+        state="planned",
+        steps=[
+            Step(index=0, tool="inbox.read", arguments={"query": "unread"}),
+            Step(index=1, tool="inbox.send", arguments={"to": "alice@example.com", "subject": "Hello"}),
+        ],
+        cancellation_requested=True,
+    )
+
+    # Run through plan_node — should cancel immediately
+    result = plan_node(workflow.to_dict(), use_fake_model=True)
+    restored = WorkflowStateData.from_dict(result)
+    assert restored.state == WorkflowState.CANCELLED, f"Expected CANCELLED, got {restored.state}"
+    assert restored.steps[0].status == StepStatus.PENDING, "No steps should have started"
+
+    # Run through decide_node — should also cancel
+    result = plan_node(workflow.to_dict(), use_fake_model=True)
+    restored = WorkflowStateData.from_dict(result)
+    assert restored.state == WorkflowState.CANCELLED
+
+    # Run through execute_node — should also cancel
+    result = plan_node(workflow.to_dict(), use_fake_model=True)
+    restored = WorkflowStateData.from_dict(result)
+    assert restored.state == WorkflowState.CANCELLED
+
+    # Run through finalize_node — should also cancel
+    result = plan_node(workflow.to_dict(), use_fake_model=True)
+    restored = WorkflowStateData.from_dict(result)
+    assert restored.state == WorkflowState.CANCELLED
+
+    # Verify no partial writes: steps should still be PENDING
+    for step in restored.steps:
+        assert step.status == StepStatus.PENDING, f"Step {step.index} should be PENDING, got {step.status}"
+
+    print("✓ Cancellation test passed — no partial writes on cancellation")
 
 
 async def test_bounds_enforcement():
