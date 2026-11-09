@@ -25,12 +25,12 @@ A model response is never proof. A task is done only when its test passes.
 | P4 Design system | 15 | 21 | 21 | 0 | 0 | 100% |
 | P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 1 | 1 | 96% |
 | P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 48 | 0 | 0 | 100% |
-| P7 Finance and trips | 11 | 18 | 11 | 1 | 6 | 61% |
+| P7 Finance and trips | 11 | 18 | 12 | 1 | 5 | 67% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 7 | 0 | 39 | 15% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **251** | **15** | **137** | **62%** |
+| **Total** | **21 files** | **403** | **252** | **15** | **136** | **63%** |
 
 ## Module detail
 
@@ -49,7 +49,7 @@ A model response is never proof. A task is done only when its test passes.
 | 04 Scope lock | 19 | 0 | 1 | Nearly done | CI re-run trigger (task 17) is not in `ci.yml`. |
 | 09 Inbox and calendar | 18 | 0 | 0 | Complete | Inbox rows 1 to 7, 9, 10 done. Draft preview done. Calendar page done with tests. Calendar adapter, attendee-aware approval, conflict detection, ICS import and export, provider failure paths done. Lab 6 delivered against the real service code; acceptance 'send without a grant fails' passes. Three-pane Inbox page done against spec:407. Module 09 complete. |
 | 10 Tasks and notes | 30 | 0 | 0 | Complete | All task IDs done. The file holds 32 rows; two rows repeat a number. |
-| 11 Finance and trips | 11 | 1 | 6 | Started | Transaction table and trip table only. CSV and OFX import done with locale variants (task 11.2). PDF statement parsing done through the document service; rows keep row and column refs (task 11.3). Content-addressed deduplication across imports done; re-import is a no-op (task 11.4). Deterministic currency conversion with a dated rate table done; rounding cases pass (task 11.5). Rule-based categoriser with override history done; rules are deterministic (task 11.6). Model-drafted category with confidence and reason done; low confidence forces review (task 11.7). Ambiguous-import review queue done; queue surfaces only uncertain rows (task 11.8). Totals, budgets and trends computed in code; rounding cases pass (task 11.9). Export and delete for the finance domain done; delete removes objects (task 11.10). |
+| 11 Finance and trips | 12 | 1 | 5 | Started | Transaction table and trip table only. CSV and OFX import done with locale variants (task 11.2). PDF statement parsing done through the document service; rows keep row and column refs (task 11.3). Content-addressed deduplication across imports done; re-import is a no-op (task 11.4). Deterministic currency conversion with a dated rate table done; rounding cases pass (task 11.5). Rule-based categoriser with override history done; rules are deterministic (task 11.6). Model-drafted category with confidence and reason done; low confidence forces review (task 11.7). Ambiguous-import review queue done; queue surfaces only uncertain rows (task 11.8). Totals, budgets and trends computed in code; rounding cases pass (task 11.9). Export and delete for the finance domain done; delete removes objects (task 11.10). Provider connection handling and account-linking consent done; consent scope is explicit (task 11.11). |
 | 12 Jobs agent | 0 | 0 | 21 | Not started | `jobs-service` holds an unrelated generic job scaffold. |
 | 13 Employer registry | 7 | 0 | 18 | Started | Tasks 1 to 7 done. Connectors, scheduling, freshness, UI open. |
 | 14 Channels | 0 | 0 | 20 | Not started | Telegram and WhatsApp hold `.gitkeep` only. |
