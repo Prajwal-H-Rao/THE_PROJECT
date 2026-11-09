@@ -24,13 +24,13 @@ A model response is never proof. A task is done only when its test passes.
 | P3 Document sandbox and models | 06, 05 | 37 | 37 | 0 | 0 | 100% |
 | P4 Design system | 15 | 21 | 21 | 0 | 0 | 100% |
 | P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 1 | 1 | 96% |
-| P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 47 | 0 | 1 | 98% |
+| P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 48 | 0 | 0 | 100% |
 | P7 Finance and trips | 11 | 18 | 2 | 2 | 14 | 11% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 7 | 0 | 39 | 15% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **241** | **16** | **146** | **60%** |
+| **Total** | **21 files** | **403** | **242** | **16** | **145** | **60%** |
 
 ## Module detail
 
@@ -47,7 +47,7 @@ A model response is never proof. A task is done only when its test passes.
 | 21 MCP surface | 15 | 0 | 0 | Complete | Bounded fetch, browser worker, service MCP servers, lab 13. |
 | 03 Agent runtime | 18 | 1 | 0 | Nearly done | Cancellation (task 16) implemented and ticked, but stays partial: only py_compile ran because langgraph is not installable here. |
 | 04 Scope lock | 19 | 0 | 1 | Nearly done | CI re-run trigger (task 17) is not in `ci.yml`. |
-| 09 Inbox and calendar | 17 | 0 | 1 | Nearly done | Inbox rows 1 to 7, 9, 10 done. Draft preview done. Calendar page done with tests. Calendar adapter, attendee-aware approval, conflict detection, ICS import and export, provider failure paths done. Lab 6 delivered against the real service code; acceptance 'send without a grant fails' passes. Remaining: three-pane Inbox page. |
+| 09 Inbox and calendar | 18 | 0 | 0 | Complete | Inbox rows 1 to 7, 9, 10 done. Draft preview done. Calendar page done with tests. Calendar adapter, attendee-aware approval, conflict detection, ICS import and export, provider failure paths done. Lab 6 delivered against the real service code; acceptance 'send without a grant fails' passes. Three-pane Inbox page done against spec:407. Module 09 complete. |
 | 10 Tasks and notes | 30 | 0 | 0 | Complete | All task IDs done. The file holds 32 rows; two rows repeat a number. |
 | 11 Finance and trips | 2 | 2 | 14 | Started | Transaction table and trip table only. |
 | 12 Jobs agent | 0 | 0 | 21 | Not started | `jobs-service` holds an unrelated generic job scaffold. |

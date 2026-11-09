@@ -68,7 +68,7 @@ Exit: the red-team suite passes. No unregistered tool call succeeds.
 - [x] 09.15 — partial provider failure paths
 - [x] 09.16 — Calendar page: agenda, week, month, timezone, approval preview
 - [x] 09.17 — deliver lab 6
-- [ ] 09.18 — three-pane Inbox page
+- [x] 09.18 — three-pane Inbox page
 
 Exit: send without a grant fails. The reminder restart test delivers once.
 
