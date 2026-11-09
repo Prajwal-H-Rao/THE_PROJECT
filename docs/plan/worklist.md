@@ -38,8 +38,8 @@ Exit: every fixture passes. The isolation suite passes.
 
 ## P4 — design system
 
-- [ ] 15.17 — add Playwright; sign-in and approval-rejection flows
-- [ ] 15.13 — add approve, reject, edit and expire outcomes to `ActionPreview` (partial)
+- [x] 15.17 — add Playwright; sign-in and approval-rejection flows
+- [x] 15.13 — add approve, reject, edit and expire outcomes to `ActionPreview` (partial)
 
 Exit: Playwright passes. Zero critical a11y violations.
 

@@ -79,8 +79,8 @@ def wrong_leaf_count(work):
     """Change the leaf directory count in the extra paths section."""
     return replace_diff(
         work,
-        "The tree holds 111 leaf directories.",
-        "The tree holds 112 leaf directories.")
+        "The tree holds 115 leaf directories.",
+        "The tree holds 116 leaf directories.")
 
 
 def missing_module_file(work):
@@ -92,8 +92,8 @@ def wrong_allow_list(work):
     """Change the allow-list that the extra paths section states."""
     return replace_diff(
         work,
-        "services/tasks-reminders-service and tests/layout.",
-        "services/tasks-reminders-service.")
+        "workers/document-worker and workers/inference-worker.",
+        "workers/document-worker.")
 
 
 def bad_spec_citation(work):
@@ -179,5 +179,5 @@ def second_allow_list(work):
     """Add a second allow-list to the extra paths section."""
     return insert_diff(
         work,
-        "services/tasks-reminders-service and tests/layout.",
+        "workers/inference-worker.",
         "The allow-list holds tests/layout.")

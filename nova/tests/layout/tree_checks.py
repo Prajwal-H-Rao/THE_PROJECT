@@ -4,6 +4,7 @@ import ignored_paths
 
 # The module that owns a path adds the path prefix to this list.
 EXTRA_DIRECTORY_PREFIXES = (
+    "apps/web",
     "tests/layout",
     "labs",
     "db",
@@ -30,8 +31,8 @@ EXTRA_DIRECTORY_PREFIXES = (
 )
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 181
-EXPECTED_LEAVES = 112
+EXPECTED_DIRECTORIES = 185
+EXPECTED_LEAVES = 115
 EXPECTED_PLACEHOLDERS = 43
 
 # The header that every placeholder file holds.
