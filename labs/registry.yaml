@@ -41,8 +41,8 @@ labs:
     name: "One domain integration: Gmail read-only, then draft and send"
     owning_module: "09-inbox-calendar"
     phase: "P6"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "node labs/lab06/test_lab06.js"
 
   - number: 7
     name: "Job search in permitted mode on a labelled set"

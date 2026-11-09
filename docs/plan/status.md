@@ -23,14 +23,14 @@ A model response is never proof. A task is done only when its test passes.
 | P2 Identity and policy | 07, 08 | 33 | 33 | 0 | 0 | 100% |
 | P3 Document sandbox and models | 06, 05 | 37 | 37 | 0 | 0 | 100% |
 | P4 Design system | 15 | 21 | 21 | 0 | 0 | 100% |
-| P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 0 | 0 | 100% |
-| P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 45 | 0 | 4 | 89% |
+| P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 1 | 1 | 96% |
+| P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 47 | 0 | 1 | 98% |
 | P7 Finance and trips | 11 | 18 | 2 | 2 | 14 | 11% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 7 | 0 | 39 | 15% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **240** | **16** | **147** | **59%** |
+| **Total** | **21 files** | **403** | **241** | **16** | **146** | **60%** |
 
 ## Module detail
 
@@ -45,9 +45,9 @@ A model response is never proof. A task is done only when its test passes.
 | 06 Document sandbox | 21 | 0 | 0 | Complete | OCR, isolation proof, fixture corpus, citation validator, malware scan, NLP resume. |
 | 15 Design system | 21 | 0 | 0 | Complete | Playwright harness written and both e2e flows pass against the local stack (spec:873). Approval outcomes keyboard-reachable (task 13 done). |
 | 21 MCP surface | 15 | 0 | 0 | Complete | Bounded fetch, browser worker, service MCP servers, lab 13. |
-| 03 Agent runtime | 19 | 0 | 0 | Complete | Cancellation (task 16) implemented — worker checks cancellation_requested at each node. |
+| 03 Agent runtime | 18 | 1 | 0 | Nearly done | Cancellation (task 16) implemented and ticked, but stays partial: only py_compile ran because langgraph is not installable here. |
 | 04 Scope lock | 19 | 0 | 1 | Nearly done | CI re-run trigger (task 17) is not in `ci.yml`. |
-| 09 Inbox and calendar | 10 | 11 | 0 | 5 | Partial | Inbox 1 to 7, 9, 10 done. Draft preview done. Calendar adapter done; attendee-aware approval done. Conflict detection done. Citation validator, malware scan, NLP resume, calendar adapter interface done. |
+| 09 Inbox and calendar | 17 | 0 | 1 | Nearly done | Inbox rows 1 to 7, 9, 10 done. Draft preview done. Calendar page done with tests. Calendar adapter, attendee-aware approval, conflict detection, ICS import and export, provider failure paths done. Lab 6 delivered against the real service code; acceptance 'send without a grant fails' passes. Remaining: three-pane Inbox page. |
 | 10 Tasks and notes | 30 | 0 | 0 | Complete | All task IDs done. The file holds 32 rows; two rows repeat a number. |
 | 11 Finance and trips | 2 | 2 | 14 | Started | Transaction table and trip table only. |
 | 12 Jobs agent | 0 | 0 | 21 | Not started | `jobs-service` holds an unrelated generic job scaffold. |

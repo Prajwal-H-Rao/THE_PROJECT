@@ -1,353 +1,193 @@
 /**
  * Nova design system - Calendar page (task 09.16, module 09).
- * Renders calendar view with agenda, week, month views, timezone indicator,
- * and approval preview showing invitees and conflicts.
- * Spec:408 - A write preview lists invitees and conflicts.
- * Spec:366 - Chat must stay usable at 320px width.
- * Spec:279 - Status must not be encoded with color alone: pair status colors with text, icon and/or label.
+ * Three views (agenda, week, month); one shared timezone state so every
+ * view keeps the timezone. Categories and statuses pair colour with a
+ * text label, never colour alone (spec:279, spec:405). Selecting an
+ * event opens a write preview listing invitees and conflicts (spec:408).
  */
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ActionPreview } from "@/components/ActionPreview";
 
-interface CalendarEvent {
+export interface CalendarEvent {
   id: string;
   title: string;
   start: string;
   end: string;
   attendees: string[];
   status: "confirmed" | "pending" | "cancelled";
+  category: string;
 }
 
-interface CalendarDay {
-  date: string;
-  events: CalendarEvent[];
-}
-
-interface CalendarViewProps {
+interface CalendarPageProps {
   initialEvents?: CalendarEvent[];
 }
 
-interface CalendarViewState {
-  view: "agenda" | "week" | "month";
-  timezone: string;
-  selectedDate: string;
+const VIEWS = ["Agenda", "Week", "Month"] as const;
+type View = (typeof VIEWS)[number];
+
+// Status and category always render their own text label beside their
+// variant colour, so colour alone never encodes meaning (spec:279).
+const STATUS_VARIANT: Record<CalendarEvent["status"], "success" | "warning" | "destructive"> = {
+  confirmed: "success",
+  pending: "warning",
+  cancelled: "destructive",
+};
+const CATEGORY_VARIANTS = ["info", "secondary", "outline", "warning", "success"] as const;
+
+// Purpose: pick a stable badge variant for an event category.
+function categoryVariant(category: string) {
+  let hash = 0;
+  for (const char of category) hash += char.charCodeAt(0);
+  return CATEGORY_VARIANTS[hash % CATEGORY_VARIANTS.length];
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
+// Purpose: find events whose time range overlaps the given event.
+function findConflicts(event: CalendarEvent, events: CalendarEvent[]): string[] {
+  return events
+    .filter((other) =>
+      other.id !== event.id &&
+      new Date(other.start) < new Date(event.end) &&
+      new Date(event.start) < new Date(other.end)
+    )
+    .map((other) => other.title);
+}
+
+// Purpose: format a timestamp in the page's timezone.
+function formatTime(iso: string, timezone: string): string {
+  return new Date(iso).toLocaleTimeString(undefined, {
+    timeZone: timezone, hour: "2-digit", minute: "2-digit", timeZoneName: "short",
   });
 }
 
-function formatTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
+// Purpose: format a calendar day header in the page's timezone.
+function formatDay(iso: string, timezone: string): string {
+  return new Date(iso).toLocaleDateString(undefined, {
+    timeZone: timezone, weekday: "short", month: "short", day: "numeric",
   });
 }
 
-function groupEventsByDate(events: CalendarEvent[]): Record<string, CalendarEvent[]> {
-  const groups: Record<string, CalendarEvent[]> = {};
-  for (const event of events) {
-    const dateKey = new Date(event.start).toDateString();
-    if (!groups[dateKey]) groups[dateKey] = [];
-    groups[dateKey].push(event);
-  }
-  return groups;
-}
+export function CalendarPage({ initialEvents = [] }: CalendarPageProps) {
+  const [view, setView] = useState<View>("Agenda");
+  const [timezone, setTimezone] = useState("UTC");
+  const [selected, setSelected] = useState<CalendarEvent | null>(null);
 
-export function CalendarPage({ initialEvents = [] }: CalendarViewProps) {
-  const [view, setView] = useState<CalendarViewState["view"]>("agenda");
-  const [timezone, setTimezone] = useState<string>("UTC");
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const conflicts = selected ? findConflicts(selected, initialEvents) : [];
 
-  const filteredEvents = events.filter((e) => {
-    if (!selectedDate) return true;
-    return new Date(e.start).toDateString() === new Date(selectedDate).toDateString();
-  });
+  // Group events by day label. Agenda shows every day; week shows only
+  // events starting within the next 7 days, so the views differ.
+  const byDay = useMemo(() => {
+    const weekEnd = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    const groups = new Map<string, CalendarEvent[]>();
+    for (const event of initialEvents) {
+      if (view === "Week" && new Date(event.start).getTime() > weekEnd) continue;
+      const key = formatDay(event.start, timezone);
+      groups.set(key, [...(groups.get(key) ?? []), event]);
+    }
+    return [...groups.entries()];
+  }, [initialEvents, view, timezone]);
 
-  const groupedEvents = groupEventsByDate(filteredEvents);
-  const sortedDates = Object.keys(groupedEvents).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  // Purpose: render one event row as a real button for keyboard access.
+  const renderEvent = (event: CalendarEvent) => (
+    <button
+      key={event.id}
+      type="button"
+      data-testid={`event-${event.id}`}
+      onClick={() => setSelected(event)}
+      className="w-full cursor-pointer rounded-md border border-border bg-muted/50 p-2 text-left"
+    >
+      <div className="flex items-center gap-2 text-sm">
+        <span className="font-medium text-foreground">{event.title}</span>
+        <Badge variant={STATUS_VARIANT[event.status]}>{event.status}</Badge>
+        <Badge variant={categoryVariant(event.category)}>{event.category}</Badge>
+      </div>
+      <div className="mt-1 text-xs text-muted-foreground">
+        {formatTime(event.start, timezone)} - {formatTime(event.end, timezone)}
+      </div>
+    </button>
   );
 
-  const handleSelectEvent = (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setSelectedDate(new Date(event.start).toDateString());
-  };
-
   return (
-    <div className="flex flex-col h-full gap-4 p-4">
-      {/* Header with timezone selector and view toggle */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-foreground">Calendar</h1>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Timezone:</span>
-            <select
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              className="text-xs border border-border rounded px-2 py-1 bg-input"
-            >
-              <option value="UTC">UTC</option>
-              <option value="America/New_York">Eastern (ET)</option>
-              <option value="America/Chicago">Central (CT)</option>
-              <option value="America/Denver">Mountain (MT)</option>
-              <option value="America/Los_Angeles">Pacific (PT)</option>
-              <option value="Europe/London">London (GMT)</option>
-              <option value="Asia/Tokyo">Tokyo (JST)</option>
-            </select>
-          </div>
+    <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold text-foreground">Calendar</h1>
+        {/* One timezone selector shared by all views; it keeps its value
+            when the user switches views. */}
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-muted-foreground" htmlFor="calendar-tz">
+            Timezone:
+          </label>
+          <select id="calendar-tz" aria-label="Timezone" value={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+            className="rounded border border-border bg-input px-2 py-1 text-xs">
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">Eastern (ET)</option>
+            <option value="Europe/London">London (GMT)</option>
+            <option value="Asia/Tokyo">Tokyo (JST)</option>
+          </select>
         </div>
         <div className="flex gap-2">
-          {["agenda", "week", "month"].map((viewName) => (
-            <Button
-              key={viewName}
-              variant={view === viewName ? "default" : "outline"}
-              size="sm"
-              onClick={() => setView(viewName as CalendarViewState["view"])}
-              aria-label={`View: ${viewName}`}
-            >
-              {viewName.charAt(0).toUpperCase() + viewName.slice(1)}
-            </button>
+          {VIEWS.map((name) => (
+            <Button key={name} variant={view === name ? "default" : "outline"} size="sm"
+              onClick={() => setView(name)} aria-label={`View: ${name}`}>
+              {name}
+            </Button>
           ))}
         </div>
       </div>
 
-      {/* Calendar content */}
-      <div className="flex-1 overflow-auto">
-        {view === "agenda" && (
-          <div className="flex flex-col gap-4">
-            {sortedDates.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-                No events scheduled.
+      <div className="flex-1 overflow-auto" data-testid={view === "Week" ? "week-cells" : "agenda-cells"}>
+        {byDay.length === 0 ? (
+          <div className="py-8 text-center text-muted-foreground">No events in this view.</div>
+        ) : view === "Month" ? (
+          // Month view: a 7-column grid of day cells with their events.
+          <div className="grid grid-cols-7 gap-1 rounded-lg border border-border p-2" data-testid="month-grid">
+            {byDay.flatMap(([day, events]) => (
+              <div key={day} data-testid="month-cell" className="rounded bg-muted/30 p-2">
+                <div className="text-xs font-semibold text-foreground">{day}</div>
+                {events.map(renderEvent)}
               </div>
-            ) : (
-              sortedDates.map((dateKey) => {
-                const date = new Date(dateKey);
-                const isOverdue =
-                  new Date(dateKey) < new Date(new Date().setHours(0, 0, 0, 0));
-                const dayEvents = groupedEvents[dateKey] || [];
-
-                return (
-                  <div key={dateKey} className="border border-border rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        {formatDate(dateKey)}
-                      </h3>
-                      {isOverdue && (
-                        <Badge variant="destructive" className="text-xs">
-                          Overdue
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {dayEvents.map((event) => (
-                        <div
-                          key={event.id}
-                          onClick={() => handleSelectEvent(event)}
-                          className={`cursor-pointer rounded-md p-2 ${event.status === "confirmed" ? "bg-blue-50 border border-blue-100" : event.status === "tentative" ? "bg-amber-50 border border-amber-100" : "bg-muted/50 border border-muted"}`}
-                        >
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="font-medium text-foreground">
-                              {event.title}
-                            </span>
-                            <Badge
-                              variant={
-                                event.status === "confirmed"
-                                  ? "success"
-                                  : event.status === "tentative"
-                                    ? "warning"
-                                    : "destructive"
-                              }
-                              size="xs"
-                            >
-                              {event.status}
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {formatTime(event.start)} - {formatTime(event.end)}
-                          </div>
-                          {event.attendees.length > 0 && (
-                            <div className="text-xs mt-1">
-                              <span className="font-medium text-muted-foreground">
-                                Attendees:
-                              </span>
-                              {event.attendees.join(", ")}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-          )}
-          {view === "week" && (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-foreground">
-                Week of {new Date(selectedDate || new Date()).toLocaleDateString(
-                  undefined,
-                  { month: "short", day: "numeric" }
-                )}
-              </h3>
-              <div className="flex flex-col gap-2">
-                {sortedDates.map((dateKey) => {
-                  const dayEvents = groupedEvents[dateKey] || [];
-                  return (
-                    <div key={dateKey} className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-semibold text-foreground">
-                          {formatDate(dateKey)}
-                        </h4>
-                        <Badge
-                          variant={
-                            new Date(dateKey) <
-                            new Date(new Date().setHours(0, 0, 0, 0))
-                              ? "destructive"
-                              : "secondary"
-                          }
-                          size="sm"
-                        >
-                          {new Date(dateKey) <
-                            new Date(new Date().setHours(0, 0, 0, 0))
-                            ? "Past"
-                            : "Upcoming"}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        {dayEvents.map((event) => (
-                          <div
-                            key={event.id}
-                            onClick={() => handleSelectEvent(event)}
-                            className={`cursor-pointer rounded-md p-2 ${event.status === "confirmed" ? "bg-blue-50 border border-blue-100" : event.status === "tentative" ? "bg-amber-50 border border-amber-100" : "bg-muted/50 border border-muted"}`}
-                          >
-                            <div className="flex items-center gap-2 text-sm">
-                              <span className="font-medium text-foreground">
-                                {event.title}
-                              </span>
-                              <Badge
-                                variant={
-                                  event.status === "confirmed"
-                                    ? "success"
-                                    : event.status === "tentative"
-                                      ? "warning"
-                                      : "destructive"
-                                }
-                                size="xs"
-                              >
-                                {event.status}
-                              </Badge>
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {formatTime(event.start)} - {formatTime(event.end)}
-                            </div>
-                            {event.attendees.length > 0 && (
-                              <div className="text-xs mt-1">
-                                <span className="font-medium text-muted-foreground">
-                                  Attendees:
-                                </span>
-                                {event.attendees.join(", ")}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          {view === "month" && (
-            <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-foreground">
-                Month View
-              </h3>
-              <div className="grid grid-cols-7 gap-1 border border-border rounded-lg p-2">
-                {/* Day headers */}
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                  <div key={day} className="text-xs text-center text-muted-foreground font-medium">
-                    {day}
-                  </div>
-                ))}
-                {/* Days of month */}
-                {Array.from({ length: 31 }).map((_, i) => {
-                  const dayNum = i + 1;
-                  const dateStr = `2026-11-${dayNum.toString().padStart(2, "0")}`;
-                  const dayEvents = groupedEvents[new Date(dateStr).toDateString()] || [];
-                  const hasEvents = dayEvents.length > 0;
-                  return (
-                    <div key={i} className={`flex flex-col gap-1 p-2 rounded-lg ${hasEvents ? "bg-blue-50 border border-blue-100" : "bg-muted/20 border border-transparent"}`}>
-                      <div className="text-xs font-semibold text-foreground">
-                        {dayNum}
-                      </div>
-                      {dayEvents.map((event) => (
-                        <div
-                          key={event.id}
-                          onClick={() => handleSelectEvent(event)}
-                          className="cursor-pointer rounded-md p-1 text-xs"
-                        >
-                          {event.title}
-                          <Badge
-                            variant={
-                              event.status === "confirmed"
-                                ? "success"
-                                : event.status === "tentative"
-                                  ? "warning"
-                                  : "destructive"
-                            }
-                            size="xs"
-                          >
-                            {event.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Approval preview panel */}
-        {selectedEvent && (
-          <div className="flex-1 overflow-auto">
-            <ActionPreview
-              tool="calendar.create_event"
-              arguments={{
-                title: selectedEvent.title,
-                start: selectedEvent.start,
-                end: selectedEvent.end,
-                attendees: selectedEvent.attendees.join(", "),
-              }}
-              permissions={["calendar.write"]}
-              sideEffects={["Creates calendar event", "Notifies attendees"]}
-              reversible={true}
-              expiry={new Date(selectedEvent.start)}
-              rationale="Calendar event creation requires approval to prevent double-booking."
-              onApprove={() => {
-                setSelectedEvent(null);
-              }}
-              onReject={() => {
-                setSelectedEvent(null);
-              }}
-              loading={false}
-            />
+            ))}
           </div>
+        ) : (
+          // Agenda and week views: per-day sections.
+          byDay.map(([day, events]) => (
+            <div key={day} className="rounded-lg border border-border p-3">
+              <h3 className="mb-2 text-sm font-semibold text-foreground">{day}</h3>
+              <div className="flex flex-col gap-2">{events.map(renderEvent)}</div>
+            </div>
+          ))
         )}
       </div>
+
+      {selected && (
+        <section data-testid="approval-preview" aria-label="Approval preview"
+          className="flex flex-col gap-2 rounded-lg border border-border p-3">
+          <h3 className="text-sm font-semibold text-foreground">Approve event write</h3>
+          <div className="text-xs">
+            <span className="font-medium text-muted-foreground">Invitees: </span>
+            {selected.attendees.join(", ")}
+          </div>
+          <div className="text-xs">
+            <span className="font-medium text-muted-foreground">Conflicts: </span>
+            {conflicts.length > 0 ? conflicts.join(", ") : "None"}
+          </div>
+          <ActionPreview tool="calendar.create_event"
+            arguments={{ title: selected.title, start: selected.start, end: selected.end }}
+            permissions={["calendar.write"]}
+            sideEffects={["Creates calendar event", "Notifies attendees"]}
+            reversible={true} expiry={new Date(selected.start)}
+            rationale="Calendar writes need an approval grant."
+            onApprove={() => setSelected(null)} onReject={() => setSelected(null)} loading={false} />
+        </section>
+      )}
     </div>
   );
 }
+
+// Next.js route pages need a default export; re-export the type for tests.
+export default CalendarPage;

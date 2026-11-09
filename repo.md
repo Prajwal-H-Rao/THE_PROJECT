@@ -88,6 +88,13 @@ Read any downloaded `SKILL.md` before you trust it. It is third-party agent inst
 - Global 266, local 45, project 1.
 - `AGENT_CONFIG.md`: 348 lines. sha256 `d31286006116d615390f3c56fafb67bfeffba017f8f4fc9ef160a9b84c645415`.
 
+## Verified tree counts (2026-11-09)
+
+- Tree: 195 directories below `nova/`, 121 leaf directories, 43 `.gitkeep` placeholders.
+- Catalogue: 23 entries. Deployable layout paths: 22. Exact name matches: 15.
+- Checker: 28 checks, all pass. Self-test suite: every mutation case rejects.
+- Build status lives in `docs/plan/status.md`. P6 now 47 done of 48 tasks; 09.18 remains.
+
 ## Verified tree counts (2026-11-04)
 
 - Tree: 180 directories below `nova/`, 111 leaf directories, 43 `.gitkeep` placeholders.
