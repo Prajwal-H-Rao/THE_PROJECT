@@ -4,7 +4,7 @@
  * Base URL and user id come from environment variables.
  */
 
-import type { Task, Note } from "./api-types.js";
+import type { Draft, Task, Note } from "./api-types.js";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 const USER_ID = process.env.NEXT_PUBLIC_USER_ID ?? "dev-user";
@@ -28,3 +28,28 @@ export async function fetchTasks(): Promise<Task[]> {
 export async function fetchNotes(): Promise<Note[]> {
   return fetchJson<Note[]>(`${BASE_URL}/notes`);
 }
+
+export async function fetchDraft(draftId: string): Promise<Draft> {
+  return fetchJson<Draft>(`${BASE_URL}/drafts/${draftId}`);
+}
+
+export async function sendDraft(
+  draftId: string,
+  grantNonce: string,
+  payload: { to: string; subject: string; body: string },
+  target: string,
+): Promise<{ messageId: string }> {
+  const res = await fetch(`${BASE_URL}/drafts/${draftId}/send`, {
+    method: "POST",
+    headers: {
+      ...headers(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ grantNonce, payload, target }),
+  });
+  if (!res.ok) {
+    throw new Error(`Send failed: ${res.status} ${res.statusText}`);
+  }
+  return (await res.json()) as { messageId: string };
+}
+

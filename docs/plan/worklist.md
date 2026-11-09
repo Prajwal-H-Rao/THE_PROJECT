@@ -60,7 +60,7 @@ Exit: the red-team suite passes. No unregistered tool call succeeds.
 
 ## P6 — inbox, calendar, tasks, notes
 
-- [ ] 09.8 — build the draft preview; it matches the send payload
+- [x] 09.8 — build the draft preview; it matches the send payload
 - [ ] 09.11 — calendar adapter interface and the Google adapter
 - [ ] 09.12 — attendee-aware approval for invite events
 - [ ] 09.13 — conflict detection against the provider

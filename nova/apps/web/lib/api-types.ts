@@ -32,3 +32,10 @@ export interface Note {
   readonly createdAt: string;
   readonly updatedAt: string;
 }
+
+export interface Draft {
+  readonly draftId: string;
+  readonly to: string;
+  readonly subject: string;
+  readonly body: string;
+}
