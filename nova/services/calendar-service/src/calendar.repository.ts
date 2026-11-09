@@ -80,6 +80,21 @@ export class CalendarEventRepository {
     return result.rows.map((row) => this.mapRow(row));
   }
 
+  async detectConflicts(userId: string, startAt: string, endAt: string, excludeEventId?: string): Promise<CalendarEvent[]> {
+    const query = `
+      SELECT event_id, user_id, title, description, start_at, end_at,
+             status, attendees, recurrence_rule, created_at, updated_at
+      FROM ${CALENDAR_EVENTS_TABLE}
+      WHERE user_id = $1
+        AND start_at < $2
+        AND end_at > $3
+        AND ($4 IS NULL OR event_id <> $4)
+    `;
+    const values = [userId, endAt, startAt, excludeEventId ?? null];
+    const result = await this.pool.query(query, values);
+    return result.rows.map((row) => this.mapRow(row));
+  }
+
   private mapRow(row: unknown): CalendarEvent {
     const r = row as Record<string, unknown>;
     return {
