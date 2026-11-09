@@ -78,6 +78,7 @@ export function validate_mcp_call(call: Record<string, unknown>): MCPCall {
     user_id: validateOptionalString(validated.user_id, "user_id"),
     correlation_id: validateOptionalString(validated.correlation_id, "correlation_id"),
     created_at: validated.created_at as string,
+    approval_grant: validateOptionalString(validated.approval_grant, "approval_grant"),
   };
 }
 
