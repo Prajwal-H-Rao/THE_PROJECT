@@ -18,7 +18,7 @@ External gates: maps key and Plaid or AA terms. Use `manual_only` and CSV only w
 - [x] 11.9 — totals, budgets and trends in code
 - [x] 11.10 — export and delete for finance (partial)
 - [x] 11.11 — provider connection and consent inside finance
-- [ ] 11.12 — Plaid or AA behind a config flag
+- [x] 11.12 — Plaid or AA behind a config flag
 - [ ] 11.14 — route and fare estimate with an estimate label
 - [ ] 11.15 — itinerary, packing list and checklist
 - [ ] 11.16 — gate booking behind an approval grant
