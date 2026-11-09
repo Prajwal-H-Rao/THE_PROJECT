@@ -120,6 +120,20 @@ export class FinanceTransactionRepository {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async exportTransactions(userId: string): Promise<FinanceTransaction[]> {
+    const query = `
+      SELECT transaction_id, user_id, source, source_reference, amount_minor,
+             currency, transaction_date, posted_at, merchant, category,
+             category_confidence, category_confidence_reason, idempotency_key,
+             raw_json, created_at
+      FROM ${FINANCE_TRANSACTIONS_TABLE}
+      WHERE user_id = $1
+      ORDER BY transaction_date DESC
+    `;
+    const result = await this.pool.query(query, [userId]);
+    return result.rows.map((row) => this.mapRow(row));
+  }
+
   private mapRow(row: unknown): FinanceTransaction {
     const r = row as Record<string, unknown>;
     return {

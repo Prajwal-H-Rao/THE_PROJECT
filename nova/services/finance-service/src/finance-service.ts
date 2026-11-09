@@ -39,4 +39,8 @@ export class FinanceService {
   async deleteTransaction(userId: string, transactionId: string): Promise<boolean> {
     return this.repository.deleteTransaction(userId, transactionId);
   }
+
+  async exportTransactions(userId: string): Promise<FinanceTransaction[]> {
+    return this.repository.exportTransactions(userId);
+  }
 }

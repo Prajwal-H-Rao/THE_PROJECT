@@ -15,8 +15,8 @@ External gates: maps key and Plaid or AA terms. Use `manual_only` and CSV only w
 - [x] 11.6 — rule-based categoriser with override history
 - [x] 11.7 — model-drafted category with confidence and reason
 - [x] 11.8 — ambiguous-import review queue
-- [ ] 11.9 — totals, budgets and trends in code
-- [ ] 11.10 — export and delete for finance (partial)
+- [x] 11.9 — totals, budgets and trends in code
+- [x] 11.10 — export and delete for finance (partial)
 - [ ] 11.11 — provider connection and consent inside finance
 - [ ] 11.12 — Plaid or AA behind a config flag
 - [ ] 11.14 — route and fare estimate with an estimate label
