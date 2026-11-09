@@ -25,12 +25,12 @@ A model response is never proof. A task is done only when its test passes.
 | P4 Design system | 15 | 21 | 21 | 0 | 0 | 100% |
 | P5 Agent runtime and scope lock | 21, 03, 04 | 54 | 52 | 1 | 1 | 96% |
 | P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 48 | 0 | 0 | 100% |
-| P7 Finance and trips | 11 | 18 | 2 | 2 | 14 | 11% |
+| P7 Finance and trips | 11 | 18 | 3 | 2 | 13 | 17% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 7 | 0 | 39 | 15% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 0 | 0 | 41 | 0% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **242** | **16** | **145** | **60%** |
+| **Total** | **21 files** | **403** | **243** | **16** | **144** | **60%** |
 
 ## Module detail
 
@@ -49,7 +49,7 @@ A model response is never proof. A task is done only when its test passes.
 | 04 Scope lock | 19 | 0 | 1 | Nearly done | CI re-run trigger (task 17) is not in `ci.yml`. |
 | 09 Inbox and calendar | 18 | 0 | 0 | Complete | Inbox rows 1 to 7, 9, 10 done. Draft preview done. Calendar page done with tests. Calendar adapter, attendee-aware approval, conflict detection, ICS import and export, provider failure paths done. Lab 6 delivered against the real service code; acceptance 'send without a grant fails' passes. Three-pane Inbox page done against spec:407. Module 09 complete. |
 | 10 Tasks and notes | 30 | 0 | 0 | Complete | All task IDs done. The file holds 32 rows; two rows repeat a number. |
-| 11 Finance and trips | 2 | 2 | 14 | Started | Transaction table and trip table only. |
+| 11 Finance and trips | 3 | 2 | 13 | Started | Transaction table and trip table only. CSV and OFX import done with locale variants (task 11.2). |
 | 12 Jobs agent | 0 | 0 | 21 | Not started | `jobs-service` holds an unrelated generic job scaffold. |
 | 13 Employer registry | 7 | 0 | 18 | Started | Tasks 1 to 7 done. Connectors, scheduling, freshness, UI open. |
 | 14 Channels | 0 | 0 | 20 | Not started | Telegram and WhatsApp hold `.gitkeep` only. |

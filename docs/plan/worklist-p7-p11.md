@@ -8,7 +8,7 @@ Rules are in `docs/plan/worklist.md`. Start P7 only when P1 to P6 pass.
 
 External gates: maps key and Plaid or AA terms. Use `manual_only` and CSV only when a gate is closed.
 
-- [ ] 11.2 — CSV and OFX import with locale variants
+- [x] 11.2 — CSV and OFX import with locale variants
 - [ ] 11.3 — PDF statement path through the document service
 - [ ] 11.4 — content-addressed dedup across imports (partial)
 - [ ] 11.5 — deterministic currency conversion with a dated table
