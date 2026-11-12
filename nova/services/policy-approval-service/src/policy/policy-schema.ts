@@ -31,6 +31,8 @@ export interface PolicyDecisionRequest {
   readonly target: string;
   readonly sensitivity?: Sensitivity;
   readonly payloadHash?: string;
+  /** Call arguments validated against the operation registry (Task 11.18). */
+  readonly arguments?: Record<string, unknown>;
   // Optional fields supplied by the verified service plane (never chat/body):
   // userId: authenticated user from the service plane (session-derived)
   // resourceOwnerId: concrete target owner when provided by resource service

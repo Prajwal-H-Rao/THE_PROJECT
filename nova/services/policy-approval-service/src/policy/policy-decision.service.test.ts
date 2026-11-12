@@ -173,8 +173,8 @@ describe("policy decision service", () => {
   it("getAllRules returns all rules", () => {
     const rules = service.getAllRules();
     assert.ok(rules.length > 0);
-    // 7 canonical families: inbox(3) + calendar_tasks(8) + finance(5) + trips(3) + resume_jobs(5) + notes_memory(5) + integrations(5) = 34
-    assert.strictEqual(rules.length, 34);
+    // 7 canonical families: inbox(3) + calendar_tasks(8) + finance(5) + trips(4) + resume_jobs(5) + notes_memory(5) + integrations(5) = 35
+    assert.strictEqual(rules.length, 35);
   });
 
   it("getRule finds existing rule", () => {

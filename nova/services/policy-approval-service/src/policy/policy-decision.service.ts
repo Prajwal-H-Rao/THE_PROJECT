@@ -14,6 +14,7 @@ import { createHash } from "node:crypto";
 import { getPolicyVersion } from "./policy-version.js";
 import { decideBulk } from "./policy-bulk-decision.js";
 import { authorize, AuthDecision, CallerContext, resetQuotaForTests } from "./authorization.js";
+import { defaultRegistry } from "./operation-registry.js";
 
 /** Chat approval policy result for the decision flow. */
 interface ChatApprovalPolicy {
@@ -85,6 +86,20 @@ export class PolicyDecisionService {
         policyVersion: getPolicyVersion(),
         reason: `No policy rule matches actor=${request.actor}, scope=${request.scope}, action=${request.action}, target=${request.target}`,
       };
+    }
+
+    // Operation registry validation (Task 11.18): trips operations must
+    // have registered argument schemas; unregistered arguments are rejected.
+    if (rule.id.startsWith("trips.")) {
+      const validation = defaultRegistry.validateArguments(rule.id, request.arguments);
+      if (!validation.valid) {
+        return {
+          decision: "deny",
+          ruleId: "unregistered_argument",
+          policyVersion: getPolicyVersion(),
+          reason: validation.reason ?? "Unregistered argument",
+        };
+      }
     }
 
     // Deterministic decision based on the rule

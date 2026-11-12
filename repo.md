@@ -93,7 +93,7 @@ Read any downloaded `SKILL.md` before you trust it. It is third-party agent inst
 - Tree: 202 directories below `nova/`, 127 leaf directories, 43 `.gitkeep` placeholders.
 - Catalogue: 23 entries. Deployable layout paths: 22. Exact name matches: 15.
 - Checker: 28 checks, all pass. Self-test suite: every mutation case rejects.
-- Build status lives in `docs/plan/status.md`. P6 complete (48 of 48 tasks). P7 finance and trips at 94%; Finance and Trips page done (task 11.17).
+- Build status lives in `docs/plan/status.md`. P6 complete (48 of 48 tasks). P7 finance and trips at 100%; trips operations registered with the policy layer done (task 11.18).
 
 ## Verified tree counts (2026-11-04)
 

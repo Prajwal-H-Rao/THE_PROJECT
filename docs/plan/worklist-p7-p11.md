@@ -23,7 +23,7 @@ External gates: maps key and Plaid or AA terms. Use `manual_only` and CSV only w
 - [x] 11.15 — itinerary, packing list and checklist
 - [x] 11.16 — gate booking behind an approval grant
 - [x] 11.17 — Finance and Trips page
-- [ ] 11.18 — register trips operations with policy
+- [x] 11.18 — register trips operations with policy
 
 Exit: uncertain rows go to review. Every estimate carries its label.
 
