@@ -38,3 +38,14 @@ rules:
     allowedActions: ["compare"]
     chatApprovalAllowed: true
     version: 1
+  - id: "trips.book"
+    actor: "user"
+    scope: "trips:write"
+    sensitivity: "medium"
+    target: "own_trips"
+    blastRadius: "self"
+    riskTier: "tier3"
+    defaultDecision: "needs_approval"
+    allowedActions: ["book"]
+    chatApprovalAllowed: true
+    version: 1

@@ -102,6 +102,72 @@
         "trips:write"
       ],
       "version": 1
+    },
+    {
+      "operation_id": "trips.book",
+      "name": "trips.book",
+      "description": "Book a trip. Purchases require approval; this operation is tier3 and always needs a valid approval grant.",
+      "arguments": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "trip_id": {
+              "type": "string"
+            },
+            "origin": {
+              "type": "string"
+            },
+            "destination": {
+              "type": "string"
+            },
+            "travel_date": {
+              "type": "string"
+            },
+            "fare_minor": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "trip_id",
+            "origin",
+            "destination",
+            "travel_date",
+            "fare_minor"
+          ]
+        }
+      },
+      "output": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "booking_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "booking_id",
+            "status"
+          ]
+        }
+      },
+      "classification": "write",
+      "risk_tier": "tier3",
+      "idempotency": "idempotency_key",
+      "verifier": "verify_trips_book",
+      "family": "trips",
+      "owning_service": "trips-service",
+      "mcp_server": "trips-mcp",
+      "resource_scope": "own_trips",
+      "allowed_roles": [
+        "user"
+      ],
+      "allowed_scopes": [
+        "trips:write"
+      ],
+      "version": 1
     }
   ],
   "version": 1

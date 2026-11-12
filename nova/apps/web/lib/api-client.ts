@@ -4,7 +4,7 @@
  * Base URL and user id come from environment variables.
  */
 
-import type { Draft, Task, Note } from "./api-types.js";
+import type { Draft, FinanceTransaction, Task, Note, Trip } from "./api-types.js";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 const USER_ID = process.env.NEXT_PUBLIC_USER_ID ?? "dev-user";
@@ -51,5 +51,13 @@ export async function sendDraft(
     throw new Error(`Send failed: ${res.status} ${res.statusText}`);
   }
   return (await res.json()) as { messageId: string };
+}
+
+export async function fetchTransactions(): Promise<FinanceTransaction[]> {
+  return fetchJson<FinanceTransaction[]>(`${BASE_URL}/transactions`);
+}
+
+export async function fetchTrips(): Promise<Trip[]> {
+  return fetchJson<Trip[]>(`${BASE_URL}/trips`);
 }
 
