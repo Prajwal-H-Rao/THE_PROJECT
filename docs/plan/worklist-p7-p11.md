@@ -14,5 +14,5 @@
 - [x] 20.17 — RBAC on every page route
 - [x] 20.18 — privileged endpoints behind the P5 rule
 - [x] 20.19 — Storybook variants
-- [ ] 20.20 — Storybook interaction tests
-- [ ] 20.21 — family 7 operations
+- [x] 20.20 — Storybook interaction tests
+- [x] 20.21 — family 7 operations

@@ -1,0 +1,83 @@
+# Family 7 — Automation operations.
+# Covers automation runs, notification delivery, and audit inspection per spec:193.
+name: "automations"
+description: "Automation operations: scheduled runs, notification delivery, audit inspection"
+defaultSensitivity: "medium"
+defaultBlastRadius: "self"
+defaultRiskTier: "tier2"
+defaultDecision: "needs_approval"
+rules:
+  - id: "automation.run"
+    actor: "user"
+    scope: "automation:run"
+    sensitivity: "medium"
+    target: "own_automations"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["automation.run"]
+    requiresStepUp: false
+    chatApprovalAllowed: false
+    version: 1
+  - id: "automation.pause"
+    actor: "user"
+    scope: "automation:write"
+    sensitivity: "medium"
+    target: "own_automations"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "allow"
+    allowedActions: ["automation.pause"]
+    version: 1
+  - id: "automation.resume"
+    actor: "user"
+    scope: "automation:write"
+    sensitivity: "medium"
+    target: "own_automations"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "allow"
+    allowedActions: ["automation.resume"]
+    version: 1
+  - id: "automation.delete"
+    actor: "user"
+    scope: "automation:write"
+    sensitivity: "medium"
+    target: "own_automations"
+    blastRadius: "self"
+    riskTier: "tier2"
+    defaultDecision: "needs_approval"
+    allowedActions: ["automation.delete"]
+    version: 1
+  - id: "notification.send"
+    actor: "user"
+    scope: "notification:send"
+    sensitivity: "low"
+    target: "own_notifications"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["notification.send"]
+    chatApprovalAllowed: true
+    version: 1
+  - id: "notification.mute"
+    actor: "user"
+    scope: "notification:write"
+    sensitivity: "low"
+    target: "own_notifications"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["notification.mute"]
+    version: 1
+  - id: "audit.inspect"
+    actor: "user"
+    scope: "audit:read"
+    sensitivity: "low"
+    target: "own_audit_logs"
+    blastRadius: "self"
+    riskTier: "tier1"
+    defaultDecision: "allow"
+    allowedActions: ["audit.inspect"]
+    chatApprovalAllowed: true
+    version: 1

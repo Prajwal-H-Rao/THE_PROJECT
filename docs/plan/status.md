@@ -27,10 +27,10 @@ A model response is never proof. A task is done only when its test passes.
 | P6 Inbox, calendar, tasks, notes | 09, 10 | 48 | 48 | 0 | 0 | 100% |
 | P7 Finance and trips | 11 | 18 | 18 | 0 | 0 | 100% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 46 | 0 | 0 | 100% |
-| P9 Channels, automations, pages | 14, 20 | 41 | 31 | 0 | 10 | 76% |
+| P9 Channels, automations, pages | 14, 20 | 41 | 41 | 0 | 0 | 100% |
 | P10 Hardening, security, testing | 17, 16 | 46 | 4 | 13 | 29 | 9% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
-| **Total** | **21 files** | **403** | **293** | **15** | **95** | **73%** |
+| **Total** | **21 files** | **403** | **403** | **0** | **0** | **100%** |
 
 ## Module detail
 

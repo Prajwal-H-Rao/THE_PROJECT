@@ -20,6 +20,7 @@ export const CANONICAL_FAMILIES = [
   "trips",
   "resume_jobs",
   "integrations",
+  "automations",
 ] as const;
 
 export type CanonicalFamily = (typeof CANONICAL_FAMILIES)[number];
