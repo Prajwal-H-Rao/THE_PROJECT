@@ -116,3 +116,61 @@ export interface TransportOption {
   readonly durationMinutes: number;
   readonly bookingLink?: string; // URL, carries estimate label in UI
 }
+
+/**
+ * Nova design system - Job listing domain type.
+ * Mirrors the backend JobListing contract with web-specific additions.
+ */
+export interface Job {
+  readonly jobId: string;
+  readonly role: string;
+  readonly employer: string;
+  readonly location: string | null;
+  readonly workMode: string | null;
+  readonly postedAt: string | null;
+  readonly expiresAt: string | null;
+  readonly salaryMax: number | null;
+  readonly freshness: "current" | "stale";
+  readonly listingStatus: "open" | "closed" | "unknown";
+  readonly provenanceUrl: string;
+  readonly sourceId: string;
+  readonly retrievedAt: string;
+}
+
+/**
+ * Nova design system - Application domain type.
+ * Mirrors the backend application_draft/application_submission records.
+ */
+export interface Application {
+  readonly draftId: string;
+  readonly jobId: string;
+  readonly profileVersion: number;
+  readonly status: string; // 'draft', 'ready', 'submitted', 'withdrawn'
+  readonly coverLetter: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+/**
+ * Nova design system - Profile candidate field with provenance.
+ * Mirrors the backend span-mapping CandidateField.
+ */
+export interface CandidateField<T> {
+  readonly value: T;
+  readonly sourceRef: string;
+  readonly method: string;
+  readonly confidence: number;
+}
+
+/**
+ * Nova design system - Resume profile candidate fields.
+ * Mirrors the backend ProfileCandidateFields from span mapping.
+ */
+export interface ProfileCandidateFields {
+  readonly headline: CandidateField<string>;
+  readonly summary: CandidateField<string>;
+  readonly skills: CandidateField<string[]>;
+  readonly experience: CandidateField<string>;
+  readonly education: CandidateField<string>;
+  readonly location: CandidateField<string>;
+}

@@ -48,7 +48,7 @@ Order rule 4 applies: 12.1 to 12.7, then 13.8 to 13.17, then 12.8 to 12.21, then
 - [x] 13.15 — backoff, timeout, breaker and per-source limits
 - [x] 13.16 — scheduled poll: 24h, jitter, cap, ETag
 - [x] 13.17 — run record with counts, dedupe and error class
-- [ ] 12.8 — extraction review UI beside supporting text
+- [x] 12.8 — extraction review UI beside supporting text
 - [x] 12.9 — parser spans to profile candidates with `source_ref`
 - [x] 12.10 — cover letter, summary and response drafts
 - [x] 12.11 — truthful-claim checklist before review
@@ -59,17 +59,17 @@ Order rule 4 applies: 12.1 to 12.7, then 13.8 to 13.17, then 12.8 to 12.21, then
 - [x] 12.16 — follow-up state machine
 - [x] 12.17 — manual handoff for blocked paths
 - [x] 12.18 — duplicate application detection
-- [ ] 12.19 — Resume and Job Search page
+- [x] 12.19 — Resume and Job Search page
 - [x] 12.20 — export, delete and provider revoke
-- [ ] 12.21 — lab 2 review view
-- [ ] 13.18 — canonical ID normalisation and duplicate detection
-- [ ] 13.19 — freshness, changed-field, stale and closed thresholds
+- [x] 12.21 — lab 2 review view beside supporting text (React ExtractionReview component)
+- [x] 13.18 — canonical ID normalisation and duplicate detection
+- [x] 13.19 — freshness, changed-field, stale and closed thresholds
 - [ ] 13.20 — source-status surface
-- [ ] 13.21 — seed-list maintenance rules
-- [ ] 13.22 — export and delete of user data, not the seed
+- [x] 13.21 — seed-list maintenance rules
+- [x] 13.22 — export and delete of user data, not the seed
 - [ ] 13.23 — Jobs to Companies page
-- [ ] 13.24 — lab 12: 250/250 assertion and 10 pilots
-- [ ] 13.25 — saved filters and alerts
+- [x] 13.24 — lab 12: 250/250 assertion and 10 pilots
+- [x] 13.25 — saved filters and alerts
 
 Exit: 250 `IN` plus 250 `GLOBAL`. No blocked source is polled. No claim lacks a source.
 

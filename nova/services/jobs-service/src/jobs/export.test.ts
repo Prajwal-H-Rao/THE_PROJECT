@@ -2,13 +2,14 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import type { Pool } from "pg";
 import { exportUserData, exportComplete, type UserRow } from "./export.js";
 
 /** Build a mock query result. */
 function result(rows: unknown[]) { return { rows }; }
 
 /** Build a mock pool with query results per table. */
-function mockPool(tableRows: Record<string, unknown[]>): { query: (sql: string, params: unknown[]) => Promise<{ rows: unknown[] }> } {
+function mockPool(tableRows: Record<string, unknown[]>): Pool {
   return {
     query: async (_sql: string, _params: unknown[]) => {
       const lower = _sql.toLowerCase();
@@ -23,7 +24,7 @@ function mockPool(tableRows: Record<string, unknown[]>): { query: (sql: string, 
       }
       return result([]);
     },
-  };
+  } as unknown as Pool;
 }
 
 test("exportUserData returns rows from all three tables", async () => {
@@ -33,7 +34,7 @@ test("exportUserData returns rows from all three tables", async () => {
     profiles: [{ id: "p-1", data: { profile_id: "p-1", user_id: "u-1", headline: "Engineer" } }],
   });
 
-  const rows = await exportUserData(pool as any, "u-1");
+  const rows = await exportUserData(pool, "u-1");
   assert.equal(rows.length, 3);
   const tables = rows.map((r) => r.table);
   assert.ok(tables.includes("application_draft"));
@@ -43,7 +44,7 @@ test("exportUserData returns rows from all three tables", async () => {
 
 test("export with no data returns empty array", async () => {
   const pool = mockPool({ drafts: [], submissions: [], profiles: [] });
-  const rows = await exportUserData(pool as any, "u-1");
+  const rows = await exportUserData(pool, "u-1");
   assert.equal(rows.length, 0);
 });
 

@@ -83,8 +83,8 @@ labs:
     name: "500-employer directory import and pilot verification"
     owning_module: "13-employer-registry"
     phase: "P8"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "python labs/lab12/run_lab.py"
 
   - number: 13
     name: "MCP surface and tool authorization"

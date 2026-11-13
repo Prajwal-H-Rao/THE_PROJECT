@@ -79,8 +79,8 @@ def wrong_leaf_count(work):
     """Change the leaf directory count in the extra paths section."""
     return replace_diff(
         work,
-        "The tree holds 133 leaf directories.",
-        "The tree holds 134 leaf directories.")
+        "The tree holds 134 leaf directories.",
+        "The tree holds 135 leaf directories.")
 
 
 def missing_module_file(work):

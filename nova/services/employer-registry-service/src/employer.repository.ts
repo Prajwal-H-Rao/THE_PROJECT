@@ -8,11 +8,20 @@ import { Pool } from "pg";
 
 const EMPLOYERS_TABLE = "employer_registry.employers";
 
+/** One employer row as stored in employer_registry.employers. */
+interface EmployerRow {
+  readonly name: string;
+  readonly status: string;
+  readonly type: string;
+  readonly region: string | null;
+  readonly contact_info: Record<string, unknown>;
+}
+
 @Injectable()
 export class EmployerRegistryRepository {
   constructor(@Inject("PG_POOL") private readonly pool: Pool) {}
 
-  async createEmployer(employer: any) {
+  async createEmployer(employer: EmployerRow) {
     const query = `
       INSERT INTO employer_registry.employers (name, status, type, region, contact_info)
       VALUES ($1, $2, $3, $4, $5)
