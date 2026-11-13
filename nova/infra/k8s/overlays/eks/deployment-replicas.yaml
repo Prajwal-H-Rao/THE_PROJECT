@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: nova
+spec:
+  replicas: 3
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-service
+  namespace: nova
+spec:
+  replicas: 3
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employer-registry-service
+  namespace: nova
+spec:
+  replicas: 3

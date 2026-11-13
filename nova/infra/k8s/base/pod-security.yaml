@@ -1,0 +1,54 @@
+apiVersion: security.k8s.io/v1
+kind: PodSecurityPolicy
+metadata:
+  name: nova-restricted
+  annotations:
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: runtime/default
+    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  allowedCapabilities: []
+  runAsUser:
+    rule: MustRunAsNonRoot
+  seLinux:
+    rule: RunAsAny
+  fsGroup:
+    rule: MustRunAs
+    ranges:
+      - min: 1000
+        max: 65535
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - configMap
+    - emptyDir
+    - projected
+    - secret
+    - downwardAPI
+    - persistentVolumeClaim
+
+---
+apiVersion: security.k8s.io/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: nova-privileged
+  annotations:
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: runtime/default
+    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+spec:
+  privileged: true
+  allowPrivilegeEscalation: true
+  allowedCapabilities: ['*']
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - '*'
