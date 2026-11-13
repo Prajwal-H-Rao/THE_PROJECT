@@ -31,36 +31,36 @@ Exit: uncertain rows go to review. Every estimate carries its label.
 
 Order rule 4 applies: 12.1 to 12.7, then 13.8 to 13.17, then 12.8 to 12.21, then 13.18 to 13.25.
 
-- [ ] 12.1 — listing contract with provenance fields
-- [ ] 12.2 — normalisation with source and freshness per field
-- [ ] 12.3 — 200-case labelled ranking evaluation set
-- [ ] 12.4 — hard filters as deterministic code
-- [ ] 12.5 — explainable feature scoring
-- [ ] 12.6 — optional embedding rerank after hard filters
-- [ ] 12.7 — profile versioning, field sources and confirm flags
-- [ ] 13.8 — Greenhouse Job Board adapter
-- [ ] 13.9 — Lever Postings adapter with XML fallback
-- [ ] 13.10 — Ashby public posting adapter
-- [ ] 13.11 — SmartRecruiters posting adapter
-- [ ] 13.12 — lab 7: permitted ATS source with a labelled set
-- [ ] 13.13 — permitted-public-page extractor with review gate
-- [ ] 13.14 — registry opening, match and run tables
-- [ ] 13.15 — backoff, timeout, breaker and per-source limits
-- [ ] 13.16 — scheduled poll: 24h, jitter, cap, ETag
-- [ ] 13.17 — run record with counts, dedupe and error class
+- [x] 12.1 — listing contract with provenance fields
+- [x] 12.2 — normalisation with source and freshness per field
+- [x] 12.3 — 200-case labelled ranking evaluation set
+- [x] 12.4 — hard filters as deterministic code
+- [x] 12.5 — explainable feature scoring
+- [x] 12.6 — optional embedding rerank after hard filters
+- [x] 12.7 — profile versioning, field sources and confirm flags
+- [x] 13.8 — Greenhouse Job Board adapter
+- [x] 13.9 — Lever Postings adapter with XML fallback
+- [x] 13.10 — Ashby public posting adapter
+- [x] 13.11 — SmartRecruiters posting adapter
+- [x] 13.12 — lab 7: permitted ATS source with a labelled set
+- [x] 13.13 — permitted-public-page extractor with review gate
+- [x] 13.14 — registry opening, match and run tables
+- [x] 13.15 — backoff, timeout, breaker and per-source limits
+- [x] 13.16 — scheduled poll: 24h, jitter, cap, ETag
+- [x] 13.17 — run record with counts, dedupe and error class
 - [ ] 12.8 — extraction review UI beside supporting text
-- [ ] 12.9 — parser spans to profile candidates with `source_ref`
-- [ ] 12.10 — cover letter, summary and response drafts
-- [ ] 12.11 — truthful-claim checklist before review
-- [ ] 12.12 — application envelope with hash and nonce
-- [ ] 12.13 — gate submission behind an approval grant
-- [ ] 12.14 — submission adapter with `Idempotency-Key`
-- [ ] 12.15 — confirmation record with provider evidence
-- [ ] 12.16 — follow-up state machine
-- [ ] 12.17 — manual handoff for blocked paths
-- [ ] 12.18 — duplicate application detection
+- [x] 12.9 — parser spans to profile candidates with `source_ref`
+- [x] 12.10 — cover letter, summary and response drafts
+- [x] 12.11 — truthful-claim checklist before review
+- [x] 12.12 — application envelope with hash and nonce
+- [x] 12.13 — gate submission behind an approval grant
+- [x] 12.14 — submission adapter with `Idempotency-Key`
+- [x] 12.15 — confirmation record with provider evidence
+- [x] 12.16 — follow-up state machine
+- [x] 12.17 — manual handoff for blocked paths
+- [x] 12.18 — duplicate application detection
 - [ ] 12.19 — Resume and Job Search page
-- [ ] 12.20 — export, delete and provider revoke
+- [x] 12.20 — export, delete and provider revoke
 - [ ] 12.21 — lab 2 review view
 - [ ] 13.18 — canonical ID normalisation and duplicate detection
 - [ ] 13.19 — freshness, changed-field, stale and closed thresholds

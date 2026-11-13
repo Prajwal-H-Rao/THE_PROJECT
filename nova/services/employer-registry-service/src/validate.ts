@@ -41,7 +41,10 @@ function validateCounts(rows: EmployerCsvRow[]): void {
   const seenNames: Set<string> = new Set();
 
   for (let i = 0; i < rows.length; i += 1) {
-    const row: EmployerCsvRow = rows[i];
+    const row = rows[i];
+    if (row === undefined) {
+      continue;
+    }
     if (row.region === "IN") {
       inCount += 1;
     } else if (row.region === "GLOBAL") {

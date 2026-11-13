@@ -88,4 +88,4 @@ export class EmployerAliasRepository {
   }
 }
 
-export { AliasInsertInput };
+export type { AliasInsertInput };

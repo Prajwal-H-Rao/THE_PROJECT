@@ -1,0 +1,200 @@
+{"case_id":"je001","label":"relevant","note":"go and k8s fit, hybrid blr, salary ok"}
+{"case_id":"je002","label":"relevant","note":"same city onsite acceptable, stack fits"}
+{"case_id":"je003","label":"not_relevant","note":"java stack, needs 5 years"}
+{"case_id":"je004","label":"relevant","note":"remote ok, go stack fits"}
+{"case_id":"je005","label":"relevant","note":"devops overlap strong"}
+{"case_id":"je006","label":"not_relevant","note":"needs 6 years, grpc niche"}
+{"case_id":"je007","label":"not_relevant","note":"onsite in mumbai"}
+{"case_id":"je008","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je009","label":"not_relevant","note":"clearance required"}
+{"case_id":"je010","label":"not_relevant","note":"frontend role"}
+{"case_id":"je011","label":"relevant","note":"stale but full stack fit"}
+{"case_id":"je012","label":"relevant","note":"salary just clears, partial fit"}
+{"case_id":"je013","label":"relevant","note":"onsite same city, core stack fits"}
+{"case_id":"je014","label":"not_relevant","note":"needs 5 years"}
+{"case_id":"je015","label":"relevant","note":"sponsorship covered by IN auth"}
+{"case_id":"je016","label":"not_relevant","note":"rust only, no overlap"}
+{"case_id":"je017","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je018","label":"relevant","note":"strong fit despite stale"}
+{"case_id":"je019","label":"not_relevant","note":"qa role"}
+{"case_id":"je020","label":"relevant","note":"devops triple overlap"}
+{"case_id":"je021","label":"relevant","note":"core data stack, remote"}
+{"case_id":"je022","label":"relevant","note":"dbt and sql fit, hybrid in own city"}
+{"case_id":"je023","label":"not_relevant","note":"ml research needs pytorch, no overlap"}
+{"case_id":"je024","label":"not_relevant","note":"onsite mumbai"}
+{"case_id":"je025","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je026","label":"relevant","note":"near-exact stack, stale accepted"}
+{"case_id":"je027","label":"not_relevant","note":"backend role"}
+{"case_id":"je028","label":"not_relevant","note":"onsite bengaluru"}
+{"case_id":"je029","label":"not_relevant","note":"clearance required"}
+{"case_id":"je030","label":"relevant","note":"sklearn analytics adjacent"}
+{"case_id":"je031","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je032","label":"relevant","note":"spark and kafka fit"}
+{"case_id":"je033","label":"not_relevant","note":"qa role"}
+{"case_id":"je034","label":"relevant","note":"sql spark airflow fit"}
+{"case_id":"je035","label":"not_relevant","note":"deep ml needs pytorch"}
+{"case_id":"je036","label":"not_relevant","note":"frontend role"}
+{"case_id":"je037","label":"relevant","note":"etl adjacent, remote"}
+{"case_id":"je038","label":"not_relevant","note":"onsite hyderabad"}
+{"case_id":"je039","label":"relevant","note":"sponsorship covered, senior fit"}
+{"case_id":"je040","label":"not_relevant","note":"devops role"}
+{"case_id":"je041","label":"relevant","note":"react ts onsite own city"}
+{"case_id":"je042","label":"relevant","note":"react css figma fit"}
+{"case_id":"je043","label":"not_relevant","note":"vue not in stack"}
+{"case_id":"je044","label":"not_relevant","note":"needs 4 years"}
+{"case_id":"je045","label":"not_relevant","note":"gurugram onsite"}
+{"case_id":"je046","label":"not_relevant","note":"fullstack not a listed family"}
+{"case_id":"je047","label":"not_relevant","note":"clearance required"}
+{"case_id":"je048","label":"not_relevant","note":"remote against onsite preference"}
+{"case_id":"je049","label":"not_relevant","note":"needs 5 years"}
+{"case_id":"je050","label":"not_relevant","note":"angular not in stack"}
+{"case_id":"je051","label":"not_relevant","note":"mobile role"}
+{"case_id":"je052","label":"relevant","note":"full stack overlap, stale accepted"}
+{"case_id":"je053","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je054","label":"relevant","note":"sponsorship covered, react fit"}
+{"case_id":"je055","label":"not_relevant","note":"qa role"}
+{"case_id":"je056","label":"relevant","note":"a11y plus react fit"}
+{"case_id":"je057","label":"relevant","note":"design systems match"}
+{"case_id":"je058","label":"not_relevant","note":"threejs niche"}
+{"case_id":"je059","label":"not_relevant","note":"jaipur hybrid"}
+{"case_id":"je060","label":"not_relevant","note":"data role"}
+{"case_id":"je061","label":"relevant","note":"jvm triple overlap remote"}
+{"case_id":"je062","label":"not_relevant","note":"munich onsite"}
+{"case_id":"je063","label":"relevant","note":"kafka postgres fit"}
+{"case_id":"je064","label":"relevant","note":"kotlin adjacent jvm"}
+{"case_id":"je065","label":"not_relevant","note":"devops role"}
+{"case_id":"je066","label":"relevant","note":"exact stack, stale accepted"}
+{"case_id":"je067","label":"not_relevant","note":"clearance required"}
+{"case_id":"je068","label":"relevant","note":"hybrid own city, jvm fit"}
+{"case_id":"je069","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je070","label":"not_relevant","note":"data role"}
+{"case_id":"je071","label":"relevant","note":"sponsorship covered"}
+{"case_id":"je072","label":"relevant","note":"jvm fit, remote"}
+{"case_id":"je073","label":"not_relevant","note":"security role"}
+{"case_id":"je074","label":"relevant","note":"full overlap, high pay"}
+{"case_id":"je075","label":"not_relevant","note":"legacy soap only"}
+{"case_id":"je076","label":"relevant","note":"kafka fit despite stale"}
+{"case_id":"je077","label":"not_relevant","note":"needs 8 years"}
+{"case_id":"je078","label":"not_relevant","note":"ml role"}
+{"case_id":"je079","label":"relevant","note":"sponsorship covered"}
+{"case_id":"je080","label":"relevant","note":"remote amsterdam, jvm fit"}
+{"case_id":"je081","label":"relevant","note":"exact ml stack hybrid"}
+{"case_id":"je082","label":"relevant","note":"llm work, remote accepted"}
+{"case_id":"je083","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je084","label":"relevant","note":"onsite own city, stack fits"}
+{"case_id":"je085","label":"not_relevant","note":"clearance required"}
+{"case_id":"je086","label":"relevant","note":"strong fit, stale accepted"}
+{"case_id":"je087","label":"not_relevant","note":"backend role"}
+{"case_id":"je088","label":"relevant","note":"data adjacent, remote"}
+{"case_id":"je089","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je090","label":"relevant","note":"full overlap"}
+{"case_id":"je091","label":"relevant","note":"tensorflow adjacent"}
+{"case_id":"je092","label":"not_relevant","note":"frontend role"}
+{"case_id":"je093","label":"relevant","note":"sponsorship covered"}
+{"case_id":"je094","label":"not_relevant","note":"junior, low pay"}
+{"case_id":"je095","label":"relevant","note":"mlops fit"}
+{"case_id":"je096","label":"not_relevant","note":"needs 7 years"}
+{"case_id":"je097","label":"not_relevant","note":"qa role"}
+{"case_id":"je098","label":"not_relevant","note":"hybrid in boston"}
+{"case_id":"je099","label":"relevant","note":"onsite own city"}
+{"case_id":"je100","label":"relevant","note":"data adjacent, own city"}
+{"case_id":"je101","label":"relevant","note":"playwright ts remote fit"}
+{"case_id":"je102","label":"not_relevant","note":"selenium java, no overlap"}
+{"case_id":"je103","label":"relevant","note":"playwright api ci fit"}
+{"case_id":"je104","label":"not_relevant","note":"needs 4 years"}
+{"case_id":"je105","label":"not_relevant","note":"onsite chennai"}
+{"case_id":"je106","label":"relevant","note":"perf adjacent, stale accepted"}
+{"case_id":"je107","label":"relevant","note":"full overlap"}
+{"case_id":"je108","label":"not_relevant","note":"frontend role"}
+{"case_id":"je109","label":"relevant","note":"onsite own city"}
+{"case_id":"je110","label":"relevant","note":"cypress adjacent e2e"}
+{"case_id":"je111","label":"not_relevant","note":"devops role"}
+{"case_id":"je112","label":"relevant","note":"security plus playwright fit"}
+{"case_id":"je113","label":"not_relevant","note":"manual only, pay below floor"}
+{"case_id":"je114","label":"not_relevant","note":"clearance required"}
+{"case_id":"je115","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je116","label":"relevant","note":"pune remote, stack fits"}
+{"case_id":"je117","label":"relevant","note":"docker plus playwright fit"}
+{"case_id":"je118","label":"not_relevant","note":"data role"}
+{"case_id":"je119","label":"not_relevant","note":"needs 5 years"}
+{"case_id":"je120","label":"relevant","note":"hybrid own city"}
+{"case_id":"je121","label":"relevant","note":"triple infra overlap"}
+{"case_id":"je122","label":"relevant","note":"infra fit remote"}
+{"case_id":"je123","label":"relevant","note":"backend with k8s fits"}
+{"case_id":"je124","label":"not_relevant","note":"munich onsite"}
+{"case_id":"je125","label":"not_relevant","note":"clearance required"}
+{"case_id":"je126","label":"relevant","note":"infra fit, stale accepted"}
+{"case_id":"je127","label":"not_relevant","note":"frontend role"}
+{"case_id":"je128","label":"relevant","note":"observability adds fit"}
+{"case_id":"je129","label":"not_relevant","note":"needs 8 years"}
+{"case_id":"je130","label":"not_relevant","note":"security role"}
+{"case_id":"je131","label":"relevant","note":"sponsorship covered"}
+{"case_id":"je132","label":"not_relevant","note":"azure not in stack"}
+{"case_id":"je133","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je134","label":"not_relevant","note":"jvm stack, no overlap"}
+{"case_id":"je135","label":"relevant","note":"four-token overlap"}
+{"case_id":"je136","label":"not_relevant","note":"data role"}
+{"case_id":"je137","label":"relevant","note":"onsite own city"}
+{"case_id":"je138","label":"not_relevant","note":"qa role"}
+{"case_id":"je139","label":"relevant","note":"infra fit, modest pay"}
+{"case_id":"je140","label":"relevant","note":"go plus infra fit"}
+{"case_id":"je141","label":"relevant","note":"kotlin android fit"}
+{"case_id":"je142","label":"relevant","note":"swift ios fit"}
+{"case_id":"je143","label":"not_relevant","note":"flutter not in stack"}
+{"case_id":"je144","label":"relevant","note":"dual platform, remote"}
+{"case_id":"je145","label":"not_relevant","note":"bengaluru onsite"}
+{"case_id":"je146","label":"relevant","note":"full overlap, stale accepted"}
+{"case_id":"je147","label":"not_relevant","note":"backend role"}
+{"case_id":"je148","label":"relevant","note":"frontend family listed, react adjacent"}
+{"case_id":"je149","label":"not_relevant","note":"needs 5 years"}
+{"case_id":"je150","label":"not_relevant","note":"clearance required"}
+{"case_id":"je151","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je152","label":"relevant","note":"ci plus mobile fit"}
+{"case_id":"je153","label":"relevant","note":"java android adjacent"}
+{"case_id":"je154","label":"relevant","note":"pune remote"}
+{"case_id":"je155","label":"not_relevant","note":"needs 6 years"}
+{"case_id":"je156","label":"not_relevant","note":"qa role"}
+{"case_id":"je157","label":"not_relevant","note":"hyderabad hybrid"}
+{"case_id":"je158","label":"relevant","note":"onsite own city, graphql plus"}
+{"case_id":"je159","label":"relevant","note":"react-native fit"}
+{"case_id":"je160","label":"relevant","note":"kmp adjacent, own city"}
+{"case_id":"je161","label":"relevant","note":"appsec burp python fit"}
+{"case_id":"je162","label":"relevant","note":"cloud security hybrid own city"}
+{"case_id":"je163","label":"relevant","note":"devops family listed"}
+{"case_id":"je164","label":"not_relevant","note":"clearance required"}
+{"case_id":"je165","label":"relevant","note":"appsec fit, stale accepted"}
+{"case_id":"je166","label":"not_relevant","note":"frontend role"}
+{"case_id":"je167","label":"relevant","note":"four-token overlap"}
+{"case_id":"je168","label":"not_relevant","note":"grc niche, no overlap"}
+{"case_id":"je169","label":"not_relevant","note":"backend role"}
+{"case_id":"je170","label":"not_relevant","note":"manchester onsite"}
+{"case_id":"je171","label":"relevant","note":"sponsorship covered"}
+{"case_id":"je172","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je173","label":"not_relevant","note":"needs 9 years"}
+{"case_id":"je174","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je175","label":"not_relevant","note":"ml role"}
+{"case_id":"je176","label":"relevant","note":"edinburgh remote, appsec fit"}
+{"case_id":"je177","label":"relevant","note":"pentest adjacent"}
+{"case_id":"je178","label":"relevant","note":"core appsec fit"}
+{"case_id":"je179","label":"not_relevant","note":"qa role"}
+{"case_id":"je180","label":"relevant","note":"appsec k8s fit"}
+{"case_id":"je181","label":"relevant","note":"junior BI fit own city"}
+{"case_id":"je182","label":"relevant","note":"etl fit own city"}
+{"case_id":"je183","label":"not_relevant","note":"spark scala, needs 3 years"}
+{"case_id":"je184","label":"relevant","note":"basic analyst fit"}
+{"case_id":"je185","label":"not_relevant","note":"pune onsite"}
+{"case_id":"je186","label":"not_relevant","note":"remote against onsite preference"}
+{"case_id":"je187","label":"not_relevant","note":"backend role"}
+{"case_id":"je188","label":"relevant","note":"full overlap, stale accepted"}
+{"case_id":"je189","label":"not_relevant","note":"needs 4 years"}
+{"case_id":"je190","label":"relevant","note":"tableau adjacent BI"}
+{"case_id":"je191","label":"not_relevant","note":"ml role, needs 3 years"}
+{"case_id":"je192","label":"not_relevant","note":"salary below floor"}
+{"case_id":"je193","label":"not_relevant","note":"clearance required"}
+{"case_id":"je194","label":"not_relevant","note":"chennai onsite"}
+{"case_id":"je195","label":"not_relevant","note":"needs 3 years"}
+{"case_id":"je196","label":"not_relevant","note":"frontend role"}
+{"case_id":"je197","label":"relevant","note":"sponsorship covered, full overlap"}
+{"case_id":"je198","label":"relevant","note":"three-token fit"}
+{"case_id":"je199","label":"not_relevant","note":"qa role"}
+{"case_id":"je200","label":"relevant","note":"full overlap, own city"}

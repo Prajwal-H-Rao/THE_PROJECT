@@ -90,9 +90,9 @@ test("listAliases returns every stored row, including unresolved", async () => {
   const repository = new EmployerAliasRepository(mockPool(rows));
   const list = await repository.listAliases();
   strictEqual(list.length, 2);
-  strictEqual(list[0].targetEmployerId, null);
-  strictEqual(list[0].reviewed, false);
-  strictEqual(list[1].targetEmployerId, "tgt-2");
-  strictEqual(list[1].reviewed, true);
+  strictEqual(list[0]!.targetEmployerId, null);
+  strictEqual(list[0]!.reviewed, false);
+  strictEqual(list[1]!.targetEmployerId, "tgt-2");
+  strictEqual(list[1]!.reviewed, true);
   deepStrictEqual(list.map((row) => row.aliasId), ["a1", "a2"]);
 });

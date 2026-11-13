@@ -154,12 +154,18 @@ async function importCsv(csvPath: string = DEFAULT_CSV_PATH): Promise<EmployerCs
   if (rows.length === 0) {
     throw new Error("Invalid header: CSV file is empty");
   }
-
-  validateHeader(rows[0]);
+  const headerRow = rows[0];
+  if (headerRow === undefined) {
+    throw new Error("Invalid header: CSV file is empty");
+  }
+  validateHeader(headerRow);
 
   const result: EmployerCsvRow[] = [];
   for (let r = 1; r < rows.length; r += 1) {
-    const fields: string[] = rows[r];
+    const fields = rows[r];
+    if (fields === undefined) {
+      throw new Error(`Invalid row at index ${r}`);
+    }
     const row: EmployerCsvRow = {
       target_id: fields[0] ?? "",
       region: fields[1] ?? "",
@@ -181,4 +187,5 @@ async function importCsv(csvPath: string = DEFAULT_CSV_PATH): Promise<EmployerCs
   return result;
 }
 
-export { importCsv, DEFAULT_CSV_PATH, EmployerCsvRow, validateCounts };
+export { importCsv, DEFAULT_CSV_PATH, validateCounts };
+export type { EmployerCsvRow };

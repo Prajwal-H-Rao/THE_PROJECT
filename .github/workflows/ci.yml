@@ -81,6 +81,13 @@ jobs:
           npm ci
           npm test
 
+      - name: Build and test the employer-registry-service
+        run: |
+          cd nova/services/employer-registry-service
+          npm ci
+          npm run build
+          npm test
+
       - name: Build and test the policy-approval-service
         run: |
           cd nova/services/policy-approval-service

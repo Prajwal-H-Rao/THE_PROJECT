@@ -1,0 +1,10 @@
+{"case_id":"je-lab-001","label":"relevant","board":"greenhouse:acme","note":"go and k8s fit, hybrid blr"}
+{"case_id":"je-lab-002","label":"not_relevant","board":"greenhouse:acme","note":"java stack, needs 5 years"}
+{"case_id":"je-lab-003","label":"relevant","board":"lever:globex","note":"react ts onsite own city"}
+{"case_id":"je-lab-004","label":"not_relevant","board":"ashby:widgets","note":"salary below floor"}
+{"case_id":"je-lab-005","label":"relevant","board":"smartrecruiters:widgets","note":"sponsorship covered"}
+{"case_id":"je-lab-006","label":"not_relevant","board":"greenhouse:acme","note":"clearance required"}
+{"case_id":"je-lab-007","label":"relevant","board":"lever:globex","note":"playwright api ci fit"}
+{"case_id":"je-lab-008","label":"not_relevant","board":"ashby:widgets","note":"frontend role"}
+{"case_id":"je-lab-009","label":"relevant","board":"greenhouse:acme","note":"four-token overlap"}
+{"case_id":"je-lab-010","label":"not_relevant","board":"smartrecruiters:widgets","note":"salary below floor"}

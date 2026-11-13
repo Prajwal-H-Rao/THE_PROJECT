@@ -3,14 +3,14 @@
  * Job orchestration service for scheduled tasks.
  */
 
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { Pool } from "pg";
 
 const JOBS_TABLE = "jobs_service.jobs";
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly pool: Pool) {}
+  constructor(@Inject("PG_POOL") private readonly pool: Pool) {}
 
   async createJob(userId: string, type: string, payload: string, scheduledAt: string) {
     const query = `

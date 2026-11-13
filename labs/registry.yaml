@@ -48,8 +48,8 @@ labs:
     name: "Job search in permitted mode on a labelled set"
     owning_module: "13-employer-registry"
     phase: "P8"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "npx tsc -p labs/lab07/tsconfig.json && node labs/lab07/dist/run_lab.js"
 
   - number: 8
     name: "Docker hardening with isolation proofs"

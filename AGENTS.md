@@ -36,7 +36,7 @@ Downloadable collections (fetch content from here):
 Hand-made skills (no public source — write the content yourself):
 
 - The 29 system-design and engineering skills in the local agent scope: `api-design`, `architecture-diagram`, `back-of-the-envelope`, `blob-store`, `caching`, `consistency-coordination`, `content-delivery`, `data-storage`, `distributed-logging`, `distributed-search`, `dns`, `impeccable`, `investigate-first`, `lean-build`, `load-balancing`, `messaging-streaming`, `migration`, `observability`, `requirements-scoping`, `resilience-failure`, `safe-refactor`, `scaling-evolution`, `sequencer`, `service-decomposition`, `sharded-counters`, `surgical-patch`, `system-design`, `task-scheduling`, `verify-and-stop`.
-- The 1 project skill: `graphify`.
+- The 2 project skills: `graphify` (stub) and `autorouter` (active).
 - The 4 rule-referenced skills: `ponytail`, `ponytail-review`, `claude-mem`, `security-review`.
 
 Security caution: a downloaded SKILL.md is agent instructions from a third party. Read it before you trust it. Prefer `trailofbits/skills-curated` for reviewed security skills. Never install a skill you have not read.

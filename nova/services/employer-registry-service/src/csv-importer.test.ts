@@ -57,11 +57,11 @@ test("imports a valid 500-row CSV (250 IN + 250 GLOBAL)", async () => {
     await writeFile(path, content, { encoding: "utf8" });
     const rows = await importCsv(path);
     strictEqual(rows.length, 500);
-    strictEqual(rows[0].target_id, "IN-001");
-    strictEqual(rows[249].target_id, "IN-250");
-    strictEqual(rows[250].target_id, "GLOBAL-001");
-    strictEqual(rows[499].target_id, "GLOBAL-250");
-    ok(rows[0].career_url === "");
+    strictEqual(rows[0]!.target_id, "IN-001");
+    strictEqual(rows[249]!.target_id, "IN-250");
+    strictEqual(rows[250]!.target_id, "GLOBAL-001");
+    strictEqual(rows[499]!.target_id, "GLOBAL-250");
+    ok(rows[0]!.career_url === "");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

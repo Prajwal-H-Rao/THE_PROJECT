@@ -1,21 +1,13 @@
 /**
  * Nova design system - Jobs module.
+ * Wires JobsService.
  */
 
 import { Module } from "@nestjs/common";
-import { Pool } from "pg";
-import { JobService } from "./jobs/job.service.js";
-
-const PG_POOL = "PG_POOL";
+import { JobsService } from "./job.service.js";
 
 @Module({
-  providers: [
-    {
-      provide: PG_POOL,
-      useFactory: () => new Pool({ connectionString: process.env.DATABASE_URL }),
-    },
-    JobService,
-  ],
-  exports: [JobService],
+  providers: [JobsService],
+  exports: [JobsService],
 })
 export class JobsModule {}

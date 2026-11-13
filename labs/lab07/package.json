@@ -1,0 +1,14 @@
+{
+  "name": "nova-lab-07",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nova Lab 7 - Job search in permitted mode on a labelled set",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/run_lab.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "5.9.3"
+  }
+}

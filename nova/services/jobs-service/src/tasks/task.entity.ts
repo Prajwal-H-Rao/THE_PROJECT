@@ -38,6 +38,29 @@ export interface UpdateJobInput {
   readonly timezone?: string;
 }
 
+/** The alias names the repository and the service import. They predate the Job naming. */
+export interface Task {
+  readonly taskId: string;
+  readonly userId: string;
+  readonly title: string;
+  readonly description: string | null;
+  readonly status: string;
+  readonly priority: number;
+  readonly dueAt: string | null;
+  readonly parentTaskId: string | null;
+  readonly recurrenceRule: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+export type CreateTaskInput = CreateJobInput;
+export type UpdateTaskInput = UpdateJobInput;
+
+/** The list filter the repository applies. */
+export interface TaskListFilter {
+  readonly status?: string;
+  readonly dueAt?: string;
+}
+
 export interface JobListFilter {
   status?: string;
   dueAt?: string;

@@ -42,7 +42,7 @@ test("derived pollable set is exactly the 5 expected states", () => {
 test("unverified and user-action states refuse (never polled)", () => {
   for (const state of REFUSAL_STATES) {
     strictEqual(canPoll(state), false, `${state} must refuse`);
-    throws(() => guardPoll(state), undefined, `${state} must throw`);
+    throws(() => guardPoll(state), `${state} must throw`);
   }
 });
 

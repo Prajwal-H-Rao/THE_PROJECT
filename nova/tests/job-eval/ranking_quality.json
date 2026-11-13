@@ -1,0 +1,11 @@
+{
+  "set_present": true,
+  "cases": 200,
+  "labelled": 200,
+  "relevant": 95,
+  "metric": "precision_at_50",
+  "ranker": 0.96,
+  "with_rerank": 0.98,
+  "measured": true,
+  "set_hash": "5ad1676a8c0c78a855ab32e617fac606d0cddffc72f69e08c442b7bb01950895"
+}

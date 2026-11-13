@@ -3,7 +3,7 @@
  * Manages employer registry with per-employer targeting and verification.
  */
 
-import { Module } from "@nestjs/common";
+import { Module, Global } from "@nestjs/common";
 import { Pool } from "pg";
 
 const PG_POOL = "PG_POOL";
@@ -18,4 +18,4 @@ const PG_POOL = "PG_POOL";
   ],
   exports: [PG_POOL],
 })
-export class EmployerRegistryServiceModule {}
+export class AppModule {}

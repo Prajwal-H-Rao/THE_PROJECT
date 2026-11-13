@@ -18,4 +18,4 @@ interface EmployerAlias {
   reviewedAt: string | null;
 }
 
-export { EmployerAlias };
+export type { EmployerAlias };

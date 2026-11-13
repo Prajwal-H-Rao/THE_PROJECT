@@ -16,6 +16,10 @@
       "types": "./dist/approval-hash.d.ts",
       "default": "./dist/approval-hash.js"
     },
+    "./job-listing": {
+      "types": "./dist/job-listing.d.ts",
+      "default": "./dist/job-listing.js"
+    },
     "./event-envelope": {
       "types": "./dist/events/event-envelope.d.ts",
       "default": "./dist/events/event-envelope.js"
@@ -79,7 +83,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && cp -r mcp/catalogue dist/mcp/",
-    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/grant-verification.test.js dist/audit-contracts.test.js dist/migrations/runner.test.js dist/mcp/tool.test.js dist/mcp/call.test.js dist/mcp/audit.test.js dist/mcp/catalogue/catalogue-load.test.js dist/mcp/fetch.test.js dist/mcp/security.test.js"
+    "test": "tsc -p tsconfig.json && node --test dist/service-token.test.js dist/approval-hash.test.js dist/job-listing.test.js dist/events/event-envelope.test.js dist/events/event-consumers.test.js dist/events/event-envelope.compat.test.js dist/service-api.test.js dist/grant-verification.test.js dist/audit-contracts.test.js dist/migrations/runner.test.js dist/mcp/tool.test.js dist/mcp/call.test.js dist/mcp/audit.test.js dist/mcp/catalogue/catalogue-load.test.js dist/mcp/fetch.test.js dist/mcp/security.test.js"
   },
   "devDependencies": {
     "@types/node": "22.19.1",

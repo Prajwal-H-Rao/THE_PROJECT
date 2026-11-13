@@ -36,7 +36,12 @@ const LEGAL_TRANSITIONS: Map<string, readonly string[]> = new Map();
 
 // Pipeline: exactly one forward step, no skip, no backward.
 for (let i = 0; i < PIPELINE_STATES.length - 1; i += 1) {
-  LEGAL_TRANSITIONS.set(PIPELINE_STATES[i], [PIPELINE_STATES[i + 1]]);
+  const current = PIPELINE_STATES[i];
+  const next = PIPELINE_STATES[i + 1];
+  if (current === undefined || next === undefined) {
+    continue;
+  }
+  LEGAL_TRANSITIONS.set(current, [next]);
 }
 
 // Polling: any poll outcome may set any health state (spec:562).

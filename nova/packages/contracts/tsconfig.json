@@ -17,6 +17,8 @@
     "service-token.test.ts",
     "approval-hash.ts",
     "approval-hash.test.ts",
+    "job-listing.ts",
+    "job-listing.test.ts",
     "events/event-envelope.ts",
     "events/event-consumers.ts",
     "events/event-envelope.test.ts",

@@ -347,4 +347,5 @@ This file lists installed skills and configured agent rules. Give it to any agen
 - verify-and-stop
 
 ### Project skills
+- autorouter
 - graphify
