@@ -34,8 +34,8 @@ labs:
     name: "Messaging channels: Telegram first, then WhatsApp"
     owning_module: "14-channels"
     phase: "P9"
-    status: "planned"
-    test_command: ""
+    status: "implemented"
+    test_command: "npx tsc -p labs/lab05/tsconfig.json && node labs/lab05/dist/run_lab.js"
 
   - number: 6
     name: "One domain integration: Gmail read-only, then draft and send"

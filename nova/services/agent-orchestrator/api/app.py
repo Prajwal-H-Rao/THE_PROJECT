@@ -172,6 +172,67 @@ def get_plan_steps(plan_id: str):
     return jsonify({"error": "not_implemented"}), 501
 
 
+# Conversation API (task 20.3)
+@app.route("/conversation", methods=["POST"])
+@require_service_token
+def create_conversation():
+    """Create a new conversation."""
+    data = request.get_json() or {}
+    user_id = data.get("user_id")
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+
+    conversation_id = str(uuid.uuid4())
+    return jsonify({
+        "conversation_id": conversation_id,
+        "user_id": user_id,
+        "status": "active",
+        "messages": [],
+        "created_at": datetime.utcnow().isoformat(),
+    }), 201
+
+
+@app.route("/conversation/<conversation_id>", methods=["GET"])
+@require_service_token
+def get_conversation(conversation_id: str):
+    """Get conversation history."""
+    # In real implementation, fetch from state store
+    return jsonify({
+        "conversation_id": conversation_id,
+        "messages": [],
+        "status": "active",
+    })
+
+
+@app.route("/conversation/<conversation_id>/message", methods=["POST"])
+@require_service_token
+def send_message(conversation_id: str):
+    """Send a message in a conversation."""
+    data = request.get_json() or {}
+    content = data.get("content", "")
+    if not content:
+        return jsonify({"error": "content required"}), 400
+
+    return jsonify({
+        "conversation_id": conversation_id,
+        "message_id": str(uuid.uuid4()),
+        "content": content,
+        "role": "user",
+        "timestamp": datetime.utcnow().isoformat(),
+    })
+
+
+@app.route("/conversation/<conversation_id>/stop", methods=["POST"])
+@require_service_token
+def stop_conversation(conversation_id: str):
+    """Stop/conclude a conversation."""
+    return jsonify({
+        "conversation_id": conversation_id,
+        "status": "stopped",
+        "timestamp": datetime.utcnow().isoformat(),
+    })
+
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8005"))
     app.run(host="0.0.0.0", port=port, debug=False)
