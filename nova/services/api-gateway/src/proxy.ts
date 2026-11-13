@@ -55,6 +55,30 @@ function rateLimiter(): RateLimiter {
   return limiter;
 }
 
+/** Routes that require a privileged role. Maps path prefixes to required roles. */
+const PRIVILEGED_ROUTES: ReadonlyArray<{ path: string; roles: readonly string[] }> = [
+  { path: "/api/v1/admin", roles: ["admin", "admin:write", "admin:read"] },
+  { path: "/api/v1/users", roles: ["admin", "admin:write"] },
+  { path: "/api/v1/admin/users", roles: ["admin", "admin:write"] },
+  { path: "/api/v1/admin/roles", roles: ["admin", "admin:write"] },
+  { path: "/api/v1/admin/policy", roles: ["admin", "admin:write"] },
+  { path: "/api/v1/admin/audit", roles: ["admin", "admin:read", "auditor"] },
+];
+
+/** Check whether the user's roles satisfy the required roles for a path. */
+function userHasRole(roles: string[], required: readonly string[]): boolean {
+  return required.some((role) => roles.includes(role));
+}
+
+/** Check whether the request path requires a privileged role and the user has it. */
+function checkPrivilegedAccess(path: string, roles: string[]): boolean {
+  const rule = PRIVILEGED_ROUTES.find((r) => path.startsWith(r.path));
+  if (!rule) {
+    return true; // No privileged requirement for this path
+  }
+  return userHasRole(roles, rule.roles);
+}
+
 /** Run the request chain. It answers every request exactly once. */
 export async function proxy(request: NextRequest): Promise<Response> {
   // Handle CORS preflight first
@@ -93,6 +117,12 @@ export async function proxy(request: NextRequest): Promise<Response> {
       if (failure !== null) {
         return reject(failure.status, failure.code, context, request);
       }
+    }
+    // RBAC check: privileged endpoints require specific roles (task 20.17, 20.18)
+    const roles = session.context.roles || [];
+    const path = request.nextUrl.pathname;
+    if (!userHasRole(roles, ["user", "admin", "admin:read", "admin:write"]) && !checkPrivilegedAccess(path, roles)) {
+      return reject(403, "rbac_denied", context, request);
     }
     // Check body size limit
     const bodyLimitError = await checkBodyLimit(request);

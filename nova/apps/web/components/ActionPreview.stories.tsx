@@ -1,6 +1,6 @@
 /**
- * Task 20.20 — Storybook interaction tests for ActionPreview.
- * Stories for the ActionPreview component showing approve/reject/edit interactions.
+ * Task 20.19 — Storybook variants for ActionPreview.
+ * Stories for the ActionPreview component showing approve/reject/edit states.
  */
 
 import type { Meta, StoryObj } from "@storybook/react";
@@ -52,5 +52,12 @@ export const Closed: Story = {
   args: {
     ...Default.args,
     listing_status: "closed",
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    ...Default.args,
+    loading: true,
   },
 };

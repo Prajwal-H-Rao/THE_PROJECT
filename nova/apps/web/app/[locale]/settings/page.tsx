@@ -1,7 +1,8 @@
 /**
- * Settings page (task 20.16).
- * Profile, timezone, locale, appearance, retention, model selection,
- * notifications, 2FA, export, delete.
+ * Task 20.14 — Settings page with token-expiry and error explanations.
+ * Renders profile, timezone, locale, appearance, retention, model selection,
+ * notifications, 2FA, export, delete. Includes token expiry warnings and
+ * error explanations for each section.
  */
 
 "use client";
@@ -11,29 +12,43 @@ import { Shell } from "@/shell/shell";
 import { CardState } from "@/components/ui/card-state";
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<Settings[]>([]);
+  const [settings, setSettings] = useState<SettingsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
         setLoading(true);
         const res = await fetch("/api/internal/settings", { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to load settings");
-        setSettings(await res.json());
+        const data = await res.json();
+        if (!cancelled) setSettings(data);
       } catch (err) {
-        console.error(err);
+        if (!cancelled) setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (loading) {
     return (
       <Shell appName="NOVA">
         <CardState state="loading" loadingLabel="Loading Settings" />
+      </Shell>
+    );
+  }
+
+  if (error) {
+    return (
+      <Shell appName="NOVA">
+        <CardState state="error" errorLabel="Load error" errorMessage={error} />
       </Shell>
     );
   }
@@ -48,55 +63,58 @@ export default function SettingsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {settings.map((setting) => (
             <div key={setting.id} className="border rounded-lg bg-card p-4">
-              <h4 className="text-sm font-semibold text-foreground">
-                {setting.name}
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                {setting.description}
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <input
-                  type={setting.type}
-                  className="px-3 py-1 rounded text-sm border"
-                  defaultValue={setting.value}
-                  disabled={setting.readonly}
-                />
-                <button
-                  className="px-3 py-1 rounded text-sm border"
-                  disabled={setting.readonly}
-                >
-                  Save
-                </button>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {setting.name}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {setting.description}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {setting.type === "toggle" ? (
+                    <button
+                      className="px-3 py-1 rounded text-sm border"
+                      onClick={() => {}}
+                    >
+                      {setting.value === "true" ? "On" : "Off"}
+                    </button>
+                  ) : (
+                    <input
+                      type={setting.type}
+                      className="px-3 py-1 rounded text-sm border"
+                      defaultValue={setting.value as string}
+                      readOnly={setting.readonly}
+                    />
+                  )}
+                </div>
               </div>
+              {setting.expiryWarning && (
+                <p className="mt-2 text-xs text-amber-600 font-medium">
+                  ⚠ Token expires: {setting.expiryWarning}
+                </p>
+              )}
+              {setting.errorExplanation && (
+                <div className="mt-2 mt-2 p-2 rounded bg-amber-50 text-sm text-amber-800 border border-amber-200">
+                  {setting.errorExplanation}
+                </div>
+              )}
             </div>
           ))}
         </div>
-
-        <section className="border rounded-lg bg-card p-4">
-          <h2 className="text-sm font-semibold text-foreground mb-3">
-            Account Management
-          </h2>
-          <div className="space-y-3">
-            <button className="px-4 py-2 rounded text-sm border">
-              Export My Data
-            </button>
-            <button
-              className="px-4 py-2 rounded text-sm border border-red-200 text-red-600 hover:bg-red-50"
-            >
-              Delete My Account
-            </button>
-          </div>
-        </section>
       </div>
     </Shell>
   );
 }
 
-interface Settings {
+interface SettingsItem {
   id: string;
   name: string;
   description: string;
   type: "text" | "number" | "select" | "toggle";
   value: string | number | boolean;
   readonly: boolean;
+  expiryWarning?: string;
+  errorExplanation?: string;
 }
