@@ -28,7 +28,7 @@ A model response is never proof. A task is done only when its test passes.
 | P7 Finance and trips | 11 | 18 | 18 | 0 | 0 | 100% |
 | P8 Jobs agent and registry | 12, 13 | 46 | 46 | 0 | 0 | 100% |
 | P9 Channels, automations, pages | 14, 20 | 41 | 41 | 0 | 0 | 100% |
-| P10 Hardening, security, testing | 17, 16 | 46 | 10 | 5 | 31 | 22% |
+| P10 Hardening, security, testing | 17, 16 | 46 | 25 | 0 | 21 | 54% |
 | P11 Release gate | 18 | 20 | 0 | 0 | 20 | 0% |
 | **Total** | **21 files** | **403** | **403** | **0** | **0** | **100%** |
 
