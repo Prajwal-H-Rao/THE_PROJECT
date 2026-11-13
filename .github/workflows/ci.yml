@@ -109,6 +109,31 @@ jobs:
           npm run build:test
           npm test
 
+      - name: CI fails on missing required test (task 16.19)
+        run: |
+          # CI test gate: every service must have at least one test file
+          missing=0
+          for svc in nova/services/*/; do
+            svc_name=$(basename "$svc")
+            # Skip template and non-service directories
+            case "$svc" in
+              *_template|_template) continue ;;
+            esac
+            # Check if this is a service with source code
+            if [ ! -d "$svc/src" ]; then continue; fi
+            # Check for test files
+            if [ ! -f "$svc/src/test.ts" ] && [ ! -f "$svc/src/test.py" ] && [ ! -f "$svc/src/*_test.py" ] 2>/dev/null && [ ! -f "$svc/src/*.test.ts" ] 2>/dev/null && [ ! -f "$svc/src/*.test.py" ] 2>/dev/null; then
+              echo "MISSING TEST: $svc has no test files"
+              missing=1
+            fi
+          done
+          if [ "$missing" = "1" ]; then
+            echo "CI gate failed: one or more services lack test files"
+            exit 1
+          fi
+          echo "CI test gate passed: all services have test files"
+
+
       - name: Test the image runs non-root and holds no secret
         run: |
           docker buildx build --load -t nova/image-proof \
@@ -276,3 +301,9 @@ jobs:
           $compose run --rm --workdir /app nova/infra/scripts/backup-drill.sh
           $compose down -v --remove-orphans
           rm -f nova/infra/compose/.env
+
+      - name: Run security test layer (task 16.5)
+        run: |
+          cd nova/services/employer-registry-service
+          npm ci
+          npm test

@@ -1,0 +1,84 @@
+# NOVA Alerting Rules (task 16.10)
+# Alert definitions for monitoring NOVA services
+
+groups:
+  - name: nova_service_alerts
+    rules:
+      # Service health alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute."
+
+      - label: service
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "Error rate for {{ $labels.job }} is above 5% over the last 5 minutes."
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "Error rate for {{ $labels.job }} is above 5% over the last 5 minutes."
+
+      - alert: ServiceLatencyHigh
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency on {{ $labels.job }}"
+          description: "95th percentile latency for {{ $labels.job }} is above 1 second."
+
+      - alert: QueueDepthHigh
+        expr: queue_depth > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High queue depth on {{ $labels.queue }}"
+          description: "Queue depth for {{ $labels.job }} is above 1000 messages."
+
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Circuit breaker open for {{ $labels.service }}"
+          description: "Circuit breaker for {{ $labels.service }} has been open for more than 5 minutes."
+
+      - alert: DiskSpaceLow
+        expr: node_filesystem_avail_bytes / node_filesystem_size_bytes < 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk usage on {{ $labels.instance }} is above 90%."
+
+      - alert: RecoveryDrillFailed
+        expr: restore_drill_success == 0
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "Recovery drill failed"
+          description: "Recovery drill has not passed in the last hour."
+
+  # Cost alerts
+  - alert: HighCostAlert
+    expr: daily_cost > budget_threshold
+    for: 1h
+    labels:
+      severity: warning
+    annotations:
+      summary: "High cost alert"
+      description: "Daily cost has exceeded budget threshold."
