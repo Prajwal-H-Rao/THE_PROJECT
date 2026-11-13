@@ -13,7 +13,7 @@ Run:
 python nova/tests/layout/check_layout.py
 ```
 
-28 checks (A–AB). All pass on the current tree: 209 directories, 134 leaf
+28 checks (A–AB). All pass on the current tree: 211 directories, 136 leaf
 directories, 43 `.gitkeep` placeholders.
 
 Run the mutation suite to prove each check rejects a bad tree:

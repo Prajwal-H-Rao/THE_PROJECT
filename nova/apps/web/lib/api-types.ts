@@ -152,6 +152,50 @@ export interface Application {
 }
 
 /**
+ * Nova design system - Source status type.
+ * Mirrors the backend source status surface from employer-registry-service.
+ */
+export interface SourceStatus {
+  readonly sourceId: string;
+  readonly employerName: string;
+  readonly provider: string;
+  readonly status: "verified" | "stale" | "failed" | "rate-limited" | "manual" | "unsupported" | "paused";
+  readonly reason: string | null;
+  readonly lastPollAt: string | null;
+  readonly lastSuccessAt: string | null;
+  readonly openingsCount: number;
+}
+
+/**
+ * Nova design system - Job source type.
+ * Mirrors the backend employer_job_sources record.
+ */
+export interface JobSource {
+  readonly sourceId: string;
+  readonly employerName: string;
+  readonly name: string;
+  readonly baseUrl: string;
+  readonly isActive: boolean;
+  readonly lastRunAt: string | null;
+  readonly lastRunStatus: string | null;
+  readonly openingsCount: number;
+}
+
+/**
+ * Nova design system - Company type for Jobs to Companies page.
+ * Mirrors the backend employer_targets record.
+ */
+export interface Company {
+  readonly employerId: string;
+  readonly name: string;
+  readonly region: "IN" | "GLOBAL";
+  readonly status: string;
+  readonly sourcesCount: number;
+  readonly openingsCount: number;
+  readonly lastPollAt: string | null;
+}
+
+/**
  * Nova design system - Profile candidate field with provenance.
  * Mirrors the backend span-mapping CandidateField.
  */

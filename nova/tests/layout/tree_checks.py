@@ -32,8 +32,8 @@ EXTRA_DIRECTORY_PREFIXES = (
 )
 
 # The tree counts that the repo records. A module task updates them.
-EXPECTED_DIRECTORIES = 209
-EXPECTED_LEAVES = 134
+EXPECTED_DIRECTORIES = 211
+EXPECTED_LEAVES = 136
 EXPECTED_PLACEHOLDERS = 43
 
 # The header that every placeholder file holds.

@@ -64,10 +64,10 @@ Order rule 4 applies: 12.1 to 12.7, then 13.8 to 13.17, then 12.8 to 12.21, then
 - [x] 12.21 — lab 2 review view beside supporting text (React ExtractionReview component)
 - [x] 13.18 — canonical ID normalisation and duplicate detection
 - [x] 13.19 — freshness, changed-field, stale and closed thresholds
-- [ ] 13.20 — source-status surface
+- [x] 13.20 — source-status surface
 - [x] 13.21 — seed-list maintenance rules
 - [x] 13.22 — export and delete of user data, not the seed
-- [ ] 13.23 — Jobs to Companies page
+- [x] 13.23 — Jobs to Companies page
 - [x] 13.24 — lab 12: 250/250 assertion and 10 pilots
 - [x] 13.25 — saved filters and alerts
 
